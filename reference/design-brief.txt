@@ -1,0 +1,3023 @@
+Hecho · Mobile App · Design Brief v1.1
+View
+Design Brief · v1.1 · Build-ready
+Contents
+Brief · contents
+00 Cover & summary
+01 Audience & scope
+M Metrics & success
+MC Market context
+02 Decisions locked & permissions
+TM Tier model
+03 Information architecture
+04 Screen inventory
+Shop Scan Carts Orders You Onboarding Rep mode System Edge & states
+05 User flows
+F1 · First-time setup F2 · Showroom scan F3 · Photo identify F4 · Build a draft cart F5 · Share & approval F6 · Smart reorder F7 · Order lifecycle F8 · Pay an invoice F9 · File a damage / RMA F10 · Renew tax ID F11 · Rep co-shop F12 · Privacy on the floor F13 · Discover a style guide F14 · Brand-launch notification
+06 Per-screen specs
+Shop screens Scan screens Carts screens Orders screens You screens Onboarding screens Rep mode screens System screens Edge / state screens
+06b Component Manifest
+07 Cross-cutting requirements
+07b App visual direction
+07H Data & integration contracts
+08 Tech & integration
+PH Phasing & MVP
+09 Out of scope
+10 Acceptance criteria
+11 Open issues log
+13 Copy deck
+SR Screen-reader copy deck
+12 Version footer
+Companion
+Design System v1.0, with the Component Manifest (§06b) listing the additions v1.1 must absorb.
+Predecessor
+Overview v0.7, historical context only. This brief owns its own scope, voice, personas, and metrics.
+Hecho Trading Co. · Mobile App · Design Brief · v1.1
+The brief I'll use to design every screen of the functional prototype .
+A phone-first wholesale companion to Hecho's web platform, built around the physical showroom. This document fixes scope, decisions, architecture, screens, flows, and states, so screen design begins the moment it is approved.
+Persona focus
+4
+Buyer, assistant, rep, brand owner.
+Screens to design
+91
+Five tabs, plus onboarding, rep mode, system, edge states.
+Flows clickable
+14
+Every primary motion, end to end, with branches.
+Success criterion
+1
+A buyer scans a real showroom shelf and submits a reorder without leaving the app.
+01 · Audience & scope
+Four people. One mobile app. One scope.
+The brief targets a single app that serves three of the four personas (P1, P2, P3). The brand-side experience (P4) is its own product and is out of scope for this round. Each persona below is self-contained: role, goals, pains, usage rhythm, and the basis I am working from.
+P1 · Primary
+The Boutique Buyer
+Owner-operator of 1 to 10 gift, home, and lifestyle stores. Walks the showroom on visit days and approves every final order personally. Holds the budget and the brand relationships.
+Goals
+Never run out of bestsellers; never sit on dead stock; move from a real shelf to a draft cart in seconds; keep final sign-off in my own hands.
+Pains
+Reordering means cross-checking shelves against spreadsheets; live stock is invisible on the floor; neighbors can read my numbers over my shoulder; approving a manager's cart still needs a phone call.
+Frequency
+A few buying trips per season, plus reorders between trips; opens the app weekly to check orders and approvals.
+Basis Assumption from v0.7 product framing, not yet validated by direct buyer research.
+P2 · Secondary
+The Buying Assistant
+Store manager employed by P1. Walks the showroom on the owner's behalf and builds draft carts, but cannot submit a final order alone. Maps to the Manager company role.
+Goals
+Build the draft cart on the floor; send it up for approval without a phone call; get the green light fast; cover more of the showroom than the owner has time for.
+Pains
+No authority to commit spend, so every cart stalls waiting on the owner; cannot self-approve; loses context when handing a cart over; unclear which lines the owner will cut.
+Frequency
+Most active during the owner's buying trips and between-trip reorders; in the app several days a week when a season is running.
+Basis Assumption from v0.7 product framing, not yet validated by direct buyer research.
+P3 · Internal
+The Hecho Rep
+Hecho's own field rep. Walks the showroom alongside a buyer, co-shops draft carts live, and switches between assigned retailer accounts. Quotes credit, shipping, and MOQ on the spot. Maps to the Rep role.
+Goals
+Co-shop a draft cart with my buyer and have it ready before the next appointment; keep every assigned retailer moving; add the right line the moment the buyer points at a shelf.
+Pains
+Cannot submit on a retailer's behalf without an explicit grant; juggles many accounts in one day; must respect each retailer's privacy setting; appointments overlap and carts go cold between visits.
+Frequency
+Daily during showroom season; multiple retailer accounts touched per visit day.
+Basis Assumption from v0.7 product framing, not yet validated by direct buyer research.
+P4 · Out of scope
+The Brand Owner
+Maker or founder of a brand Hecho represents. Curates products, watches performance, and reads demand signals. Lives in a parallel brand-side app, not this one.
+Goals
+Curate the assortment Hecho shows; understand sell-through across retailers; time brand launches; surface the products worth pushing.
+Pains
+No direct line to retailer demand; launch timing is guesswork; authored style guides need approval before they ship. (All addressed in the brand-side product, not here.)
+Frequency
+Not applicable to this scope; the brand-side app is designed in a later round.
+Basis Assumption from v0.7 product framing, not yet validated. Out of scope for v1.1.
+Platform
+Native iOS and Android, mobile-first. Tablet support is graceful (the same layout scales up; nothing tablet-exclusive). Web has its own product already in use; this app reaches parity with the web's retailer-facing features (cart, drafts, order history, address book, company users, AI upload-a-file, AI forward-an-email, scan-a-barcode, repeat-order) and adds the showroom-native layer (live shelf scan, live POS stock, smart reorder, privacy on the floor, rep co-shop, wayfinding). No public landing site or marketing surface is part of this scope.
+Out of scope
+The brand-side app (P4 surfaces), the admin desktop, the marketing site, AR shelf overlays, full localization, in-showroom tap-to-pay, and any payment processor beyond ACH and saved card. Itemized in §09 .
+M · Metrics & success
+One north star. Seven numbers I can watch move .
+I do not ship a dashboard in this round. I do design every affordance so the events in §07-G have a surface to fire from, and I tie each one to a target I can read later. Every figure here is an Inferred target, pending leadership confirmation : I propose the range, leadership locks the number.
+KPI tree
+North star at the top. Five input metrics that move it. One retention metric that proves it held. Each row names the event it reads from.
+Tier Metric, definition, and feeding event Target
+N North star: showroom scan to submitted reorder Of shelves scanned on a showroom visit, the share that end in a submitted reorder within the same draft cycle. Reads scan.result.added_to_cart joined to cart.submitted where the cart carries a scan-sourced line.
+18 to 30%
+A1 Activation New retailers who submit at least one order inside fourteen days of first sign-in. Reads first cart.submitted per new account against the onboarding cohort.
+40 to 55%
+A2 Scan to cart conversion Of scan results shown, the share that reach a draft cart. Reads scan.result.added_to_cart over scan.result.shown , split by source (barcode, photo, manual).
+25 to 40%
+A3 Reorder adoption Of submitted orders, the share seeded by Smart reorder. Reads cart.smart_reorder.accepted against cart.submitted on the same source basket id.
+30 to 50%
+A4 Payment on time Net-30 invoices paid on or before the due window. Reads order.paid timestamped against the invoice due date.
+80 to 90%
+A5 Rep-assisted GMV Share of GMV on orders touched by a P3 rep co-shop. Reads cart.submitted carrying a rep-attribution flag set during F11. Baseline first, then grown.
+baseline, then +8 to 12pt
+R M3 retailer retention Retailers active in month one who submit again by month three. Reads repeat cart.submitted across the activation cohort.
+60 to 70%
+Inferred targets
+Numbers I propose, leadership locks
+The whole set is labelled Inferred targets, pending leadership confirmation . I set the ranges from the v0.7 ambition and category norms. They drive no gating in v1.0. They exist so the prototype's affordances point somewhere, and so the first cohort of real numbers has a bar to clear.
+MC · Market context
+The category is crowded. The floor is empty.
+Wholesale ordering is a solved-looking category: Faire, NuOrder, Joor, and Brandboom all move line sheets and Net terms at scale. None of them was built around a buyer standing in a physical showroom with a phone. That gap is the one thing I own, and it is the reason this app is mobile-first, not a port.
+The field
+Who I am measured against
+Faire. Marketplace discovery and Net terms for small retail. Web and app, no showroom layer.
+NuOrder. Brand-led digital line sheets and B2B order writing. Sales-rep tooling, desktop-anchored.
+Joor. Enterprise wholesale and virtual showrooms. Virtual, not the physical floor.
+Brandboom. Line sheets, order capture, a lightweight catalog. No live POS, no on-floor privacy.
+The one differentiator
+What none of them can do
+I am showroom-native: a live shelf scan that resolves to that retailer's own live POS stock, on the floor. Two things ride only on that floor: Privacy on the floor (sensitive price and stock masked by default, revealed only while the buyer holds the chip, per F12) and rep co-shop (a Hecho rep adding to the buyer's draft live, per F11).
+That triple, live-POS scan plus privacy plus co-shop, is the position I defend. A desktop-born competitor cannot retrofit it.
+Table stakes
+Parity I must reach to be taken seriously
+Line sheets. A curated, browsable surface. I answer this with the style-guide surface (S001, S002), a spread not a spreadsheet.
+Net terms. Net-30 ordering with a credit relationship. Covered by the wallet and the Net-terms model in §02 Q3.
+Reorder. Repeat-order off past purchases as a first-class motion. Covered by Smart reorder (F6).
+Read
+Where the line sits
+Parity is the cost of entry, not the pitch. I match line sheets, Net terms, and reorder so a buyer never feels they traded down to come to the floor. I win on the floor itself. If the showroom layer is not unmistakably better than typing into Faire back at the store, I have built a worse Faire. The whole brief leans the other way.
+02 · Decisions locked
+Six answers. Six concrete design implications.
+These are the v0.7 sign-off questions, answered. Every answer flows directly into a screen, a state, or a component selection. Provenance is explicit: Confirmed means leadership signed off on the answer; Inferred means I adopted the v0.7 proposal as a working answer that was a proposal there, not a handed-down decision. Every inferred answer is logged in the open issues log (OI-11 to OI-13) for explicit confirmation.
+Confirmed Leadership signed off.
+Inferred Adopted from the v0.7 proposal; awaiting confirmation, logged in §11.
+Q1
+POS integrations, top three Inferred · OI-11
+Shopify, Lightspeed, Square at launch. Open API for everything else. Retailers without a connected POS still use every feature; live stock fields degrade to "unknown, last counted" with a manual count entry.
+Design implication The S413 Connected POS screen ships with three vendor cards plus an "Other (open API)" entry. Every .scan-result , product detail, and reorder card has a degraded state for "POS not connected" that swaps the stock number for a manual-count field. POS-disconnected retailers reach every other feature without friction.
+Q2
+One app or two Confirmed
+One app, role-switching . P1, P2, P3 share a single binary with role pickers on launch and a quick switch in the You tab. P4 (brand-side) gets its own app in a later round.
+Design implication An account picker ( S506 ) appears at first launch when the account holds more than one role. Role switching is reachable from S401 You as a one-tap row. The bottom tab bar adapts: P3 (rep) gets a Retailers slot in place of You ; navigation labels and content lists are role-aware.
+Q3
+In-app payment scope Confirmed
+Net-30 ACH and saved-card auto-pay at launch. Tap-to-pay is deferred. Every order opens as Net-30 by default; the buyer can override to "pay now" with a saved instrument.
+Design implication The Wallet sits inside the Orders tab ( S304 Payment sheet ) and surfaces from order detail and the invoice viewer. ACH onboarding is a one-time flow ( S304a ) gated to the first ACH payment, not at signup. No in-showroom checkout component is designed in this round.
+Q3+
+Net-terms, completed: source, limit, over-limit, past-due Inferred defaults
+Q3 locked Net-30 ACH and saved card , with partial payment not supported in v1.0 (the amount is fixed). What follows fills the four gaps the wallet needs to be buildable.
+Terms source An account carries a default term, Net-30 , settable per account by Hecho ops . The buyer never edits it. It drives the due window on every invoice and the wallet on S301 .
+Credit limit Each account has a credit limit, set by Hecho ops, shown in the wallet as a balance-against-limit row (outstanding, limit, headroom). It is a Privacy-on-the-floor sensitive field: masked by default, revealed only on hold.
+Over-limit If a submit would push outstanding past the limit, S204 shows an over-limit warning row above Submit. It does not hard-block the submit in v1.0. Inferred default, pending confirmation.
+Past-due An account with any invoice past its due window surfaces a wallet chip on S301 and a coral "Past due" tag (icon plus label plus color, never color alone) on the affected order rows. Past-due does not hard-block new submits in v1.0. Inferred default, flag for confirmation.
+Q4
+Pricing visibility rules Inferred · OI-12
+Negotiated wholesale + MAP / MSRP visible to every authenticated retailer . Volume-tier prices appear only on lines where the buyer qualifies. Tier-locked prices show a generic "Higher tier" hint, never the dollar number.
+Design implication The .price component renders three rows where relevant: Your price (always), MSRP as a strike-through ref, Volume tier visible only to qualifiers, masked otherwise. Tier-gated brands hide their pricing entirely behind S804 Tier-locked . The privacy mask ( F12 ) hides Your price first.
+Q5
+Style-guide authorship Confirmed
+Hecho and brand owners both author guides . A brand-owner guide that contains another brand's product enters an approval queue and only ships once Hecho approves. The retailer always sees a single curated surface and never knows who authored a guide.
+Design implication The retailer-facing surface ( S001 Shop home , S002 Style guide detail , S705 Gallery ) is identical regardless of author. The brand-owner authoring + approval UI is a P4 surface and lives outside this scope. The brief shows the consuming side only and does not expose author metadata on the retailer screens.
+Q6
+Brand exclusivity tiers Inferred · OI-13
+Yes, tiers exist . Some brands are tier-gated, hidden from non-qualifying retailers. New brand launches give a top-tier first-look window; mid-tier and standard retailers see the brand only after the window closes.
+Design implication Discovery surfaces filter by the buyer's tier silently. Direct deep links to a tier-locked brand land on S804 Tier-locked . Push delivery for brand launches ( F14 ) is segmented by tier upstream; the design assumes the notification reaches only eligible retailers.
+§02b · Roles and capabilities
+The role-switching decision (Q2) implies a permission model that S405 to S407 only sketch in prose. Here it is as one matrix: personas mapped to roles (P1 = Owner, P2 = Manager, P3 = Rep, plus a third company role, Member), capabilities grouped exactly as S407 groups them, and every cell filled.
+Capability
+Owner P1 · Buyer
+Manager P2 · Assistant
+Member Company staff
+Rep P3 · Hecho Rep
+Cart
+Create / edit / share draft carts yes yes yes yes
+Submit a final order yes no no with-grant
+Approval
+Approve a draft for submission yes no no no
+Grant the Approve permission to others yes no no no
+Compliance
+Manage Tax-ID, W-9, COI, terms yes view-only view-only view-only
+Payment
+Pay invoices; manage ACH and saved cards yes no no no
+User management
+Invite, change role, remove users yes no no no
+yes permitted
+no blocked
+view-only read, no edit
+with-grant only after an Owner enables it per account
+Hard rules encoded above. A Manager cannot submit a final order alone and cannot self-approve or grant Approve to itself ( S205 , S208 ). Owner permissions are read-only in S407 . The only Owner cannot be removed, and no one can demote themselves while sole Owner ( S405 ). The Owner role cannot be granted by invite ( S406 ). A Rep cannot submit on the retailer's behalf without an explicit per-account grant: a single toggle on S407 , set by an Owner, off by default (resolves OI-03). Defaults are inferred where the source brief was silent, pending confirmation.
+TM · Tier model
+Two axes. One buildable rule per axis.
+Tiers are two different things wearing one word. The first is a volume tier : a price break the buyer earns per line. The second is an exclusivity tier : which brands a retailer is allowed to see at all. They never share a predicate, so I define each separately and render each differently. Every predicate below is an Inferred default, pending confirmation .
+A
+Volume tier: a per-line quantity break
+A buyer qualifies for a volume tier on a single line when that line's quantity meets or exceeds the brand's published break for the tier. The predicate is local to the line, not the cart, not the account: line qty &ge; brand break(tier) . Cross-line and cross-brand bundling is out of scope in v1.0.
+Render rule When a higher break is in reach, the masked volume price shows the unlock hint "Save at {n} units" , where {n} is the brand's break for the next tier. I never print the dollar figure of a price the buyer has not unlocked. The moment the line crosses {n} , the unlocked price replaces the hint inline on S004 and S102 . When the buyer does not qualify and no break is in reach, the row falls back to the generic "Higher tier" hint from Q4, never the dollar number.
+B
+Exclusivity tier: assigned, not computed
+Exclusivity has three named levels: Standard , Mid , Top . A retailer's level is assigned by Hecho ops , not derived from spend or volume. The app reads the level as account state. It governs which brands are visible, which are first-look eligible, and which are locked.
+Render rule Discovery surfaces filter silently by the account's level. A brand the level cannot see is never teased on an index. A direct deep link to a brand above the level lands on S804 Tier-locked, the same lock F14's below-tier branch routes to on Brand index and Brand page, with the CTA Request access.
+Brand-visibility matrix
+For each exclusivity level, the state a brand presents in. Reading across: a brand in general release, a brand inside a first-look launch window, a brand gated above the level.
+Level General release · First-look window · Above level Lock
+Top Visible · First-look eligible · Visible Top sees everything its grant covers, and gets the first-look window the moment a launch opens (F14 push fires to this level first).
+none
+Mid Visible · Locked until window closes · Locked → S804 Mid sees general-release brands. During a first-look window the launching brand is locked, and opens to Mid only after the Top window closes. Brands above Mid's grant resolve to S804.
+S804
+Standard Visible · Locked until window closes · Locked → S804 Standard sees general-release brands and reaches every non-gated feature without friction. First-look brands and gated brands are locked, with Request access as the only forward path.
+S804
+OI-06 resolved · upgrade path
+From Request access to a brand that just appears
+The path OI-06 left open, made concrete and reversible at each step:
+1. Request access. On S804 the buyer taps Request access. The button emits brand.requested_access and the screen moves to a Request sent state with the brand held.
+2. Rep follow-up. The request surfaces to the assigned P3 rep, who confirms fit with the buyer over rep chat.
+3. Ops grant. Hecho ops raises the account's exclusivity level, or grants the single brand. Same assignment lever as axis B: a human action, not a computed unlock.
+4. Resolves on next load. On the next load the brand resolves to its normal state. S804 is replaced by the live Brand page. No celebratory interstitial: the lock simply is not there anymore. Owner: Hecho ops .
+03 · Information architecture
+One tree. Five primary tabs. Every screen lives somewhere.
+The bottom .tabbar holds five slots: Shop , Scan , Carts , Orders , You . P3 (Rep) gets Retailers in place of You when the rep role is active. Everything else lives in modals, sheets, drawers, or system layers reachable from these tabs.
+Hecho · Mobile App · v1.0
+├── Onboarding (first run) role-aware, skippable past splash
+│ ├── S501 Splash · brand mark hold
+│ ├── S502 Welcome · scan / draft / reorder (3 cards)
+│ ├── S503 Sign in (email + magic link)
+│ ├── S504 Magic-link sent
+│ ├── S505 Email verification
+│ ├── S506 Account picker · roles + retailer accounts
+│ ├── S507 Camera permission prompt
+│ ├── S508 Notification permission prompt
+│ ├── S509 POS connect invite (skippable)
+│ └── S510 First showroom-visit cue
+│
+├── Tab 01 · Shop discovery, browse, search, brand pages, product detail
+│ ├── S001 Shop home (style guides featured, brand spotlights, recs)
+│ ├── S002 Style guide detail (shoppable vignette)
+│ ├── S003 Brand page (story + products)
+│ ├── S004 Product detail (price, MOQ, stock, history)
+│ ├── S005 Search (name / SKU / barcode entry)
+│ ├── S006 Search results
+│ ├── S007 Category index (brands & categories)
+│ ├── S008 Filters sheet [sheet]
+│ └── S009 Brand launch detail (first-look window)
+│
+├── Tab 02 · Scan camera, photo-id, fallback, permission
+│ ├── S101 Scanner viewfinder (live camera)
+│ ├── S102 Scan result (.scan-result card)
+│ ├── S103 Photo recognition (gallery + shutter)
+│ ├── S104 Photo result with multiple matches
+│ ├── S105 Permission denied (camera)
+│ └── S106 Manual SKU entry fallback
+│
+├── Tab 03 · Carts drafts, share, approval, MOQ, submit
+│ ├── S201 Carts index (named drafts)
+│ ├── S202 Cart detail
+│ ├── S203 New cart sheet [sheet]
+│ ├── S204 Cart submit (review & submit)
+│ ├── S205 Cart share sheet [sheet]
+│ ├── S206 Cart shared / approval requested (confirmation)
+│ ├── S207 Cart MOQ-not-met state
+│ ├── S208 Approval inbox (P1)
+│ ├── S209 Approval review
+│ ├── S210 Privacy toggle confirmation [sheet]
+│ ├── S211 Add to cart sheet [sheet]
+│ └── S212 Shop the look sheet [sheet]
+│
+├── Tab 04 · Orders history, status, invoices, payment, RMA
+│ ├── S301 Orders index (segmented: open / fulfillment / shipped / delivered / settled)
+│ ├── S302 Order detail
+│ ├── S303 Invoice viewer
+│ ├── S304 Payment sheet (ACH / saved card) [sheet]
+│ ├── S304a ACH onboarding (first ACH only) [modal]
+│ ├── S305 Payment success
+│ ├── S306 Tracking detail
+│ ├── S307 Damage / RMA start (photo)
+│ ├── S308 RMA submit / review
+│ ├── S309 RMA submitted
+│ └── S310 RMA history
+│
+├── Tab 05 · You account, identity, compliance, settings
+│ ├── S401 You overview
+│ ├── S402 My details
+│ ├── S403 Address book
+│ ├── S404 Address detail / add
+│ ├── S405 Company users
+│ ├── S406 Invite user
+│ ├── S407 Roles & permissions
+│ ├── S408 Compliance hub
+│ ├── S409 Tax-ID upload
+│ ├── S410 Tax-ID hold (submit block)
+│ ├── S411 Notification settings
+│ ├── S412 Privacy on the floor settings
+│ ├── S413 Connected POS
+│ ├── S414 POS connect OAuth flow
+│ ├── S415 POS disconnect confirm [modal]
+│ ├── S416 Reports (purchase history by period)
+│ └── S417 Sign out [modal]
+│
+├── Role · Rep mode replaces "You" with "Retailers" when rep role active
+│ ├── S601 Rep account picker
+│ ├── S602 Rep dashboard (assigned retailers + live carts)
+│ ├── S603 Rep retailer profile (cart history, notes)
+│ ├── S604 Rep cart co-shop (live editing in their draft)
+│ ├── S605 Rep visit memo (voice / photo memo)
+│ └── S606 Rep chat with retailer
+│
+├── System & cross-cutting reachable from header, push, or QR deep link
+│ ├── S701 Notifications center (in-app inbox)
+│ ├── S702 Notification settings (per category)
+│ ├── S703 Global search
+│ ├── S704 Help & support
+│ ├── S705 Style-guide gallery (all guides)
+│ ├── S706 Brand directory (all brands)
+│ ├── S707 Privacy holding state (transient)
+│ ├── S708 Showroom map / wayfinding
+│ ├── S709 Booth detail from QR
+│ └── S710 Brand-launch arrival (push deep link)
+│
+└── Edge / state screens never reached on their own; reached from a parent
+├── S801 Offline (no cache)
+├── S802 Empty (orders, carts, drafts, search)
+├── S803 Generic error
+├── S804 Locked (tier-gated brand)
+├── S805 Locked (tax-ID expired)
+├── S806 Locked (MOQ not met)
+├── S807 Sync conflict resolver
+├── S808 Loading skeleton
+├── S809 Permission denied (camera / notifications)
+└── S810 Slow network
+Sheets, modals, and drawers are noted inline. Anything outside the tree is, by definition, out of scope for v1.0. New surfaces require a brief revision before they enter design.
+04 · Screen inventory
+Ninety-one screens. Every one accounted for.
+Numbered by tab. Each row carries the screen ID, name, one-line purpose, the primary persona, and the flow it sits inside. Edge and state screens are listed in full; nothing is implied. Tap an ID to jump to its full spec in §06 .
+Shop tab
+Discovery, browse, search, brand pages, product detail. The editorial surface of the app.
+ID Screen Persona · flow
+S001 Shop home Style guides featured, brand spotlights, recommended for you.
+P1·P2 · F13
+S002 Style guide detail One curated multi-brand vignette, all lines shoppable as a set.
+P1·P2 · F13
+S003 Brand page One brand's products, story, assets.
+P1·P2 · F13
+S004 Product detail Single SKU: price, MOQ, live stock, history, add to cart.
+P1·P2 · F2·F4
+S005 Search Name, SKU, or barcode entry; recent searches; voice.
+P1·P2 · F4
+S006 Search results Result list with brand filter and quick-add.
+P1·P2 · F4
+S007 Category index Browse all brands and categories.
+P1·P2 · F13
+S008 Filters sheet Filter by brand, category, price tier, MOQ, in-stock only.
+P1·P2 · F4
+S009 Brand launch detail First-look window for top-tier retailers; gated for others.
+P1 · F14
+Scan tab
+Camera-driven identification on the showroom floor. Photo recognition and manual fallback.
+ID Screen Persona · flow
+S101 Scanner viewfinder Live camera, viewfinder frame, scan-line, hint.
+P1·P2·P3 · F2
+S102 Scan result Product card with stock, last order, reorder rec.
+P1·P2·P3 · F2
+S103 Photo recognition Pick or shoot a photo to identify a product.
+P1·P2 · F3
+S104 Photo result Multiple match candidates ranked by confidence.
+P1·P2 · F3
+S105 Permission denied (camera) Soft re-ask + jump to system settings.
+All · F2·F3
+S106 Manual SKU entry Fallback when camera is unavailable.
+P1·P2 · F2
+Carts tab
+Draft carts, sharing, approval, MOQ states, submit.
+ID Screen Persona · flow
+S201 Carts index Named drafts, shared drafts, approval-pending segment.
+P1·P2·P3 · F4·F5
+S202 Cart detail The working surface for one draft.
+P1·P2·P3 · F4·F5
+S203 New cart sheet Name the cart; pick template (blank, repeat last, smart reorder).
+P1·P2 · F4
+S204 Cart submit Final review with totals, shipping, tax-ID status, terms.
+P1 · F7
+S205 Cart share sheet Pick recipient: co-owner, manager, Hecho rep.
+P1·P2 · F5
+S206 Share / approval confirmation "Sent" toast + drawer with status.
+P1·P2 · F5
+S207 MOQ-not-met state Cart blocked from submit; suggest lines to hit minimum.
+P1·P2 · F4
+S208 Approval inbox P1 owner's queue of carts awaiting their approval.
+P1 · F5
+S209 Approval review P1 reviews a cart and approves, edits, or rejects.
+P1 · F5
+S210 Privacy toggle confirmation Quick sheet for turning floor-privacy on/off.
+All · F12
+S211 Add to cart sheet Pick a draft, set quantity (recommended qty pre-filled), confirm. The universal add surface.
+P1·P2·P3 · F2·F3·F4
+S212 Shop the look sheet Every product in a style guide with a pick-or-skip toggle; batch-add the set.
+P1·P2 · F13
+Orders tab
+Order history, lifecycle, invoices, payment, damage / RMA.
+ID Screen Persona · flow
+S301 Orders index Segmented list: open, in fulfillment, shipped, delivered, settled.
+P1·P2 · F7
+S302 Order detail Line items, totals, status timeline, invoice link, payment.
+P1·P2 · F7·F8
+S303 Invoice viewer PDF-style invoice, re-email or download.
+P1 · F8
+S304 Payment sheet Pay invoice via ACH or saved card.
+P1 · F8
+S304a ACH onboarding One-time bank-link flow on first ACH payment.
+P1 · F8
+S305 Payment success Confirmation with receipt link.
+P1 · F8
+S306 Tracking detail Carrier events, ETA, shipping address.
+P1·P2 · F7
+S307 Damage / RMA start Take photo of damaged item; select line.
+P1·P2 · F9
+S308 RMA submit / review Pre-filled claim form against original order.
+P1·P2 · F9
+S309 RMA submitted Confirmation with claim ID and brand queue routing.
+P1·P2 · F9
+S310 RMA history Past claims with status.
+P1·P2 · F9
+You tab
+Account, identity, compliance, settings, POS, reports.
+ID Screen Persona · flow
+S401 You overview Account home with quick-access tiles.
+P1·P2 · all
+S402 My details Name, email, phone, password.
+P1·P2 · F1
+S403 Address book Shipping & billing addresses; default chips.
+P1·P2 · F7
+S404 Address detail / add Form view for an address.
+P1·P2 · F7
+S405 Company users Members of the retailer; role pills.
+P1 · F5
+S406 Invite user Email an invite with a role pre-selected.
+P1 · F5
+S407 Roles & permissions Per-user permissions matrix.
+P1 · F5
+S408 Compliance hub Tax-ID, W-9, COI, MAP policy, signed terms; expiry chips.
+P1 · F10
+S409 Tax-ID upload Upload or re-upload tax-ID document.
+P1 · F10
+S410 Tax-ID hold (submit block) Blocks submitting a new order until the tax-ID is refreshed.
+P1 · F10
+S411 Notification settings Per-category push toggles.
+P1·P2 · F14
+S412 Privacy on the floor settings Toggle default, choose hold-to-preview gesture, mask scope.
+All · F12
+S413 Connected POS Shopify, Lightspeed, Square cards + Other (open API).
+P1 · F1
+S414 POS OAuth flow Web-view authentication with the vendor.
+P1 · F1
+S415 POS disconnect confirm Modal confirm before unlinking a vendor.
+P1 · F1
+S416 Reports Purchase history by period (mirrors web).
+P1 · F7
+S417 Sign out Modal confirm.
+All · F1
+Onboarding
+First-run flow including auth, role pick, permissions, optional POS connect.
+ID Screen Persona · flow
+S501 Splash Brand mark hold during cold boot.
+All · F1
+S502 Welcome (3 cards) Scan, draft, reorder. Skippable.
+All · F1
+S503 Sign in Email entry, magic link.
+All · F1
+S504 Magic link sent Confirmation + resend.
+All · F1
+S505 Email verification Tapped-from-mail return state.
+All · F1
+S506 Account picker Choose retailer account / role (multi-tenant).
+All · F1
+S507 Camera permission prompt Pre-prompt rationale before OS prompt.
+All · F1·F2
+S508 Notification permission prompt Pre-prompt with category preview.
+All · F1·F14
+S509 POS connect invite Skippable, returns later in You tab.
+P1 · F1
+S510 First showroom-visit cue Detect arrival; offer wayfinding.
+All · F2
+Rep mode
+Internal role that swaps the You tab for a Retailers surface.
+ID Screen Persona · flow
+S601 Rep account picker Switch between retailer accounts the rep manages.
+P3 · F11
+S602 Rep dashboard Assigned retailers, live carts, today's appointments.
+P3 · F11
+S603 Rep retailer profile Cart history, notes, credit, tax-ID status.
+P3 · F11
+S604 Rep cart co-shop Live editing in the retailer's draft.
+P3 · F11
+S605 Rep visit memo Voice or photo memo attached to a retailer.
+P3 · F11
+S606 Rep chat with retailer In-app DM thread.
+P3 · F11
+System & cross-cutting
+Reachable from header, push, or showroom QR. Not owned by any single tab.
+ID Screen Persona · flow
+S701 Notifications center In-app inbox grouped by category, with deep links.
+All · F14
+S702 Notification settings Per-category toggles (alias of S411).
+All · F14
+S703 Global search Cross-surface search: products, brands, orders, carts.
+All · F4
+S704 Help & support FAQs, contact rep, contact Hecho support.
+All · F11
+S705 Style-guide gallery All guides; filter by season, region, theme.
+P1·P2 · F13
+S706 Brand directory All brands the retailer can see at their tier.
+P1·P2 · F13
+S707 Privacy holding state Transient screen during hold-to-preview.
+All · F12
+S708 Showroom map / wayfinding Floor plan with booth pins; breadcrumbs of seen booths.
+P1·P2 · F2
+S709 Booth detail from QR Scanning a booth QR lands here.
+P1·P2 · F2
+S710 Brand-launch arrival Tap a push notification, land here on the new brand.
+P1 · F14
+Edge & state screens
+Never reached on their own. Always entered from a parent screen.
+ID Screen Persona · flow
+S801 Offline (no cache) First boot with no network and no cached content.
+All · cross
+S802 Empty Empty states for orders, carts, drafts, search results.
+All · cross
+S803 Generic error Unrecoverable error with retry + report.
+All · cross
+S804 Locked · tier-gated Brand or product not available at the retailer's tier.
+P1·P2 · F13
+S805 Locked · tax-ID expired Submit blocked, deep link to S409.
+P1 · F10
+S806 Locked · MOQ not met Submit blocked, suggests lines.
+P1·P2 · F4
+S807 Sync conflict resolver Local vs. server divergence on a draft.
+All · cross
+S808 Loading skeleton Per-surface skeletons for first paint.
+All · cross
+S809 Permission denied Camera or notifications. Soft re-ask.
+All · cross
+S810 Slow network Long-loading indicator with "switch to offline mode" affordance.
+All · cross
+05 · User flows
+Fourteen flows. Every screen plays a part.
+Each flow is the end-to-end path a persona takes from intent to outcome, with screen IDs in brackets at every step. A single screen may appear in many flows. Branching paths are called out inline.
+F1
+First-time setup and onboarding
+All personas
+From cold install to a usable home screen, with optional POS connect and compliance staging.
+Open the app for the first time. S501 Splash holds the brand mark during cold boot.
+S502 Welcome. Three swipeable cards (Scan, Draft, Reorder). Tap Sign in, or Skip to sign in.
+S503 Sign in. Enter email for a magic link, or pick SSO (Apple, Google, Hecho).
+S504 Magic link sent. Open the link on this device, or resend.
+The link returns to the app. S505 Email verification signs the buyer in.
+If the account holds more than one retailer account or a rep role, S506 Account picker appears. Single-role accounts skip it.
+S507 Camera permission prompt, with rationale before the OS prompt. Allow or Skip.
+S508 Notification permission prompt, with a category preview. Allow or Skip.
+S509 POS connect invite (skippable). Pick Shopify, Lightspeed, or Square to jump to S414 POS OAuth flow, then back; or skip and return later from the You tab.
+Land on S001 Shop home. The first Scan tap shows the S101 first-run Coachmark. On arrival at a showroom, S510 First showroom-visit cue offers wayfinding.
+If Tax-ID has an open action, a soft chip on S401 You points to S409 . Not blocking until Submit.
+Branch · invite path If the buyer came from an invite link, S503 skips email entry and the token carries through S505 to S506 Account picker, pre-attached to the inviting retailer.
+F2
+Walking the showroom and scanning a real shelf
+P1, P2
+The signature in-person motion. Camera on, real product, live stock, instant add. A rep co-shopping (F11) reuses this same scan motion in the active retailer's context.
+Tap Scan in the tab bar. S101 Scanner viewfinder opens in barcode mode by default.
+Point at a barcode on a real shelf. The viewfinder locks.
+S102 Scan result appears as a half-sheet over the camera: product, brand, wholesale, MSRP, MAP chip, stock at the buyer store (live POS or last cached), last order date and qty, recommended reorder quantity.
+Tap Add to cart. S211 Add to cart sheet opens. Pick a draft (or new draft), set quantity, confirm.
+Sheet collapses; viewfinder live again with a confirmation chip ("Added to Back wall refresh").
+Optionally open the floor map from the Scanner header.
+Branch · camera denied If permission is denied, S105 appears with a Manual SKU entry shortcut to S106 .
+F3
+Photo-identifying a product from a competitor or magazine
+P1, P2
+Same Scanner, photo mode. Multi-match disambiguation, soft fallback to AI ingest.
+Open S101 Scanner viewfinder, switch to photo mode. S103 Photo recognition opens (capture, or pick from library).
+Take a photo of the product on a competitor shelf or magazine page.
+S104 Photo result presents up to five candidates ranked by confidence with brand chips and price.
+Tap a candidate. Lands on S004 Product detail.
+Add to cart via S211 Add to cart sheet; return to scanner or jump to the draft via cart toast.
+Branch · no match If no good match, the screen offers Forward an email and Upload a file shortcuts (existing web AI ingest).
+F4
+Building a named draft cart from scratch
+P1, P2
+From empty to ready, with multiple sources combining into one named draft. Drafts never expire.
+Open Carts. S201 Carts index.
+Tap New cart. S203 New cart sheet. Name it ("Back wall refresh"). Pick template (blank, repeat last, smart reorder).
+Land on S202 Cart detail (empty).
+Add lines from any source: S102 Scan result, S004 Product detail, S002 Style guide detail (via Shop the look), S006 Search results.
+Each add goes through S211 Add to cart sheet (qty, destination). The destination defaults to the current cart.
+Edit lines on S202 (swap variant, change qty, remove). Move lines between drafts via long-press.
+Save and continue later from any screen.
+Branch · MOQ not met If a brand minimum is not met, S207 MOQ-not-met state offers proposed additions from items the buyer has ordered before.
+F5
+Sharing a draft with a co-owner for approval
+P1, P2
+P2 builds, P1 approves, built on the existing Company Users sharing model.
+P2 finishes a draft in S202 Cart detail. Tap Share.
+S205 Cart share sheet opens. Pick a co-owner from S405 Company Users. Permission level: Can edit, or Approve to submit. Send.
+S206 Share confirmation toast. P1 receives a push (category: Approval requests).
+Tapping the push deep-links to S208 Approval inbox.
+P1 opens the draft in S209 Approval review. Lines list; inline comment per line.
+P1 approves to submit (jumps to S204 Cart submit) or sends back with notes (P2 receives a push; the draft returns to S202 with comments).
+Branch · concurrent edit If P2 edits the same draft while P1 reviews offline, S807 Sync conflict resolver opens for whoever returns online second.
+F6
+Smart reorder from past orders
+P1, P2
+Past orders become starting points, not history. The behavior model proposes a draft cart; the buyer accepts piece by piece.
+From S201 Carts index or S301 Orders index, tap Smart reorder. S203 opens with the Smart reorder template selected.
+The Builder lists proposed lines, each with the why ("Sold X in 30 days at your store, last bought N months ago, season match").
+Accept all, accept some, edit quantities inline. Each accepted line is added to a new draft.
+Dead lines (no recent sell-through) are de-emphasized with a Remove suggestion.
+The proposed draft cart totals and any MOQ flags surface at the bottom.
+Tap Continue. Lands on the new draft in S202 , ready to share or submit.
+Branch · no POS connected Suggestions are weighted by order history alone; a soft pitch invites the buyer to connect a POS for sharper recommendations.
+F7
+Submitting an order and following its lifecycle
+P1
+From commit to closure: open, in fulfillment, shipped, delivered, settled. Status visibility at every step.
+From S202 or S209 , tap Submit. Lands on S204 Cart submit.
+Submit shows ship-to (default from S403 Address book), payment terms, MOQ flags, Tax-ID status. Confirm.
+If Tax-ID is expired, S410 Tax-ID hold interrupts the submit. Resolve via S409 , return to S204 . (Inside the soft window, before expiry, the buyer sees a non-blocking warning row on S204 instead.)
+Order submits. Land on S301 Orders index with the new order at the top.
+Tap the new order. S302 Order detail. Lifecycle steps update from Open through Settled as time progresses.
+Each lifecycle change fires a push (category: order lifecycle) deep-linked to S302 .
+F8
+Paying an invoice in-app
+P1
+Net-30 ACH or saved card. Two methods, no detours.
+Open Orders. S301 Orders index. Net-terms wallet at top shows balance, oldest due, days outstanding.
+Tap a due order. S302 Order detail. Tap Pay invoice. (Or open S303 Invoice viewer first to re-email.)
+S304 Payment sheet. Choose ACH or saved card. Confirm.
+First-time ACH triggers S304a ACH onboarding (bank-link via vendor sheet).
+S305 Payment success. Reference number, optional email receipt.
+Push confirms the payment (category: Payment). Lifecycle on S302 moves to Settled.
+Branch · network error If the network drops mid-confirm, S803 Generic error shows with retry; state is preserved.
+F9
+Filing a damage or RMA claim with a photo
+P1, P2
+Photo first, pre-filled from the original line, routed to the brand queue.
+From S302 Order detail, tap a line. Choose Report damage or claim.
+S307 RMA form opens. Take or pick a photo. Form is pre-filled with order number, line, qty.
+Pick reason (damaged, missing, wrong item, other). Add a note.
+S308 RMA submit / review. Confirm.
+S309 RMA submitted. Claim id and status pill.
+If the rep replies, a push deep-links to the relevant thread.
+Branch · offline Submit queues locally; the form stays editable in S310 RMA history until the network returns.
+F10
+Renewing the tax ID as it nears expiry
+P1
+Recurring cadence, soft reminders, then a hard block at Submit time if ignored.
+System nears the Tax-ID expiry window. Push fires (category: Compliance), deep-linking to S408 Compliance hub. S401 You also shows a chip "Tax ID renews soon".
+Tap the chip. S409 Tax-ID upload.
+Re-upload the document. Confirm details. Save.
+If the buyer ignores the reminder and attempts Submit on S204 with an expired Tax-ID, S410 Tax-ID hold blocks the submit. Tap Resolve to jump to S409 .
+After fix, return to S204 and resubmit.
+F11
+Switching to the rep view and co-shopping
+P3
+Same app, role switcher, account switcher, one-tap "add this to their draft."
+From S401 You, tap Role switcher. S602 Rep dashboard opens (rep-only).
+Tap the account chip in the header. S601 Rep account picker. Pick a retailer to co-shop with.
+App context is the retailer account. Every tab reflects that account.
+On S004 Product detail or S102 Scan result, the rep can add to the retailer current draft, or send a memo via direct chat.
+Switch back any time. Recent retailer accounts are pinned.
+F12
+Turning on privacy on the floor
+P1, P2
+Sensitive fields stay masked by default; press and hold reveals them only while the buyer holds.
+Default state after onboarding: Privacy on the floor is ON, gesture is hold-to-preview.
+Sensitive fields (negotiated wholesale, on-hand stock, past spend, credit balance) render as masked chips with a coral underline.
+To preview, the buyer presses and holds the chip. Values reveal while held; release re-masks immediately.
+To change behavior, open S412 Privacy on the floor settings or the quick-access S210 Privacy toggle sheet from the header.
+Accessibility fallback: double-tap to reveal for five seconds, or Tap-to-toggle under assistive tech (chosen in S412 ).
+F13
+Discovering a style guide and adding the look to a cart
+P1, P2
+The editorial surface. A magazine, not a catalog.
+Open Shop. S001 Shop home features a hero style guide.
+Tap the hero, or open S007 Category index, or browse S003 Brand pages.
+S002 Style guide detail. Editorial spread with line illustration, multi-brand chips, the look list.
+Tap Shop the look. S212 Shop the look sheet opens with every product and a pick-or-skip toggle.
+Confirm. All picked lines flow into the chosen draft via S211 logic. Return to the guide or jump to the draft.
+Save the look as a personal template (does not publish) for re-use later.
+F14
+Receiving a brand-launch notification
+P1, gated by tier
+First-look windows are tier-gated. The launch CTA respects exclusivity.
+A brand is launching. Push fires (category: brand drop) only to retailers tiered into the brand or above.
+Tap the push. S009 Brand launch detail opens with a countdown phrase ("first-look window open now"), brand summary, primary CTA.
+Tap Open the drop. Lands on S003 Brand page with the new collection pinned.
+Add lines to a draft as in F4.
+Branch · below tier If the retailer is below the brand tier, the brand renders as S804 Tier-locked on Brand index and Brand page. The CTA becomes Request access.
+06 · Per-screen specs
+One card per screen. Every state surfaced.
+Each card carries an ID anchor for deep-linking. Every component named on a card has one canonical entry: either in the Design System v1.0 (Foundations §01 and the Components roster §02), or in the Component Manifest below. The manifest is the spec for the additions Design System v1.1 must absorb before the screens that use them are built. Nothing load-bearing resolves by guesswork: every net-new composite has a manifest entry below, and every remaining name on a card is a configured instance of a documented Design System primitive (a picker, chip, row, button, illustration, or sheet), never a new undocumented component. Where a name here differs from the system, I reconcile it: the brief's Masked Field is the Design System Privacy mask ( .privacy-row ), revealed through its is-holding state, so I drop the invented "Reveal Layer" and render hold-to-preview as the Privacy mask holding, not a separate component.
+Shop screens
+Discovery surfaces. Editorial first; the spreadsheet is the back door.
+S001
+Shop home
+P1·P2
+Purpose
+Editorial entry; surfaces what is worth a tap right now.
+Entry
+Default tab; deep link from push; post-login redirect.
+Content
+App Bar with search; brand strip; hero Style Guide Card ; rail "For your shop" (behavior-ranked); rail "New on the floor" (recent drops, tier-respected); rail "Continue shopping" (open drafts and last-viewed).
+Primary
+Tap hero → S002 .
+Secondary
+Brand chip → S003 ; Search → S005 ; rail item → S004 .
+States
+Default; loading skeletons per rail; empty (no behavior data → Hecho-curated fallback); offline (last cached); error per rail.
+Edges
+No POS connected → soft pitch rail near bottom; tier-locked items render with coral lock chip.
+Components
+App Bar, Brand Chip, Style Guide Card, Editorial Rail, Soft Pitch Card.
+S002
+Style guide detail
+P1·P2
+Purpose
+The multi-brand vignette as a shoppable moment.
+Entry
+From S001 , S705 , push deep link.
+Content
+Editorial illustration (line vignette); title; brand chip row; look list; CTA "Shop the look". Per Q5 the retailer sees a single curated surface and no author metadata.
+Primary
+Shop the look → S212 Shop the look sheet.
+Secondary
+Save as personal template; share; product row → S004 ; brand chip → S003 .
+States
+Default; loading; offline (cached); error.
+Edges
+Tier-locked lines render with coral lock chip and a Request access link; Shop the look excludes them with a note.
+Components
+Editorial Hero, Brand Chip, Product Row, Primary Button, Ghost Button.
+S003
+Brand page
+P1·P2
+Purpose
+Brand story and full catalog with the right entitlements.
+Entry
+From S001 brand strip, S706 , S009 , push deep link.
+Content
+Brand hero (line illustration + name); Tier badge; Launch badge (relative phrase); story; "Curated by this brand" lookbook rail; catalog grid with category chips.
+Primary
+Tap product → S004 .
+Secondary
+Style guide in rail → S002 ; Request access (locked); Save brand.
+States
+Default; tier-locked (S804 pattern in-screen); launching; after-launch closed; loading; offline.
+Edges
+Pricing hidden on locked state; CTA becomes Request access.
+Components
+Brand Hero, Tier Badge, Launch Badge, Editorial Rail, Catalog Card, Category Chip, Primary Button.
+S004
+Product detail
+P1·P2
+Purpose
+Decide what variant, what quantity, with confidence.
+Entry
+From S001, S002, S003, S006, S102, S104, S202 line tap.
+Content
+Product hero; name; brand chip; variant selector; Wholesale + MSRP pair; MAP chip; Stock Check row; behavior-model footnote; margin calculator; Add to cart.
+Primary
+Add to cart → S211 Add to cart sheet.
+Secondary
+Save to template; Share product; Open brand → S003 .
+States
+Default; loading; no POS connected; vendor without connector; variant OOS; tier-locked; MAP enforced; offline.
+Edges
+Privacy on the floor masks wholesale, stock, margin; hold-to-preview reveals.
+Components
+Product Hero, Variant Selector, Price Pair, MAP Chip, Stock Check Row, Margin Calculator, Behavior Footnote, Masked Field.
+S005
+Search
+P1·P2
+Purpose
+Capture intent: name, SKU, barcode, voice.
+Entry
+App Bar search; from S106 manual SKU fallback.
+Content
+Search field (sticky); voice icon; recent searches; trending chips.
+Primary
+Submit query → S006 .
+Secondary
+Voice search; clear; barcode shortcut to S101 .
+States
+Empty (no input); typing; voice listening; offline.
+Edges
+SKU prefixes match; barcode strings can be pasted.
+Components
+Search Field, Voice Button, Recent Chip.
+S006
+Search results
+P1·P2
+Purpose
+Find the thing the buyer typed.
+Entry
+From S005 .
+Content
+Filter chips (Brand, Tier, Style); result rows grouped by Brands and Products; quick-add per product row.
+Primary
+Tap result → S004 or S003 ; quick-add → S211 .
+Secondary
+Refine via S008 Filters sheet; sort.
+States
+Loading; results; no results (route to AI shortcuts); error; offline.
+Edges
+Tier-locked products render with lock chip.
+Components
+Filter Chip Bar, Search Result Row, Group Header, Quick Add Button.
+S007
+Category index
+P1·P2
+Purpose
+Browse all categories and brands.
+Entry
+Shop App Bar overflow; from S001 View all.
+Content
+Category tiles; A to Z brand list; jump-to letter.
+Primary
+Tap category → filtered S006 ; tap brand → S003 .
+Secondary
+Search within categories.
+States
+Default; loading; offline.
+Edges
+Brands the retailer cannot access are de-emphasized with lock chip.
+Components
+Category Tile, Brand List Row, A to Z Index.
+S008
+Filters sheet
+P1·P2
+Purpose
+Narrow a search or catalog view.
+Entry
+From S006 filter button.
+Content
+Brand multi-select; category multi-select; price tier; MOQ; in-stock only toggle; Apply.
+Primary
+Apply.
+Secondary
+Reset; Cancel.
+States
+Default; selecting; Apply disabled if no change.
+Edges
+Filter combos that return 0 results show inline empty state with Reset.
+Components
+Sheet, Multi-select Chip, Toggle, Primary Button, Ghost Button.
+S009
+Brand launch detail
+P1
+Purpose
+The first-look moment for tier-eligible retailers.
+Entry
+From a brand-launch push, banner on S001 for eligible tiers.
+Content
+Brand hero; countdown phrase; story; pinned new collection; Primary CTA "Open the drop".
+Primary
+Open the drop → S003 .
+Secondary
+Remind me; Hide.
+States
+Open window; closed (renders S804 pattern with Join the waitlist).
+Edges
+Below-tier retailers never reach this screen; the push is not sent.
+Components
+Brand Hero, Countdown Chip, Primary Button.
+Scan screens
+Camera and identification on the showroom floor.
+S101
+Scanner viewfinder
+P1·P2·P3
+Purpose
+Fastest path from a real shelf to a draft.
+Entry
+Scan tab; deep link from S005 barcode shortcut; booth QR.
+Content
+Full-bleed camera view; segment control (Barcode / Photo); floor map icon; flash icon; last-result drawer handle.
+Primary
+Identify (auto on barcode, manual on photo).
+Secondary
+Switch mode; Open floor map → S708 ; Manual search → S106 .
+States
+Default; identifying; permission denied → S105 ; low light hint; offline (POS may be cached).
+Edges
+Multiple barcodes in frame: pick by tap.
+Components
+Camera View, Segment Control, Icon Button, Coachmark (first run).
+S102
+Scan result
+P1·P2·P3
+Purpose
+Identity, price, stock, history, recommendation in one card.
+Entry
+Successful identify on S101 .
+Content
+Half-sheet over camera: name; brand chip; Wholesale + MSRP; MAP chip; Stock Check row; last order date/qty; recommended reorder qty; Add to cart.
+Primary
+Add to cart → S211 .
+Secondary
+Accept recommended qty; More details → S004 ; Dismiss back to S101 .
+States
+Default; no POS connected (rec from history alone); tier-locked (price masked); MAP enforced; new SKU.
+Edges
+Privacy on the floor masks wholesale, stock, recommendation.
+Components
+Sheet, Price Pair, MAP Chip, Stock Check Row, Recommendation Row, Masked Field.
+S103
+Photo recognition
+P1·P2
+Purpose
+Identify a product from a photo, not a barcode.
+Entry
+Segment control on S101 → Photo.
+Content
+Camera preview in photo mode; capture button; pick from library.
+Primary
+Capture or pick.
+Secondary
+Back to barcode mode.
+States
+Default; capturing; processing.
+Edges
+Library permission denied: prompt + fallback.
+Components
+Camera View, Capture Button, Library Picker.
+S104
+Photo result
+P1·P2
+Purpose
+Resolve ambiguous matches with confidence ranking.
+Entry
+From S103 capture.
+Content
+Up to five candidate rows with line illustration thumb, brand chip, confidence chip, price, Open per row; "None of these" footer.
+Primary
+Tap row → S004 .
+Secondary
+None of these → AI ingest shortcuts (Forward an email, Upload a file).
+States
+Default; no matches; low confidence ("Best guess" chip).
+Edges
+Confidence threshold logic transparent in the UI.
+Components
+Match Row, Confidence Chip, Brand Chip, Ghost Button.
+S105
+Permission denied (camera)
+All
+Purpose
+Recover gracefully when camera is off.
+Entry
+From S101 when permission is denied.
+Content
+Line illustration; one-line cause; Open Settings primary; Search instead secondary.
+Primary
+Open Settings (deep link to system).
+Secondary
+Search instead → S005 ; Manual SKU entry → S106 .
+States
+Default; returned-from-Settings (re-prompt if granted).
+Edges
+Permanent denial: emphasize Search and Manual entry.
+Components
+Empty Illustration, Primary Button, Ghost Button.
+S106
+Manual SKU entry
+P1·P2
+Purpose
+Type the SKU when camera is unavailable.
+Entry
+From S105 ; from S101 overflow.
+Content
+Numeric keypad-friendly input; recent SKUs; submit.
+Primary
+Submit → S004 or S006 .
+Secondary
+Cancel; Open S005 .
+States
+Default; error (SKU not found); offline.
+Edges
+SKU with hyphens/spaces normalizes automatically.
+Components
+Input, Recent Chip, Primary Button.
+Carts screens
+Drafts, sharing, approvals, submit.
+S201
+Carts index
+P1·P2·P3
+Purpose
+Every draft at a glance, grouped by status.
+Entry
+Carts tab; deep link from share or approval push.
+Content
+App Bar with New cart and Smart reorder; sections Mine, Shared with me, Pending approval (P1 only). Per-row: name, total, brand count, last edited.
+Primary
+Tap a draft → S202 .
+Secondary
+New cart → S203 ; Smart reorder → S203 with template selected; long-press to rename or archive.
+States
+Default; empty → first-run state; loading; offline (local drafts with sync-pending tag); error.
+Edges
+Archived drafts hidden but recoverable from Settings.
+Components
+App Bar, Section Header, Cart Row, Sync Tag, Status Chip.
+S202
+Cart detail
+P1·P2·P3
+Purpose
+The working surface for one draft.
+Entry
+From S201 ; share or approval push; after S203 create.
+Content
+Editable title; brand breakdown summary; lines grouped by brand; per-line variant, qty stepper, totals, MAP chip; per-brand MOQ chip; cart total; sticky bottom: Share, Smart additions, Submit.
+Primary
+P1: Submit → S204 . P2: Request approval → S205 .
+Secondary
+Share → S205 ; Move line (sheet); Delete line; Open product → S004 ; Comment on line.
+States
+Default; empty; MOQ not met → S207 ; tier-locked line (cannot submit); sync-pending banner; conflict callout → S807 ; offline.
+Edges
+Submit blocked by expired Tax-ID ( S410 ); blocked by unresolved conflicts; P2 cannot grant Approve permission on Share.
+Components
+App Bar, Brand Breakdown, Line Row, Stepper, MAP Chip, MOQ Chip, Sticky Action Bar.
+S203
+New cart sheet
+P1·P2
+Purpose
+Name the cart; pick a template.
+Entry
+From S201 New cart; from Smart reorder action.
+Content
+Name field; template chips (Blank, Repeat last order, Smart reorder); Create.
+Primary
+Create → S202 (or Smart reorder builder inside S202 if picked).
+Secondary
+Cancel.
+States
+Default; submitting; error.
+Edges
+Name collisions are auto-suffixed with a tag the buyer can edit.
+Components
+Sheet, Input, Chip Group, Primary Button.
+S204
+Cart submit
+P1
+Purpose
+The last clear-headed read before commit.
+Entry
+From S202 Submit; from S209 Approve.
+Content
+Header summary; ship-to (editable, default from S403 ); bill-to; payment terms; MOQ status per brand; Tax-ID status row (icon plus label plus color per §07-E: Current, Renews soon, Expired); Submit primary; Cancel ghost. Tab bar hidden.
+Primary
+Submit order → S301 with the new order at the top.
+Secondary
+Edit ship-to; Edit lines (back to S202 ); Cancel.
+States
+Default; submitting; error with retry; Tax-ID expired → S410 ; MOQ not met (warning blocks submit); offline (Submit disabled with banner).
+Edges
+Multi-ship: present per-brand ship-to summary.
+Components
+Review Header, Editable Field, Status Row, Primary Button, Activity Layer.
+S205
+Cart share sheet
+P1·P2
+Purpose
+Send a draft to a co-owner or rep with the right permission.
+Entry
+From S202 Share.
+Content
+Recipient picker (company users from S405 , rep); Permission picker (Can edit, Approve to submit); Note; Send.
+Primary
+Send → S206 confirmation.
+Secondary
+Manage users → S405 ; Cancel.
+States
+Default; sending; error.
+Edges
+P2 cannot grant Approve permission to self.
+Components
+Sheet, Recipient Picker, Permission Picker, Textarea, Primary Button.
+S206
+Share / approval confirmation
+P1·P2
+Purpose
+Reassure that the share landed and show the path.
+Entry
+From S205 Send.
+Content
+Toast "Sent to {name}"; brief status drawer with delivery state and revoke option.
+Primary
+Done.
+Secondary
+Revoke; Add another recipient.
+States
+Sent; delivered; viewed; revoked.
+Edges
+Recipient not on the platform: pre-invite path triggered.
+Components
+Toast, Status Drawer, Ghost Button.
+S207
+MOQ-not-met state
+P1·P2
+Purpose
+Hit brand minimums without padding with dead stock.
+Entry
+Inline from S202 when a brand MOQ is not met.
+Content
+Per-brand panel with the gap ("$160 to minimum"); suggested additions from items the buyer has ordered before, ranked by sell-through; per-item Add button with qty.
+Primary
+Add suggested.
+Secondary
+Browse brand → S003 ; Dismiss.
+States
+Default; met (collapses to checkmark); no suggestions.
+Edges
+Tier-locked brand: helper hidden; CTA Request access.
+Components
+Brand Panel, Suggested Add Row, Stepper, Primary Button.
+S208
+Approval inbox
+P1
+Purpose
+P1 reviews drafts P2 marked for approval.
+Entry
+From Carts tab Pending segment; approval push deep link.
+Content
+List of pending drafts with author chip and "since" relative phrase; row tap → S209 .
+Primary
+Tap a row → S209 .
+Secondary
+Dismiss; Mark all read.
+States
+Default; empty; loading; conflict (draft changed since push) → S807 .
+Edges
+P2 self-approval blocked.
+Components
+Inbox Row, Author Chip, Status Chip.
+S209
+Approval review
+P1
+Purpose
+P1 reviews a draft and approves, edits, or sends back.
+Entry
+From S208 .
+Content
+Read-only draft view with comment affordance; sticky bottom: Approve, Send back, Edit and own.
+Primary
+Approve to submit → S204 .
+Secondary
+Send back with notes (P2 gets a push); Edit and own (assumes the draft).
+States
+Default; commenting; conflict.
+Edges
+If owner edits while reviewing, conflict resolver opens.
+Components
+Approve Bar, Comment Bubble, Primary Button, Ghost Button.
+S210
+Privacy toggle confirmation
+All
+Purpose
+Flip privacy fast from any screen.
+Entry
+App Bar privacy icon on screens that show sensitive data.
+Content
+Master toggle; gesture chip (Hold, Double-tap, Off); link to S412 .
+Primary
+Toggle master.
+Secondary
+Change gesture; Open settings.
+States
+Default.
+Edges
+None.
+Components
+Sheet, Toggle, Chip Group, Ghost Link.
+S211
+Add to cart sheet
+P1·P2·P3
+Purpose
+The universal add surface: turn any product into a draft-cart line in one motion.
+Entry
+Add to cart on S004 , S102 , S104 ; quick-add on S006 ; batch from S212 Shop the look.
+Content
+Product summary; variant selector (if any); quantity stepper pre-filled with the recommended reorder qty (per §07-H, masked under Privacy on the floor); destination picker (current draft default, or New draft); per-brand MOQ delta echo; Confirm.
+Primary
+Confirm → returns to the caller with a confirmation chip "Added to {cart}".
+Secondary
+Change destination; New draft (inline name); Cancel.
+States
+Default; qty invalid (Confirm disabled); MOQ-short (adds, shows the gap, links S207 ); tier-locked line (blocked, Request access); offline (queues with sync-pending tag); recommended-qty masked.
+Edges
+From S212 the sheet runs once per picked line; a rep co-shopping adds to the retailer's current draft ( S604 ).
+Components
+Sheet, Variant Selector, Stepper, Destination Picker, MOQ Chip, Primary Button.
+S212
+Shop the look sheet
+P1·P2
+Purpose
+Add a curated multi-brand look to a draft as a set, not line by line.
+Entry
+Shop the look on S002 Style guide detail.
+Content
+The look's product list, each row with a pick-or-skip toggle (picked by default), price pair, per-line qty; tier-locked lines shown excluded with a note; running count "Add {n} items"; Confirm.
+Primary
+Confirm → each picked line flows through S211 logic into the chosen draft; returns to the guide or jumps to the draft.
+Secondary
+Toggle a line; change destination draft; Save the look as a personal template; Cancel.
+States
+Default; all-skipped (Confirm disabled); some lines tier-locked (excluded with note); offline (queues); MOQ delta surfaced.
+Edges
+Tier-locked lines never count toward the add; the note links Request access ( S804 ).
+Components
+Sheet, Product Row, Toggle, Price Pair, MOQ Chip, Primary Button.
+Orders screens
+Lifecycle, invoices, payment, damage and RMA.
+S301
+Orders index
+P1·P2
+Purpose
+The order timeline and the wallet, in one view.
+Entry
+Orders tab; deep link from lifecycle push; from S204 Submit success.
+Content
+App Bar; Net-terms wallet card at top (balance, oldest due, days outstanding, Pay); segment chips (All, Open, In fulfillment, Shipped, Delivered, Settled); Timeline list (order number, brand summary, status pill, ETA phrase, total).
+Primary
+Tap an order → S302 .
+Secondary
+Pay from wallet → S304 ; Smart reorder; Filter; Search.
+States
+Default; empty → first-run state; loading; offline (cached); error.
+Edges
+Past due lines get a coral border; Privacy on the floor masks the wallet card.
+Components
+App Bar, Wallet Card, Filter Chip Bar, Order Row, Status Pill, Masked Field.
+S302
+Order detail
+P1·P2
+Purpose
+One screen for the whole lifecycle of an order.
+Entry
+From S301 ; lifecycle push; from S204 Track.
+Content
+Header (number, total); Lifecycle stepper; carrier tracking row (if shipped) → S306 ; lines grouped by brand; Invoice link → S303 ; Damage CTA → S307 ; Pay if open → S304 ; Reorder all → S203 Smart template.
+Primary
+Context-dependent: Pay (open), Track (shipped), Reorder (delivered), View invoice (settled).
+Secondary
+File a claim → S307 ; Share; Chat with rep.
+States
+Per lifecycle (5); multi-shipment per line; offline (carrier may be stale); error on action.
+Edges
+Partial cancels and refunds appear inline; Privacy masks line totals and grand total.
+Components
+Lifecycle Stepper, Tracking Row, Brand Section, Line Row, Masked Field.
+S303
+Invoice viewer
+P1
+Purpose
+Show the invoice as the back-office expects it.
+Entry
+From S302 ; Payment push.
+Content
+PDF-style preview; summary card at top; Re-email; Pay (if unpaid) → S304 .
+Primary
+Pay or Re-email.
+Secondary
+Download; Share.
+States
+Default; loading; error; offline (cached).
+Edges
+Multi-page: pager dots. Very large: table summary first.
+Components
+PDF Preview, Summary Card, Primary Button, Ghost Button.
+S304
+Payment sheet
+P1
+Purpose
+Two-method pay flow.
+Entry
+From S302 , S301 wallet, S303 .
+Content
+Amount summary; method picker (ACH bank, Saved card); Add new method link; Confirm.
+Primary
+Confirm → S305 .
+Secondary
+Add new method (ACH onboarding → S304a ; card add); Cancel.
+States
+Default; processing; error with retry; bank verification needed; offline (Confirm disabled).
+Edges
+Partial payment not supported in v1.0; amount is fixed.
+Components
+Method Picker, Summary Card, Primary Button, Activity Layer, Inline Error.
+S304a
+ACH onboarding
+P1
+Purpose
+One-time bank-link before first ACH payment.
+Entry
+From S304 first ACH attempt.
+Content
+Bank-link vendor sheet; pick bank; sign in to bank; confirm account.
+Primary
+Connect bank.
+Secondary
+Cancel; Try a different method.
+States
+Default; vendor sheet; verifying; error.
+Edges
+Manual micro-deposit fallback if instant verification fails.
+Components
+In-app Vendor Sheet, Activity Layer.
+S305
+Payment success
+P1
+Purpose
+Confirm and offer a receipt.
+Entry
+Successful confirm on S304 .
+Content
+Line illustration; reference number; amount; method label; Email receipt optional; Back to Orders.
+Primary
+Back to Orders.
+Secondary
+Email receipt; Share.
+States
+Default.
+Edges
+None.
+Components
+Success Illustration, Summary Card, Primary Button.
+S306
+Tracking detail
+P1·P2
+Purpose
+Carrier events, ETA, shipping address.
+Entry
+From S302 tracking row.
+Content
+Carrier name; tracking number; event timeline; ETA phrase; ship-to summary; Open carrier site link.
+Primary
+Open carrier site (deep link).
+Secondary
+Copy tracking number; Notify on delivery.
+States
+Default; in transit; delivered; exception (delayed); offline (cached events).
+Edges
+Multi-package shipments switch to a per-package list.
+Components
+Event Timeline, Address Card, Primary Button.
+S307
+Damage / RMA start
+P1·P2
+Purpose
+Begin a claim with a photo.
+Entry
+From S302 line tap → Report damage; from a delivered-order CTA.
+Content
+Camera prompt; library picker; instructions; Continue.
+Primary
+Take photo (or pick from library) → S308 .
+Secondary
+Cancel.
+States
+Default; capturing; library; error.
+Edges
+Permission denied: route to S509 pattern with manual upload.
+Components
+Camera View, Library Picker, Primary Button.
+S308
+RMA submit / review
+P1·P2
+Purpose
+Photo-first claim with pre-filled fields.
+Entry
+From S307 after photo.
+Content
+Photo(s); pre-filled order number, line, qty (editable); reason picker (damaged, missing, wrong item, other); note; Submit.
+Primary
+Submit → S309 .
+Secondary
+Add another photo (max five); Cancel.
+States
+Default; photo missing (Submit disabled); submitting; error; offline (queue locally).
+Edges
+Large photos auto-compress.
+Components
+Photo Picker, Reason Picker, Textarea, Primary Button.
+S309
+RMA submitted
+P1·P2
+Purpose
+Confirm with claim ID and routing.
+Entry
+Successful submit on S308 .
+Content
+Claim ID; brand queue routed to; status pill (Submitted); Track in history.
+Primary
+View history → S310 .
+Secondary
+Back to order; Share claim ID.
+States
+Default; queued (offline).
+Edges
+None.
+Components
+Confirmation Card, Status Pill, Primary Button.
+S310
+RMA history
+P1·P2
+Purpose
+Past claims with status and resolution.
+Entry
+From S309 ; from order overflow menu.
+Content
+List of claims with status pill (Submitted, In review, Resolved, Refunded, Replaced, Denied); tap to expand history timeline; Chat with rep link.
+Primary
+Tap claim → expand.
+Secondary
+Reopen if Denied; Chat.
+States
+Per status; empty; loading; offline.
+Edges
+Auto-resolved claims show system message.
+Components
+Claim Row, Status Pill, Timeline, Primary Button.
+You screens
+Account, identity, compliance, settings.
+S401
+You overview
+P1·P2·P3
+Purpose
+Account snapshot and entry to every account surface.
+Entry
+You tab.
+Content
+Header (name, role chip, account chip); compliance status row (icon plus label plus color per §07-E: Current, Renews soon, Expired); quick-access tiles (My details, Address book, Company users, Compliance, POS, Notifications, Privacy, Role switcher (rep), Settings, Help, Sign out).
+Primary
+Tap a tile.
+Secondary
+Switch role (if eligible); Help.
+States
+Default; compliance warning highlighted; offline.
+Edges
+Tax-ID renews-soon chip at top.
+Components
+Account Header, Status Row, Tile.
+S402
+My details
+P1·P2
+Purpose
+Keep identity fresh; verify periodically.
+Entry
+From S401 ; contact-verification push.
+Content
+Name, email, phone, role, last-verified row with Verify.
+Primary
+Verify (clears the recurring prompt).
+Secondary
+Edit fields; change email triggers re-verification.
+States
+Default; editing; verifying; error; offline.
+Edges
+Email change requires SSO re-link.
+Components
+Editable Field, Verify Button, Inline Error.
+S403
+Address book
+P1
+Purpose
+All ship-to and bill-to; default selection.
+Entry
+From S401 ; from S204 Edit ship-to.
+Content
+List of address cards with Default badge; Add new → S404 ; per-card Edit and Delete.
+Primary
+Set default.
+Secondary
+Add new; Edit; Delete (confirms).
+States
+Default; empty; loading; error.
+Edges
+Cannot delete an address used by an open order.
+Components
+Address Card, Confirm Dialog.
+S404
+Address detail / add
+P1
+Purpose
+Form view for a single address.
+Entry
+From S403 Add or row tap.
+Content
+Country picker (postal format adapts); fields (name, line 1, line 2, city, region, postal, phone); ship-to / bill-to toggles; Default toggle; Save.
+Primary
+Save.
+Secondary
+Cancel.
+States
+Default; validating; error.
+Edges
+P.O. Boxes flagged for some carriers.
+Components
+Editable Field, Country Picker, Toggle, Primary Button.
+S405
+Company users
+P1
+Purpose
+The team that can share carts and approvals.
+Entry
+From S401 ; from S205 Manage users.
+Content
+User row list with role chip (Owner, Manager, Member), last activity phrase, remove; "Invite new user" → S406 .
+Primary
+Invite new user.
+Secondary
+Change role; Remove (confirms).
+States
+Default; loading; empty (only Owner); error.
+Edges
+Cannot remove the only Owner; cannot demote self without another Owner.
+Components
+User Row, Role Chip, Confirm Dialog.
+S406
+Invite user
+P1
+Purpose
+Invite by email; set role.
+Entry
+From S405 .
+Content
+Email; Role picker (Manager, Member); short permissions summary; Send.
+Primary
+Send invite.
+Secondary
+Copy invite link.
+States
+Default; sending; error; already invited.
+Edges
+Owner role cannot be granted via invite.
+Components
+Input, Role Picker, Primary Button.
+S407
+Roles & permissions
+P1
+Purpose
+Audit and adjust a single user permission set.
+Entry
+From a row in S405 , or from the You tab Roles and permissions tile.
+Content
+Per-permission toggles grouped by capability (Cart, Approval, Compliance, Payment, User management); plus a Rep access row listing the assigned Hecho rep, where the Owner toggles submit-on-the-account's-behalf (off by default).
+Primary
+Save changes.
+Secondary
+Reset to role default; Cancel.
+States
+Default; saving; error.
+Edges
+Owner permissions are read-only.
+Components
+Permission Group, Toggle, Primary Button.
+S408
+Compliance hub
+P1
+Purpose
+One drawer for Tax-ID, W-9, COI, MAP, signed terms; expiry windows visible.
+Entry
+From S401 ; from compliance push.
+Content
+List of compliance items with status pill (Current, Renews soon, Expired) and Open action.
+Primary
+Open an item.
+Secondary
+Download current; History.
+States
+Default; loading; offline; error.
+Edges
+Expired Tax-ID surfaces at top with red pill and coral CTA.
+Components
+Compliance Row, Status Pill, Primary Button.
+S409
+Tax-ID upload
+P1
+Purpose
+Upload or re-upload tax-ID document.
+Entry
+From S408 ; from S410 Resolve.
+Content
+Photo or PDF picker; document details (state, ID number, expiry); Save.
+Primary
+Save.
+Secondary
+Replace document; Cancel.
+States
+Default; uploading; verifying; error; offline (queue).
+Edges
+Some states require dual-document upload.
+Components
+Document Picker, Editable Field, Primary Button, Activity Layer.
+S410
+Tax-ID hold (submit block)
+P1
+Purpose
+Hard block on Submit when Tax-ID is expired.
+Entry
+From S204 on Submit attempt.
+Content
+Modal with red icon, one-line cause, Resolve primary → S409 , Cancel.
+Primary
+Resolve.
+Secondary
+Cancel.
+States
+Default.
+Edges
+None.
+Components
+Modal, Primary Button, Ghost Button.
+S411
+Notification settings
+P1·P2
+Purpose
+Control which push categories arrive and when.
+Entry
+From S401 ; notification settings deep link; alias S702 .
+Content
+System permission row; one toggle per push category, matching §07-B exactly (Order lifecycle, Payment, Low stock, Compliance, New style guide, Brand drop, Approval requests, Direct messages); Snooze picker.
+Primary
+Toggle a category.
+Secondary
+Open system Settings; Snooze.
+States
+Default; system denied (Open Settings).
+Edges
+None.
+Components
+Permission Row, Toggle Group, Snooze Picker.
+S412
+Privacy on the floor settings
+P1·P2
+Purpose
+Default-on Privacy on the floor; gesture choice.
+Entry
+From S401 ; from S210 quick sheet.
+Content
+Master toggle; Reveal-mode picker (Hold, Tap-to-toggle, Double-tap, Always-off-floor), auto-switching to Tap-to-toggle under assistive tech; list of masked fields; Watermark screenshots toggle.
+Primary
+Toggle master.
+Secondary
+Change gesture; Add custom field to mask list.
+States
+Default.
+Edges
+Reduced-motion forces Double-tap.
+Components
+Toggle, Gesture Picker, Field List.
+S413
+Connected POS
+P1
+Purpose
+Manage Shopify, Lightspeed, Square; Other (open API).
+Entry
+From S401 ; from soft pitch on S001 , S004 , S102 .
+Content
+Three vendor rows with status (Not connected, Connecting, Connected); "Connect another POS" row; last-sync phrase per connected vendor.
+Primary
+Connect / Reconnect / Disconnect → S414 / S415 .
+Secondary
+Test connection; Open API guide.
+States
+Default; connecting; connected; stale; error.
+Edges
+Multi-store vendors expand to per-store list.
+Components
+Vendor Row, Status Chip, Primary Button.
+S414
+POS OAuth flow
+P1
+Purpose
+OAuth-style handoff to vendor and back.
+Entry
+From S413 ; from S509 .
+Content
+In-app browser sheet for vendor login; loading view behind it.
+Primary
+Approve in vendor browser.
+Secondary
+Cancel.
+States
+Default; loading; error (timeout, denied); already-connected.
+Edges
+Multi-store: vendor returns multiple store ids; the buyer picks one.
+Components
+Activity Layer, In-app Browser Sheet, Inline Error.
+S415
+POS disconnect confirm
+P1
+Purpose
+Confirm before unlinking a vendor.
+Entry
+From S413 disconnect.
+Content
+Modal: vendor name; consequences (stock check returns to "no POS connected"); Confirm.
+Primary
+Disconnect.
+Secondary
+Cancel.
+States
+Default; disconnecting; error.
+Edges
+None.
+Components
+Confirm Dialog, Primary Button, Ghost Button.
+S416
+Reports
+P1
+Purpose
+Purchase history by period; mirrors web parity.
+Entry
+From S401 .
+Content
+Period picker (relative phrases only); summary cards (spend, top brands, reorder rate); detailed table.
+Primary
+Change period.
+Secondary
+Export (email link to web).
+States
+Default; loading; empty; offline.
+Edges
+Privacy masks spend totals.
+Components
+Period Picker, Summary Card, Data Table, Masked Field.
+S417
+Sign out
+All
+Purpose
+Clear session safely with a quick confirm.
+Entry
+From S401 ; from Settings.
+Content
+Confirm modal; Sign out primary; Cancel ghost.
+Primary
+Sign out (returns to S502 ).
+Secondary
+Cancel.
+States
+Default; signing out.
+Edges
+Pending sync local drafts get a warning chip before sign-out.
+Components
+Confirm Dialog, Primary Button, Ghost Button.
+Onboarding screens
+First-run only. The brand earns the first tap.
+S501
+Splash
+All
+Purpose
+Brand mark hold during cold boot.
+Entry
+App cold launch.
+Content
+HECHO mark on Powder Blush; subtle scale; preloader bar at the bottom.
+Primary
+Auto-advance.
+Secondary
+None.
+States
+Default; resolving to S502 or S001 .
+Edges
+Maintenance message if backend reports a planned outage.
+Components
+Brand Mark, Preloader Bar.
+S502
+Welcome (3 cards)
+All
+Purpose
+Communicate Scan, Draft, Reorder in three breaths.
+Entry
+From S501 on first run.
+Content
+Three swipeable cards (Scan, Draft, Reorder) each with line illustration; pager dots; Sign in primary; Skip secondary.
+Primary
+Sign in → S503 .
+Secondary
+Skip to sign in.
+States
+Default.
+Edges
+Reduced-motion fades instead of slides.
+Components
+Card Pager, Pager Dots, Primary Button.
+S503
+Sign in
+All
+Purpose
+Email entry with magic-link option.
+Entry
+From S502 .
+Content
+Email field; Send magic link primary; SSO buttons (Apple, Google, Hecho SSO); "I have an invite" link.
+Primary
+Send magic link → S504 .
+Secondary
+SSO; Invite path.
+States
+Default; loading; error; offline.
+Edges
+Account not found: friendly route to request access.
+Components
+Input, Primary Button, OAuth Button.
+S504
+Magic link sent
+All
+Purpose
+Confirm and provide a resend.
+Entry
+From S503 Send.
+Content
+Line illustration; "I sent a link to {email}. Open it on this device to sign in."; Open mail app; Send it again.
+Primary
+Open mail app.
+Secondary
+Send it again (after cool-down); Use a different email.
+States
+Default; resending; rate-limited.
+Edges
+If they return without tapping the link, the screen waits for the deep-link return.
+Components
+Empty Illustration, Primary Button, Ghost Link.
+S505
+Email verification
+All
+Purpose
+Lands here when the email link returns to the app.
+Entry
+Deep link from email.
+Content
+Activity layer "Signing you in"; success illustration on resolve.
+Primary
+Continue → S506 or S507 .
+Secondary
+Try a different email.
+States
+Verifying; success; expired link; mismatched device.
+Edges
+If the link belongs to a different account on this device, account picker opens.
+Components
+Activity Layer, Success Illustration, Primary Button.
+S506
+Account picker
+All
+Purpose
+Pick a retailer account or rep role when the account holder belongs to multiple.
+Entry
+From S505 when the account is multi-tenant; from S601 rep account picker.
+Content
+List of accounts with role chip; recent at top; search.
+Primary
+Pick an account.
+Secondary
+Sign out.
+States
+Default; loading; empty (single tenant skips this).
+Edges
+Suspended account row disabled with a note.
+Components
+Account Row, Role Chip, Search Field.
+S507
+Camera permission prompt
+All
+Purpose
+Explain why before the OS asks.
+Entry
+From S506 ; first Scan tap if skipped.
+Content
+Line illustration; one-line rationale ("Scan products on the showroom floor"); Allow primary triggers the OS prompt; Skip secondary.
+Primary
+Allow.
+Secondary
+Skip.
+States
+Default; OS prompt active.
+Edges
+If denied at OS level, route to S105 .
+Components
+Empty Illustration, Primary Button, Ghost Link.
+S508
+Notification permission prompt
+All
+Purpose
+Explain push categories before the OS asks.
+Entry
+From S507 .
+Content
+Category preview chips, a five-category preview of the eight in §07-B (Order shipped, Low stock, Tax-ID, Style guide, Brand drop); Allow primary triggers the OS prompt; Skip.
+Primary
+Allow.
+Secondary
+Skip.
+States
+Default; OS prompt active; denied (route to S411 later).
+Edges
+Provisional permission on iOS for low-interruption categories.
+Components
+Chip Group, Primary Button, Ghost Link.
+S509
+POS connect invite
+P1
+Purpose
+Soft pitch to connect POS; skippable.
+Entry
+From S508 .
+Content
+Three vendor cards (Shopify, Lightspeed, Square); "Connect another POS" tertiary row; Skip.
+Primary
+Pick a vendor → S414 OAuth.
+Secondary
+Skip (remains as a pitch throughout the app).
+States
+Default; connecting; connected (vendor card shows check chip); error.
+Edges
+Open API path for non-launch vendors.
+Components
+Vendor Card, Primary Button, Ghost Link.
+S510
+First showroom-visit cue
+P1·P2
+Purpose
+Acknowledge showroom arrival; offer wayfinding.
+Entry
+When the app detects the buyer is at a Hecho showroom (geo or QR).
+Content
+Banner on S001 or full-screen bottom sheet on first arrival; "Open floor map" → S708 ; "Start a draft" → S203 .
+Primary
+Open floor map.
+Secondary
+Start a draft; Dismiss.
+States
+First-visit; returning visit (smaller pill).
+Edges
+Location permission denied: relies on QR-based arrival only.
+Components
+Bottom Sheet, Primary Button, Ghost Link.
+Rep mode screens
+P3 internal role: co-shopping with retailers on the floor.
+S601
+Rep account picker
+P3
+Purpose
+Pick a retailer account to co-shop with.
+Entry
+Header chip; first switch to rep role.
+Content
+Pinned recent retailers; search; full list of assigned accounts.
+Primary
+Pick an account.
+Secondary
+Clear current account; Search.
+States
+Default; loading; empty (no assigned accounts).
+Edges
+Suspended account row disabled with a note.
+Components
+Sheet, Search Field, Account Row.
+S602
+Rep dashboard
+P3
+Purpose
+Today at a glance for the rep.
+Entry
+From S401 Role switcher (rep).
+Content
+Assigned retailers card; live carts list (drafts in motion); today's appointments; recent chats.
+Primary
+Tap a retailer → S603 .
+Secondary
+Open a live cart; Open a chat.
+States
+Default; loading; empty (no activity today); offline.
+Edges
+None.
+Components
+Summary Card, List Row, Status Pill.
+S603
+Rep retailer profile
+P3
+Purpose
+One screen of context per retailer.
+Entry
+From S601 pick; from S602 .
+Content
+Account header; tier badge; cart history snapshot; recent orders; credit and Tax-ID status; internal notes; quick links to chat and co-shop.
+Primary
+Co-shop → S604 .
+Secondary
+Open chat → S606 ; Add memo → S605 .
+States
+Default; loading; offline.
+Edges
+Privacy on the floor mirrors retailer setting for sensitive fields.
+Components
+Account Header, Tier Badge, Section Header, List Row.
+S604
+Rep cart co-shop
+P3
+Purpose
+Live editing in the retailer's draft.
+Entry
+From S603 Co-shop; from a live cart in S602 .
+Content
+Cart detail view (same as S202 ) with a rep banner "Editing as rep · changes are visible to the retailer".
+Primary
+Add this line (from scan or product).
+Secondary
+Send a memo; Suggest a style guide.
+States
+Default; saving; conflict (retailer edits same line) → S807 .
+Edges
+Rep cannot submit on the retailer's behalf without an explicit grant.
+Components
+Cart Detail (alias of S202), Rep Banner, Primary Button.
+S605
+Rep visit memo
+P3
+Purpose
+Voice or photo memo attached to a retailer or visit.
+Entry
+From S603 overflow; from S604 Memo.
+Content
+Voice recorder; photo picker; note field; visibility (internal only by default); Save.
+Primary
+Save.
+Secondary
+Share with retailer (switches to chat).
+States
+Default; recording; saving; error; offline (queue).
+Edges
+Memo size limits surface inline.
+Components
+Voice Recorder, Photo Picker, Textarea, Toggle, Primary Button.
+S606
+Rep chat with retailer
+P3
+Purpose
+Direct thread with voice notes and photo memos.
+Entry
+From S603 Chat; from a chat push.
+Content
+Threaded messages; composer with text, voice, photo; reply-to-context (line, order, brand).
+Primary
+Send.
+Secondary
+Attach context; Voice note.
+States
+Default; sending; error; offline (queue).
+Edges
+Privacy masks sensitive numbers in the visible thread.
+Components
+Chat Thread, Composer, Voice Recorder, Photo Picker.
+System screens
+Notifications center, global search, help, shared surfaces.
+S701
+Notifications center
+All
+Purpose
+In-app inbox grouped by category, with deep links.
+Entry
+App Bar bell on Shop and Orders.
+Content
+Grouped list (Today, Earlier this week, Older); per-row category icon, title, relative phrase, action chip.
+Primary
+Tap a row → deep link target.
+Secondary
+Mark all read; Clear category.
+States
+Default; empty; loading; offline (cached).
+Edges
+System permission off shows a banner with Open Settings.
+Components
+Section Header, Notification Row, Category Icon.
+S702
+Notification settings
+All
+Purpose
+Alias of S411 reachable from S701 .
+Entry
+From S701 Settings.
+Content
+Same as S411 .
+Primary
+Toggle a category.
+Secondary
+Open system Settings.
+States
+Same as S411 .
+Edges
+None.
+Components
+Toggle Group, Permission Row.
+S703
+Global search
+All
+Purpose
+Search across products, brands, orders, carts.
+Entry
+Header search icon on any tab.
+Content
+Search field; result sections (Products, Brands, Orders, Carts); recent searches; voice.
+Primary
+Tap a result → respective detail.
+Secondary
+Filter by section; voice search.
+States
+Empty; typing; results; offline.
+Edges
+Orders and carts only show what the account holder has permission for.
+Components
+Search Field, Section Header, Result Row.
+S704
+Help & support
+All
+Purpose
+Find a quick answer or chat with the rep.
+Entry
+From S401 Help; from overflow menus.
+Content
+Search field; FAQ sections; Chat with your rep CTA → S606 ; Contact Hecho support link.
+Primary
+Chat with your rep.
+Secondary
+FAQ search; Email support.
+States
+Default; offline (search disabled; chat queues).
+Edges
+None.
+Components
+Search Field, FAQ Row, Primary Button.
+S705
+Style-guide gallery
+P1·P2
+Purpose
+All style guides with seasonal, regional, theme filters.
+Entry
+From S001 View all; from Shop category index.
+Content
+Filter chips; grid of Style Guide Cards.
+Primary
+Tap a card → S002 .
+Secondary
+Filter; sort.
+States
+Default; loading; empty filter set; offline.
+Edges
+None.
+Components
+Filter Chip Bar, Style Guide Card.
+S706
+Brand directory
+P1·P2
+Purpose
+All brands the retailer can see at their tier.
+Entry
+From Shop App Bar; from S007 .
+Content
+Filter chips (Open, My tier, Invitation-only, Launching); grid of Brand Cards.
+Primary
+Tap a card → S003 .
+Secondary
+Search; sort.
+States
+Default; loading; offline.
+Edges
+Tier-locked cards render with coral lock chip.
+Components
+Filter Chip Bar, Brand Card, Lock Chip.
+S707
+Privacy holding state
+P1·P2
+Purpose
+Transient screen during hold-to-preview reveal.
+Entry
+While the buyer holds a masked chip.
+Content
+The revealed value with subtle pulse; "Release to mask" caption; a slow countdown for the Double-tap fallback.
+Primary
+Release (auto on lift).
+Secondary
+None.
+States
+Default; revealing; expiring (Double-tap mode).
+Edges
+Screenshot interceptor adds watermark when supported.
+Components
+Privacy mask ( is-holding state), Caption.
+S708
+Showroom map / wayfinding
+P1·P2
+Purpose
+Locate the buyer inside the showroom and remember where they have been.
+Entry
+From S101 floor map button; from booth QR redirect; from S510 .
+Content
+Floor plan as line illustration; current booth pin highlighted; breadcrumb of recent booths; Open booth CTA when a pin is selected.
+Primary
+Tap pin, then Open booth → S709 .
+Secondary
+Reset breadcrumb; visited-only toggle; Share location with rep.
+States
+Default; no location (manual booth picker); offline (cached map).
+Edges
+Unknown showroom: generic booth grid.
+Components
+Floor Plan, Pin, Breadcrumb, Primary Button.
+S709
+Booth detail from QR
+P1·P2
+Purpose
+Land here from a booth QR scan; brand context.
+Entry
+QR deep link; pin tap on S708 .
+Content
+Brand name; booth number; line vignette; Sampler cart shortcut; Open brand → S003 ; Talk to rep here.
+Primary
+Create sampler cart → S202 .
+Secondary
+Open brand; Talk to rep.
+States
+Default; no featured lines (hide sampler); tier-locked (CTA Request access); offline.
+Edges
+QR signed but stale: friendly error with current-day booth list.
+Components
+Brand Hero, Sampler CTA, Primary Button.
+S710
+Brand-launch arrival
+P1
+Purpose
+Landing surface when a launch push is tapped.
+Entry
+From a brand-drop push.
+Content
+Brand hero pinned to the new collection; first-look phrase; Open the drop → S003 .
+Primary
+Open the drop.
+Secondary
+Remind me; Save for later.
+States
+Open window; closed (renders S804 pattern with Join the waitlist).
+Edges
+Below-tier should never reach this screen.
+Components
+Brand Hero, Primary Button.
+Edge and state screens
+The states everything else relies on.
+S801
+Offline (no cache)
+All
+Purpose
+First boot with no network and nothing cached.
+Entry
+Cold launch while offline; nothing in local storage.
+Content
+Line illustration; one-line cause; Retry primary; "Use cached" disabled.
+Primary
+Retry.
+Secondary
+Open Settings; Contact support.
+States
+Default; retrying.
+Edges
+If a partial cache exists, route to S001 with a banner instead.
+Components
+Empty Illustration, Primary Button.
+S802
+Empty
+All
+Purpose
+The reusable pattern for any list with no rows.
+Entry
+From any list with zero data.
+Content
+Line illustration; one-line headline; one-line lead; Primary CTA. Optional secondary link.
+Primary
+Suggested action for that surface.
+Secondary
+Surface-specific.
+States
+Default.
+Edges
+None.
+Components
+Empty Illustration, Primary Button, Ghost Link.
+S803
+Generic error
+All
+Purpose
+Unrecoverable error with retry and report.
+Entry
+Inline at the action site, or full-screen if uncatchable.
+Content
+One-line cause; Retry primary; "What went wrong?" link.
+Primary
+Retry.
+Secondary
+Report; Open help.
+States
+Default.
+Edges
+Auth errors route to S503 .
+Components
+Inline Error, Primary Button, Ghost Link.
+S804
+Locked · tier-gated
+P1·P2
+Purpose
+Convey exclusivity without hiding the brand entirely.
+Entry
+From S003 , S006 , S706 ; reusable in cards.
+Content
+Coral lock chip; brand summary; Request access CTA.
+Primary
+Request access (queues a rep follow-up).
+Secondary
+Read brand story.
+States
+Default; Requested (CTA becomes "Request sent"); Granted (resolves to normal state on next load).
+Edges
+Cannot add to cart; cannot see pricing.
+Components
+Lock Chip, Primary Button, Ghost Button.
+S805
+Locked · tax-ID expired
+P1
+Purpose
+Hard-block submission with a clear resolve path.
+Entry
+From S204 Submit (alias of S410 ).
+Content
+Modal with red icon; cause; Resolve → S409 ; Cancel.
+Primary
+Resolve.
+Secondary
+Cancel.
+States
+Default.
+Edges
+None.
+Components
+Modal, Primary Button, Ghost Button.
+S806
+Locked · MOQ not met
+P1·P2
+Purpose
+Submit blocked until each brand minimum is met.
+Entry
+From S202 or S204 when a brand MOQ is unmet.
+Content
+Modal listing affected brands with the gap; "Add suggestions" → S207 ; Cancel.
+Primary
+Add suggestions.
+Secondary
+Cancel.
+States
+Default; met (modal auto-dismisses).
+Edges
+Tier-locked brand: hide brand suggestions; CTA Request access.
+Components
+Modal, Brand Row, Primary Button.
+S807
+Sync conflict resolver
+P1·P2
+Purpose
+Resolve a shared draft that diverged offline.
+Entry
+From S202 , S209 on sync.
+Content
+Two-pane diff (Mine vs Theirs) with per-line accept; "Keep both" merge option.
+Primary
+Apply resolution.
+Secondary
+Cancel (leaves in conflict).
+States
+Default; applying; error.
+Edges
+Conflict on a Submit-pending draft surfaces with extra emphasis.
+Components
+Diff Pane, Line Row, Toggle, Primary Button.
+S808
+Loading skeleton
+All
+Purpose
+Per-surface skeletons for first paint.
+Entry
+Any list, grid, or detail while data is loading.
+Content
+Geometric placeholders matching final shape; subtle shimmer (reduced-motion disables).
+Primary
+Auto-resolve to data.
+Secondary
+None.
+States
+Loading; long-loading (route to S810 ).
+Edges
+Never block input on the App Bar.
+Components
+Skeleton Box, Skeleton Row.
+S809
+Permission denied
+All
+Purpose
+Recover from any denied permission with a soft re-ask.
+Entry
+Any surface that needs camera, notifications, or location.
+Content
+Line illustration; cause; Open Settings primary; manual workaround secondary.
+Primary
+Open Settings.
+Secondary
+Use workaround (route varies).
+States
+Default; returned-from-Settings (re-prompt).
+Edges
+Persistent denial: emphasize the workaround.
+Components
+Empty Illustration, Primary Button, Ghost Button.
+S810
+Slow network
+All
+Purpose
+Long-loading indicator with a switch-to-offline affordance.
+Entry
+From S808 after a threshold; from any long fetch.
+Content
+Indicator chip "This is taking a moment"; Switch to offline mode link.
+Primary
+Switch to offline mode.
+Secondary
+Wait; Cancel.
+States
+Default; offline mode active (changes the banner to E01-style).
+Edges
+If the request completes during, dismiss silently.
+Components
+Indicator Chip, Ghost Link.
+06b · Component Manifest
+The components the system does not have yet. Named, not hidden.
+Design System v1.0 documents a closed set of component families and is explicit: if a component is not in that document, it is not in the product yet. The screens above reference more than that. Rather than let those names resolve to a nearby token, I list every net-new component here, with the screens that use it, a one-line anatomy, and the states it must carry. This is the build order for Design System v1.1: I do not design a screen that depends on a manifest component until its entry below ships into the system. Each row is marked → DS v1.1 .
+A · Pricing & product intelligence
+The numbers on a product, and the confidence behind them.
+Component Anatomy · screens · states Target
+A1 Price Pair Your price as the lead value, MSRP struck-through beside it, optional volume-tier row for qualifiers. Extends DS .price . Screens: S004, S102. States: default; tier shown; tier masked; MAP-enforced; tier-locked; privacy-masked.
+→ DS v1.1
+A2 MAP Chip Pill flagging a minimum-advertised-price floor, beside the Price Pair. On DS .pill . Screens: S004, S102, S202. States: not-enforced; enforced; at-floor warning.
+→ DS v1.1
+A3 Stock Check Row Label plus live on-hand from POS, with source caption. Extends DS .stock . Screens: S004, S102. States: live; stale; last-counted; manual; disconnected.
+→ DS v1.1
+A4 Margin Calculator Inline wholesale against MSRP returning a margin, with an editable retail field. Screens: S004. States: default; edited; privacy-masked; price-unavailable.
+→ DS v1.1
+A5 Behavior Footnote One quiet caption under the price block explaining why an item is ranked. First-person, plain. Screens: S004. States: shown; no data (hidden); privacy-masked.
+→ DS v1.1
+A6 Recommendation Row Last-order date and qty plus recommended reorder qty with an accept affordance. Screens: S102. States: default; history-only; privacy-masked; new SKU.
+→ DS v1.1
+A7 Confidence Chip Pill on a photo-match candidate ranking match strength. On DS .chip . Screens: S104. States: default; best-guess; none.
+→ DS v1.1
+B · Privacy (a naming fix, not a new component)
+Component Anatomy · screens · states Target
+B1 Masked / Privacy field The brief's "Masked Field" is the DS Privacy mask ( .privacy-row ). No new component. Screens: S004, S102, S301, S302, S416, S606, S707. States: masked ( is-masked ); holding / revealed ( is-holding , this is S707's hold-to-preview, replacing the deleted "Reveal Layer"); double-tap reveal; off.
+DS v1.0 · reuse
+C · Orders, payment & lifecycle
+Component Anatomy · screens · states Target
+C1 Wallet Card Net-terms summary: balance, oldest due, days outstanding, headroom, Pay. On DS .card.order . Screens: S301. States: default; nothing due; past-due; privacy-masked; loading.
+→ DS v1.1
+C2 Lifecycle Stepper Horizontal step track. Screens: S302. States (5): Open, In fulfillment, Shipped, Delivered, Settled; plus multi-shipment and offline-stale.
+→ DS v1.1
+C3 Tracking / Event Timeline Vertical carrier events with relative-time phrases and ETA; also RMA history. Screens: S306, S310. States: in transit; delivered; exception; offline; per-package.
+→ DS v1.1
+C4 Method Picker ACH bank or saved card, with Add-new-method. Screens: S304. States: default; processing; bank-verification-needed; error; offline.
+→ DS v1.1
+C5 Summary Card Compact total-and-detail card for payment, invoice, success, rep dashboard. On DS .card . Screens: S303, S304, S305, S602. States: default; loading; error.
+→ DS v1.1
+C6 PDF Preview Rendered invoice page with pager dots and a table-summary fallback; uses the Media component (F1). Screens: S303. States: default; loading; error; offline; multi-page; very-large.
+→ DS v1.1
+C7 Reason Picker Single-choice: damaged, missing, wrong item, other. On DS .chip group. Screens: S308. States: default; selected; other (reveals note).
+→ DS v1.1
+D · Account, compliance & settings
+Component Anatomy · screens · states Target
+D1 Vendor Row / Card POS vendor with status and a connect action; row in settings, card in onboarding. Screens: S413, S509. States: not connected; connecting; connected; stale; error.
+→ DS v1.1
+D2 Country Picker Country select that adapts the postal-format fields. On DS .select . Screens: S404. States: default; selected; validating.
+→ DS v1.1
+D3 Period Picker Relative-phrase period selector for reports (no specific dates). Screens: S416. States: default; loading; empty.
+→ DS v1.1
+D4 Data Table Dense purchase-history table at web parity. Screens: S416. States: loading; populated; empty; masked-cell; offline.
+→ DS v1.1
+D5 Snooze Picker Duration picker to pause a push category, relative phrases. Screens: S411. States: default; snoozed; system-denied.
+→ DS v1.1
+D6 Permission Group Toggles grouped by capability (Cart, Approval, Compliance, Payment, User management), plus the Rep access row. On DS .switch . Screens: S407. States: default; saving; error; read-only (Owner).
+→ DS v1.1
+E · Discovery & editorial (line-art, per the system)
+Component Anatomy · screens · states Target
+E1 Style Guide Card Editorial tile with a line-illustration vignette, title, multi-brand chips. Extends DS .card.style-tile . Screens: S001, S705. States: default; loading; offline.
+→ DS v1.1
+E2 Editorial Rail Horizontally scrolling titled rail of cards. Screens: S001, S003. States: default; loading; empty (curated fallback); per-rail error; offline.
+→ DS v1.1
+E3 Authorship Chip Internal-only chip noting a guide's source (Hecho, Brand, Co-authored). Never exposed on retailer screens per Q5. On DS .chip . Screens: P4 brand-authoring surface only (out of scope this round); never rendered on S002 or any retailer screen. States: Hecho; Brand; Co-authored.
+→ DS v1.1
+E4 Soft Pitch Card Low-pressure prompt to connect a POS, skippable, persistent. Screens: S001 rail, near S004 / S102. States: default; dismissed; connected (hidden).
+→ DS v1.1
+F · Media, capture & conversation
+Where real photography and live voice enter the product. See §07b App visual direction.
+Component Anatomy · screens · states Target
+F1 Media component The product / RMA / invoice photography container: fixed aspect ratios, radius from the DS scale, loading and error placeholders, RMA capture frame. The single home for real photography (line-art stays on editorial). Screens: S004, S103, S307, S303. States: loading; loaded; error; capture frame.
+→ DS v1.1
+F2 Voice Recorder Record control with elapsed read and waveform, for memos and chat. Screens: S605, S606. States: idle; recording; saving; error; offline.
+→ DS v1.1
+F3 Chat Thread / Composer Threaded messages plus a composer with text, voice, photo, reply-to-context. Screens: S606. States: default; sending; error; offline; privacy-masked numbers.
+→ DS v1.1
+F4 Coachmark First-run pointer overlay introducing the scanner. Screens: S101. States: shown; dismissed.
+→ DS v1.1
+G · Sync, rep & wayfinding
+Component Anatomy · screens · states Target
+G1 Diff Pane Two-pane Mine-vs-Theirs with per-line accept and keep-both. Screens: S807. States: default; applying; error; submit-pending (extra emphasis).
+→ DS v1.1
+G2 Floor Plan Showroom map drawn as a line illustration, current booth highlighted. Net-new. Screens: S708. States: default; no-location (manual booth picker); offline (cached); unknown showroom (generic grid).
+→ DS v1.1
+G3 Map Pin Selectable booth marker with a current-position highlight. Screens: S708. States: default; current; selected; visited.
+→ DS v1.1
+G4 Breadcrumb Trail of recently visited booths, resettable, with a visited-only toggle. Screens: S708. States: default; visited-only; empty.
+→ DS v1.1
+Cross-references unchanged from the system: App Bar, Brand Chip, Product Row, Stepper, MOQ Chip, Status Pill, Toggle, and the Sheet / Modal / Drawer family all resolve to documented Design System v1.0 entries and are not repeated here. A second tier of brand-surface composites the spec cards name (Brand Hero, Editorial Hero, Tier Badge, Launch Badge, Catalog Card, Product Hero, Variant Selector, Sticky Action Bar, Brand Breakdown, Lock Chip, Rep Banner, Sampler CTA, Sync Tag, Activity Layer) extends the Style guide spread, Product card, and Brand card already in the system, and each ships into Design System v1.1 with the same anatomy-and-states discipline as the rows above. The rest of the names on the spec cards are configured instances of documented Design System primitives, not new components: every picker (Recipient, Permission, Destination, Gesture, Reason, Method, Country, Period, Snooze) is the DS select or chip-group; every row (Compliance, Tracking, Suggested Add, Cart, Line, Order, Vendor, Inbox, Match) is the DS list row; Brand Panel, Approve Bar, Sticky Action Bar, and Status Drawer are the DS section, sheet, and drawer family; Comment Bubble, Countdown Chip, Indicator Chip, Sync Tag, and Lock Chip are the DS chip or pill; and Card Pager, Pager Dots, Preloader Bar, OAuth Button, Verify Button, Ghost Button, Document Picker, Field List, Category Tile, A to Z Index, and the In-app Browser and Vendor Sheet are configured DS Button, Input, Card, Skeleton, and Sheet primitives. Each inherits its primitive's anatomy and states; none is a new component. The Floor Plan, Map Pin, and Breadcrumb depend on a booth-coordinate source that is still unresolved; I track that as OI-01 .
+07 · Cross-cutting requirements
+The rules that apply to every screen.
+Behavior the designs assume but cannot show in a single card. Each rule is the same regardless of tab, so I apply it once here.
+A · Offline & sync
+What stays usable. What can wait.
+Local-first for browse, drafts, and notes. Writes queue and replay on reconnect. Submit, payment, RMA submit, and POS sync require network.
+Persistent banner at the top of every screen when offline.
+Sync-pending tag on each local draft, memo, message until acknowledged by the server.
+Conflict resolution uses last-write-wins for non-cart fields. Cart-line conflicts route to S807 Sync conflict resolver.
+Photo uploads compress on capture and resume on reconnect.
+B · Push taxonomy
+Eight categories. Eight deep links.
+Each push category has a single canonical deep link, a clear opt-out toggle in S411 , and a category icon in S701 . The copy deck (§13) writes one body per category.
+Order lifecycle : state change → S302 .
+Payment : invoice due or paid → S303 then S304 .
+Low stock : stock predicted to run out within the brand lead time → S203 with Smart template .
+Compliance : Tax-ID nearing expiry → S408 .
+New style guide : curation published → S002 .
+Brand drop : launch window open → S710 then S003 .
+Approval requests : a draft awaits sign-off → S208 .
+Direct messages : a rep or co-owner writes → S606 .
+C · Deep linking
+From a push or a QR to the right screen.
+All in-app routes are deep-linkable. Cold opens that target a tab swap the active tab before opening the destination.
+Push scheme : hecho://orders/&lcub;orderId&rcub; , hecho://carts/&lcub;draftId&rcub; , hecho://brands/&lcub;brandId&rcub; , hecho://style-guides/&lcub;guideId&rcub; , hecho://compliance/tax-id .
+Showroom QR scheme : https://qr.hecho.app/booth/&lcub;showroomId&rcub;/&lcub;boothId&rcub; resolves to S709 . Signed, expires per show. Stale QR shows a friendly error.
+Universal links handle both the web platform and the mobile app. The app intercepts; otherwise web continues.
+Auth-required deep links route through S503 first and resume after sign-in.
+D · Privacy on the floor
+What stays masked. How to reveal.
+On by default after onboarding. Off-floor buyers can change in S412 .
+Masked by default : negotiated wholesale, on-hand stock, past spend, credit balance, recommended reorder qty.
+Reveal gesture : hold-to-preview (default). Double-tap is the accessibility fallback (auto-mask after five seconds). Off disables masking entirely.
+Screenshot watermark overlays "for buyer eyes" when supported by the OS interceptor.
+Quick toggle via header icon → S210 sheet.
+E · Accessibility
+Floors I hold on every screen.
+I meet the floors documented in Design System v1.0 and add the screen-specific commitments below. Where the system and this brief once disagreed, this card is the source of truth.
+Coral is decoration, never the only signal : I never set coral text below 18 px bold or 24 px regular, and never use coral as the sole focus indicator. Coral on Antique White is 4.12:1, so it clears large and icon use only.
+Focus ring : Brand Gray by default, or a 3 px coral ring on a 1 px Brand-Gray inner halo so focus survives on any ground. I never strip :focus-visible .
+Error text : Brand Gray on Surface paired with a coral alert icon. The icon carries color; the word carries meaning. Coral never sets the error sentence itself.
+Contrast floors : 4.5:1 for body, 3:1 for large text and icon affordances. Brand Gray on Antique White (8.3:1) is my body default.
+Status is icon plus label plus color, never color alone : check + "Current"; clock + "Renews soon"; alert-triangle + "Expired"; coral alert icon + "Past due". The triad replaces the old "(green/yellow/red)" shorthand everywhere.
+Hit targets minimum 44 by 44 px; primary actions at 48. Reveal and icon-only controls extend the tappable area to 44 with transparent padding even when the visible glyph is 32.
+Reveal mode is its own setting : Hold, Tap-to-toggle, Double-tap (5 s), or Always-off-floor. Default is Hold, and I auto-switch to Tap-to-toggle the moment VoiceOver, TalkBack, or Switch Control is active. Tap-to-toggle reveals on one activation and re-masks on the next, with no sustained pressure and no timing.
+Reduced motion is decoupled from reveal : it removes animation only; it never changes the gesture choice.
+Dynamic Type : I honor OS text scaling through iOS AX3 and Android 200%. No fixed-height text containers; the price pair, line row, and status row reflow from columns to stacked; the S416 table switches to stacked cards above the scale threshold.
+Focus order follows visual order; modals trap focus. The S102 half-sheet over the camera traps focus and restores to the viewfinder on dismiss; the S807 diff announces "row N, Mine vs Theirs".
+VoiceOver / TalkBack labels sit on every interactive element. The masked chip announces one canonical string everywhere: "Your price, hidden. Double-tap to reveal." See the screen-reader copy deck (§SR).
+E&prime; · Inclusive showroom
+Reading prices in a real booth, by any buyer.
+The showroom is loud, bright, and shoulder-to-shoulder. These commitments keep a masked price legible and private for a buyer who scales text, mirrors layout, or works by voice and ear.
+Reflow over truncation : when text scales up, every multi-column showroom row stacks rather than clips. Nothing hides behind a fixed height.
+RTL with logical insets : I use logical start and end insets and mirror directional icons (chevron, back, stepper progression, breadcrumb). I never mirror the viewfinder, media, numerals, SKUs, or the HECHO mark.
+Tap-to-toggle under assistive tech : with VoiceOver, TalkBack, or Switch Control on, reveal is a single rotor action ("Reveal value" / "Mask value") with no hold and no countdown.
+Voice input respects the mask : when Privacy on the floor is ON, I suppress voice input for sensitive fields; in noise I fall back to keyboard plus barcode with a one-line hint.
+Status that survives color blindness and glare : every status carries an icon and a word, so a buyer reads "Past due" and the alert glyph together, never the hue alone.
+F · Localization
+English-only in v1.0. Designed to translate.
+Full localization is out of scope for this round. The design accepts variable string length and respects RTL-safe layouts.
+String length sized for 1.4 times longest English expansion.
+Numbers and currencies use the buyer account locale today; explicit i18n in a later version.
+Date phrases are relative ("two days ago"), never specific.
+G · Telemetry the design assumes
+Events that make affordances meaningful.
+I do not specify a backend; I do place affordances that emit and consume the events below.
+scan.result.shown , scan.result.added_to_cart with source (barcode, photo, manual).
+cart.created , cart.shared , cart.approved , cart.submitted , cart.smart_reorder.accepted with the source basket id.
+order.lifecycle.changed , order.paid , rma.submitted , tax_id.refreshed .
+brand_launch.cta_seen , brand_launch.cta_tapped , brand.requested_access .
+privacy.reveal with gesture and field name (the value is never logged).
+07b · App visual direction
+Four things the system does not yet rule on. Ruled on here.
+Design System v1.0 settles color, type, spacing, and the documented components. It does not settle where real photography lives, whether the app goes dark, how the showroom map looks, or which motion patterns the screens lean on. I resolve all four here so the screen work has no open visual questions. Each rule that introduces a component points back to the Component Manifest .
+A · Photography vs line-art
+Editorial stays drawn. Product, capture, and proof use real photos.
+The discovery system is line-art: flat-lay line drawings in one 1.5 px stroke, Terracotta on a paper ground, no fills or shading. That holds for every editorial surface. Real photography enters only where the buyer needs to see the actual thing, through a single Media component (manifest F1).
+Line-art stays on Style guide detail, brand heroes, empty states, and section breaks.
+Photography is required at product hero ( S004 ), photo-recognition capture ( S103 ), RMA damage photo ( S307 ), and PDF invoice preview ( S303 ).
+Media component fixes the rules: aspect ratios (1:1 product, 4:5 capture, page ratio for invoice), corner radius from the DS radius scale, a loading placeholder, and an error placeholder.
+RMA capture frame is a dedicated Media state: a framed live preview with a capture control, photos compressed on capture.
+B · Dark mode
+Light-only, except the camera. Full dark deferred.
+The v1.0 position is explicit: the app is light-only. The one exception is the camera surfaces, which already render their controls over a dark camera feed using the Design System dark surfaces.
+Light everywhere by default; the Antique White canvas is the ground for every non-camera screen.
+Camera surfaces render dark : the viewfinder and its overlays at S101 , S102 , S103 draw controls over the live feed on the DS dark surfaces, so affordances stay legible on any shelf color.
+Full dark mode is deferred to a Design System v1.1 item; I do not theme the rest of the app dark in this round.
+C · Map & wayfinding
+The floor map is net-new, with a no-location fallback.
+Nothing in Design System v1.0 covers a map. The Floor Plan , Map Pin , and Breadcrumb (manifest G2 to G4) are net-new and ship into Design System v1.1 before S708 is built. The floor plan is drawn line-art, consistent with the illustration rules.
+Floor Plan renders the showroom as a line illustration with the current booth highlighted.
+No-location fallback : when location is unavailable, the surface degrades to a manual booth picker; an unknown showroom shows a generic booth grid.
+Open dependency : the booth-coordinate source is unresolved. I cite OI-01 and will not finalize the Floor Plan geometry until it lands.
+D · Motion
+Three patterns, each mapped to a system token.
+The brief leans on three motion patterns, and each maps to a Design System duration and ease rather than an improvised timing. Reduced motion disables them; fades remain.
+Hero arrival : editorial and product heroes settle on --d-base (300 ms) with --e-out-expo .
+Sheet slide : bottom sheets, payment, review surfaces rise on --d-slow (500 ms) with --e-out-expo .
+Skeleton shimmer : loading skeletons ( S808 ) sweep continuously on --e-in-out .
+Reduced motion disables hero arrival, sheet slide, and shimmer (the scan line goes static); fades remain so nothing depends on motion alone.
+07-H · Data & integration contracts
+The shapes the UI consumes, typed and quantified.
+I do not specify a backend. I do specify the exact contracts every data-driven affordance reads, so a prototype builder never has to guess a formula, a threshold, a field, or a degraded path. Each contract below is build-ready: typed inputs, named units, explicit null-handling, and a stated default for every open item it closes.
+H1 · Reorder recommendation
+One formula. One unit. One degraded path.
+The recommended reorder quantity on S102 and S004 is a single typed formula, in units, rounded to the brand pack or case size:
+recommended_qty = round_up_to_pack( max(0, ceil(velocity_30d × lead_time_days) &minus; on_hand) )
+velocity_30d = POS sell-through units in the trailing 30 days, as units/day (a float).
+lead_time_days = brand-supplied integer; falls back to 14 when the brand omits it.
+on_hand = live POS units from the stock contract (H3); the masked value, never a guess.
+round_up_to_pack rounds up to the brand pack or case size; result is an integer unit count.
+No-POS degraded path : I suppress the qty number and rank lines by order-history recency and frequency only. Under 2 orders I show Reorder? in place of a number, never a fabricated quantity.
+Dead-line cutoff : a line is dead when sell_through_units(90d) == 0 (POS) or no reorder in 2 buying cycles (no POS). Dead lines de-emphasize and offer Remove, per F6 .
+The "why" string is a typed template with explicit null-handling, not free text: &lcub;soldQty&rcub; sold in &lcub;windowDays&rcub;d · last ordered &lcub;monthsAgo&rcub;mo ago · &lcub;seasonFlag&rcub; . The sold clause drops when POS is absent; the last-ordered clause drops when the buyer has never ordered the line; seasonFlag is one of in season / off season / null, and null drops its clause and separator.
+H2 · Photo-match confidence
+One score scale. Three branchable states. (Resolves OI-09.)
+Every candidate on S104 carries a score on a 0.00&ndash;1.00 scale. The three states the spec card lists become explicit branches off two thresholds and one cap:
+Show a candidate when score &ge; 0.40 . Below that it is never rendered.
+Best guess chip renders when the top score is < 0.65 ; the list still shows, flagged tentative.
+No-match route : when no candidate clears 0.40 or count == 0 , I drop the list and route to the AI ingest shortcuts.
+Cap at 5 candidates, ranked by descending score; ties break on brand-name sort.
+H3 · POS stock & staleness
+Per location, not per shop. (Resolves OI-02.)
+The Stock Check Row on S004 and S102 consumes one typed object, per Shopify, Lightspeed, or Square location : &lcub; on_hand:int, location_id, location_name, synced_at, source_vendor &rcub; .
+Granularity is per location. A multi-store buyer sees a location picker on the row; H1 reads the selected location's on_hand .
+Refresh is webhook-driven where supported, else poll. Same shape either way.
+Other (open API) vendors must supply this exact shape to render a live row; anything short renders as Last counted.
+Strictly additive : a disconnected, stale, or absent POS never blocks ordering.
+Staleness keys on age = now &minus; synced_at : LIVE when age < 15 min ; STALE ("as of {relative}") when 15 min &le; age < 24 h ; LAST COUNTED (manual-count path) when age &ge; 24 h or no successful sync.
+H4 · Sync & conflict
+Cart lines pick explicitly. Everything else last-write-wins.
+CART fields : line qty, line variant, line add/remove, line note. Conflicts route to S807 .
+NON-CART fields : draft title, ship-to selection, memo text. Last-write-wins, silently.
+qty conflict = explicit pick. A scalar never silently keeps both; the buyer chooses local or server.
+line-add = union. edit-vs-delete = conflict, routed to S807 , never auto-resolved.
+"Keep both" means duplicate the line, both retained; offered only where duplication is coherent, never on a scalar qty.
+Submit-pending conflict : if a cart-line conflict exists at Submit, I block and present S807 before S204 .
+H5 · Backend contracts the UI assumes. Consumed, not implemented. Each row states the shape the design reads and, where it closes an open item, the chosen default.
+Telemetry payload
+One event shape. Every affordance in §07-G emits &lcub; event:string, source:enum, entity_id:string &rcub; , where source is one of barcode / photo / manual for scans and cart / order / brand for lifecycle. A value is never carried in the payload.
+In v1.0
+Tier-segmented push
+Server filters before send. Exclusivity-tier targeting is resolved server-side, so a gated brand drop never reaches an ineligible buyer. The client renders whatever arrives; it does not gate after receipt.
+In v1.0
+Signed showroom QR
+HMAC-signed URL. https://qr.hecho.app/booth/&lcub;showroomId&rcub;/&lcub;boothId&rcub; carries an HMAC signature and an expiry field per show. An expired or unsigned QR renders the friendly error with the current-day booth list.
+In v1.0
+Invoice source
+Server-rendered PDF. The invoice view reads &lcub; pdf_url:string, page_model &rcub; . The client renders the page model and offers the PDF for download; it never composes the invoice itself.
+In v1.0
+RMA queue routing
+Brand queue by default. (Resolves OI-08.) Route an RMA to the originating brand's returns queue; when the brand defines none, fall back to Hecho central. S309 reads "Routed to {brand} queue" when a brand queue resolves, the Hecho-central string otherwise.
+In v1.0
+ACH bank-link vendor
+Plaid is the default. (Resolves OI-04.) I design S304a against Plaid, which drives the sheet copy and trust signals. A later swap keeps the same handoff shape; only copy and mark change.
+In v1.0
+08 · Tech & integration touchpoints
+The integrations the design has to honor.
+I list only the constraints that affect the screen designs. Implementation specifics are intentionally out of frame here.
+Camera & barcode
+Native APIs. iOS AVFoundation and VisionKit; Android CameraX with ML Kit Barcode. Both ship a high-fidelity viewfinder, multi-format barcode, and photo capture. The Scanner viewfinder ( S101 ) wraps the native preview; the result sheet ( S102 ) is in-app.
+The first scan triggers S507 Camera permission prompt with rationale before the OS prompt. If permission is denied, S105 degrades gracefully.
+In v1.0
+POS connect (OAuth)
+Three vendors. Shopify, Lightspeed, Square. The connect flow opens an in-app browser sheet to the vendor login, accepts the redirect, and returns to S413 . Multi-store accounts pick one store on return.
+The Stock Check Row supports three connector states (connected, connecting, not connected) and never blocks ordering when disconnected.
+In v1.0
+Payment
+ACH + saved card. The Payment sheet ( S304 ) supports two methods. First-time ACH triggers S304a ACH onboarding via the bank-link vendor sheet. Tap-to-pay in showroom is deferred.
+Failed payments preserve state and offer retry in-place; status updates go to S302 lifecycle and to the Payment push category.
+In v1.0
+AI ingest shortcuts
+Carry the web pattern. The retailer already has Upload-a-file and Forward-an-email on the web. On mobile they appear as shortcuts on S006 empty search, S104 no-match, and Help. Upload opens the document picker; Forward opens the system mail composer with the to-address pre-filled.
+In v1.0
+Showroom QR scheme
+Signed URLs. The shape https://qr.hecho.app/booth/&lcub;showroomId&rcub;/&lcub;boothId&rcub; is the placeholder I design against. Resolves to S709 ; expired or unsigned QRs render a friendly error with the current day booth list.
+In v1.0
+Notifications
+Native push with categories. Each push category in §07-B maps to a system category with actions where supported (Quick reply on chat; View on order updates). Provisional permission on iOS is used where possible to bootstrap before the explicit prompt.
+In v1.0
+Auth
+SSO + magic link. Apple, Google, and Hecho SSO sit alongside email magic-link. The auth handoff opens a system browser sheet and returns through the universal link.
+In v1.0
+Offline storage
+Local-first for drafts, notes, messages. Drafts, voice notes, and chat messages persist locally with a sync-pending tag until acknowledged. The cart submit, payment, and RMA submit require network.
+In v1.0
+PH · Phasing & MVP
+One prototype now. Two builds after, in order .
+§08 is explicit that the integrations here are the constraints that affect the screen designs, not live rails the prototype ships. This section reconciles that: the prototype depicts every rail with mocked data, and the build phases turn rails on in priority order. The §10 deliverable is the prototype. P0 and Fast-follow are the build plan that follows it.
+Prototype
+The §10 deliverable. All 91 screens and all 14 flows clickable end-to-end, on mocked data. POS stock, ACH, push, and live POS all depicted, none live. This is what is approved before anything is built. It proves the design, not the plumbing.
+Deliverable · now
+P0 · MVP build
+The first shippable. Flows F1, F2, F4, F7, F8 on real rails, plus the core Shop, Scan, Carts, Orders, You screens behind them. One POS connected live (Shopify first), and ACH designed and wired. The buyer can set up, scan a real shelf, build a draft, submit, and pay. The single motion the cover names, made real.
+P0
+Fast-follow
+Everything that deepens the floor. Flows F3, F5, F6, F9, F10, F11, F12, F13, F14 . The remaining POS vendors (Lightspeed, Square) and the open API. Photo-identify , rep co-shop , and wayfinding . RICS and Heartland stay deferred to the open-API track. Each item ships when its rail is ready, against the same designs.
+P1 / P2
+The 14 flows, tagged
+P0 is the MVP build. P1 is the first fast-follow wave. P2 is the later wave. All 14 are clickable in the prototype regardless of tag.
+Flow Name Phase
+F1 First-time setup and onboarding
+P0
+F2 Walking the showroom and scanning a real shelf
+P0
+F3 Photo-identifying a product
+P1
+F4 Building a named draft cart from scratch
+P0
+F5 Sharing a draft with a co-owner for approval
+P1
+F6 Smart reorder from past orders
+P1
+F7 Submitting an order and following its lifecycle
+P0
+F8 Paying an invoice in-app
+P0
+F9 Filing a damage or RMA claim with a photo
+P1
+F10 Renewing the tax ID as it nears expiry
+P1
+F11 Switching to the rep view and co-shopping
+P2
+F12 Turning on privacy on the floor
+P1
+F13 Discovering a style guide and adding the look to a cart
+P2
+F14 Receiving a brand-launch notification
+P2
+Why this order
+P0 is the sentence on the cover, made real
+P0 carries exactly the flows that let a buyer scan a real shelf and submit a reorder without leaving the app: setup, scan, draft, submit, pay. F12 (privacy) sits in the first fast-follow wave because the floor is incomplete without it, but it does not block the core motion. F11 co-shop, F13 style guide, and F14 brand launch deepen the experience and depend on rep tooling, the editorial surface, and tier segmentation respectively, so they land later. Sequencing is an Inferred plan, pending confirmation .
+09 · Out of scope
+What I am not designing this round.
+Explicit so I do not blur the edges. Each item has a single sentence on why and where it belongs.
+Brand-side app (P4) Separate product with its own brief. Referenced on S003 Brand page as "Curated by this brand" but the brand authoring UI is not designed here.
+Admin / leadership desktop Hecho-internal growth dashboard belongs to a desktop track. The mobile app exposes nothing of it.
+Public marketing site Marketing surface lives elsewhere; the app does not need to mirror it.
+AR shelf placement Mentioned as a v2 opportunity in the Overview. Not in this round.
+Full localization English-only in v1.0. Strings are designed to translate; explicit i18n later.
+Tap-to-pay in showroom Payment via ACH and saved card only. Tap-to-pay deferred to a later round.
+Phone calls / SMS handoff The rep chat is the canonical channel; phone and SMS fallbacks are not designed.
+Multi-currency, multi-tax engine v1.0 assumes a single currency per account and a single tax-ID profile.
+Voice-driven flows Voice memos in chat are in. Full voice navigation is not.
+10 · Acceptance criteria
+What "done" looks like for the prototype.
+The prototype is the moment the brief stops being a doc and becomes a thing you can tap. These are the checks I run before I call it done.
+Every screen in §04 designed and connected. All 91 screens land in the canvas, hit-checked against the inventory list. No orphans, no extra screens that are not on the list. State-alias frames (S702, S805) reuse a parent layout and are counted once.
+Every state in each spec card present. Default, loading, empty, error, offline, success, permission-denied, locked, and the listed edges. Every state has a corresponding frame in the prototype.
+All 14 flows clickable end-to-end. F1 through F14 connect screen-to-screen, including the branches called out inline. The prototype is navigable as a story.
+Components match the Design System with no orphan styles. Every shape, color, type, motion is sourced from the tokens and components in Design System v1.0. Anything not yet documented there is flagged in the Open issues log so the system grows with the work.
+Stakeholder walkthrough script included. A short narrated walkthrough that follows F1 → F2 → F6 → F7 → F12. Two minutes, one breath per flow, no specific times.
+Accessibility floors met. Contrast, hit targets, focus order, reduced motion, screen reader labels per §07-E.
+Telemetry affordances in place. Every event in §07-G has a clear surface so the data has somewhere to come from.
+Open issues triaged. Every item in §11 has a follow-up plan: answered, deferred to v1.1, or rejected.
+11 · Open issues log
+What is still unanswered, who owns it, what it risks.
+The six leadership questions are locked in §02. These are the smaller, design-affecting questions that come up while writing this brief. Several are now resolved in this revision: OI-02, OI-04, OI-08, and OI-09 in the data contracts (§07-H), OI-03 in the permission matrix (§02b), OI-06 in the tier model (§TM), and OI-10 in the copy deck (§13). The rest carry an owner. OI-11 to OI-13 are new: they hold the three §02 decisions I adopted as inferred, pending leadership sign-off.
+OI-01
+Showroom map source-of-truth Where do the booth coordinates live? Hecho-managed floor-plan or vendor-supplied? Risk: S708 falls back to a generic booth grid for showrooms without coordinates.
+Hecho ops
+OI-02
+POS multi-store coverage on Shopify Confirm POS data granularity per Shopify location, not per shop. Resolved: §07-H locks per-location granularity; the Stock Check Row on S004 / S102 shows a location picker for multi-store retailers.
+POS integrations
+OI-03
+Approval workflow for rep-initiated submits Can a rep submit on behalf of a retailer with an explicit grant, and how is that grant given? Resolved: §02b makes the rep submit a per-account grant, a single toggle on the S407 Rep access row, set by an Owner and off by default.
+Hecho ops
+OI-04
+Bank-link vendor choice for ACH Plaid, Stripe Financial Connections, or other? Resolved: §07-H sets Plaid as the default bank-link vendor, which drives the S304a copy and trust signals; a later swap keeps the same handoff shape.
+Payments
+OI-05
+Style-guide "Save as template" scope Are templates private to the buyer or shared with company users by default? Risk: Save action on S002 ships behind a small toggle either way.
+Product
+OI-06
+Brand-tier upgrade path What is the path from Request access to grant, and where do I show progress? Resolved: §TM defines the four-step path (Request access → rep follow-up → ops grant → resolves on next load) and the S804 Request sent state.
+Hecho ops
+OI-07
+Watermark feasibility on Android screenshots iOS supports screen-capture interception more cleanly. Android coverage varies. Risk: S707 watermark is iOS-only in v1.0; Android falls back to a soft overlay.
+Mobile platform
+OI-08
+RMA queue routing per brand Does each brand define its own queue and rep, or does Hecho route centrally? Resolved: §07-H routes an RMA to the brand's returns queue, falling back to Hecho central; S309 reads "Routed to {brand} queue" when a brand queue resolves, the central string otherwise.
+Hecho ops
+OI-09
+Photo recognition fallback budget How many candidates do I surface before defaulting to the AI ingest shortcuts? Resolved: §07-H sets the confidence floor at 0.40, the Best guess cutoff at 0.65, and caps candidates at 5; below the floor, the AI ingest shortcuts surface.
+Data team
+OI-10
+First-look window duration as a phrase I use relative phrases. The exact wording per tier ("first-look open now", "first-look ends soon") needs a copy table. Resolved: the first-look phrase table is written in the copy deck (§13), driving S009 , S710 , and the S003 launch badge.
+Brand voice
+OI-11
+Confirm Q1 POS launch set Are Shopify, Lightspeed, and Square the confirmed launch three, or a v0.7 proposal still open to change? Risk: S413 and S509 ship three vendor cards; a different launch set reshuffles both screens and the degraded-stock copy.
+Hecho leadership
+OI-12
+Confirm Q4 pricing-visibility rules Is "wholesale plus MAP/MSRP to all authenticated retailers, volume tier only to qualifiers" the signed-off rule? Risk: the price three-row component and the F12 privacy mask order both depend on this; a change is a cross-cutting rework.
+Hecho leadership
+OI-13
+Confirm Q6 brand-exclusivity tiers Are tier-gating and the new-launch first-look window confirmed, or still a v0.7 proposal? Risk: silent tier filtering on discovery, S804 Tier-locked, the §TM tier model, and segmented F14 push all assume tiers exist.
+Hecho leadership
+13 · Copy deck
+The strings, written. One maker, one buyer.
+Every load-bearing string the brief left as a placeholder, written to ship. First person singular, always "I", never "we". No em-dash. No clock time or calendar date, only relative phrases. "Buyer", "draft cart", "Privacy on the floor". This deck resolves OI-08 and OI-10 and supersedes the placeholder copy on the screens it names.
+1 · Auth (highest priority)
+Rewrites the broken first-person-plural string on S504 Magic link sent.
+S504
+Magic link sent
+All · F1
+Body
+I sent a link to {email} . Open it on this device to sign in.
+Resend
+Send it again.
+Alt
+Use a different email.
+Note
+Replaces the old "We sent a link to {email}". The product never says "we".
+2 · Push notification bodies
+One body per category. Eight categories, locked in §07-B. Relative time, first person, never "we".
+PUSH
+Order lifecycle
+→ S302
+Title
+Order shipped
+Body
+Your order to {brand} just shipped. Track it.
+PUSH
+Payment
+→ S303 then S304
+Title
+Invoice due soon
+Body
+Your {brand} invoice is due soon. Pay when you're ready.
+PUSH
+Low stock
+→ S203 Smart
+Title
+Running low
+Body
+{product} is running low at your store. Reorder?
+PUSH
+Compliance (Tax ID)
+→ S408
+Title
+Tax ID renews soon
+Body
+Your tax ID is due for renewal. Submit when you're ready.
+PUSH
+New style guide
+→ S002
+Title
+New style guide
+Body
+A new look just landed: {guide} .
+PUSH
+Brand drop
+→ S710 then S003
+Title
+First-look open
+Body
+{brand} is open for first-look. See it now.
+PUSH
+Approval requests
+→ S208
+Title
+Approval needed
+Body
+{name} sent a draft cart for your approval.
+PUSH
+Direct messages
+→ S606
+Title
+{name}
+Body
+{name} sent you a message.
+3 · First-look phrase table
+Resolves OI-10. Relative phrases only, one per window state. Drives S009 , S710 , the S003 launch badge, and F14.
+F14
+First-look window states
+S009 · S710 · S003
+Open
+First-look open now.
+Mid
+First-look open. Ends soon.
+Closing
+Last call on first-look.
+Closed
+First-look has closed. Join the waitlist.
+4 · Error, empty, and offline one-liners
+The actual strings for the edge and state screens. Plain, calm, give the buyer the next move.
+S801
+Offline, no cache
+All · cross
+Body
+You're offline and there's nothing saved yet. Reconnect to load your floor.
+S803
+Generic error
+All · cross
+Body
+Something went wrong on my end. Try again.
+Action
+Try again.
+S810
+Slow network
+All · cross
+Body
+This is taking a moment.
+Action
+Switch to offline mode.
+S105
+Camera denied
+All · F2·F3
+Cause
+I can't open the camera without permission, so scanning is off for now.
+Action
+Open Settings.
+Alt
+Search instead.
+S802
+Empty states, per surface
+All · cross
+Carts
+No drafts yet. Scan a shelf or start one by hand.
+Orders
+No orders yet.
+Search
+Nothing matched. Try a SKU or forward the email.
+5 · Permission rationales
+Pre-prompt copy shown before the OS prompt on S507 and S508 .
+S507
+Camera permission
+All · F1·F2
+Rationale
+Scan products on the showroom floor and add them to a draft in seconds.
+S508
+Notification permission
+All · F1·F14
+Rationale
+Get a ping when an order ships, stock runs low, or a brand opens first-look.
+6 · Transactional confirmations
+Success toasts and confirmation screens. S309 resolves OI-08 with brand-specific queue routing.
+S211
+Added to cart
+All · F2·F4
+Toast
+Added to {cart} .
+S206
+Shared
+P1·P2 · F5
+Toast
+Sent to {name} .
+S309
+RMA submitted
+P1·P2 · F9
+Body
+Claim {id} is in. Routed to the {brand} returns queue. I'll update you here.
+S305
+Payment success
+P1 · F8
+Body
+Paid. Reference {ref} . Your order moves to settled.
+7 · Terminology fixes
+Find-and-replace across the brief and screens. Keep the feature name "Company Users".
+Prose "basket" → "draft cart". Affects the F6 lede and step 4. The telemetry field source basket id in §08 stays as a literal field name.
+Narrative "user" → "buyer". In running copy and on-screen strings. Keep the "Company Users" feature name ( S405 ) exactly as named.
+"Tax-ID soft-lock" → "Tax-ID hold (submit block)". Renames S410 and every reference. Clearer that orders are held, not the account.
+Dated cart-name example → "Back wall refresh". In the F2 confirmation chip and the F4 New cart example. Drops the dated name for a showroom-native one.
+SR · Screen-reader copy deck
+What a buyer hears, word for word.
+Verbatim VoiceOver and TalkBack strings for the load-bearing controls. I write them first-person, in relative time, with no "we" and no specific dates. The masked chip uses one canonical value string and one pair of rotor actions everywhere it appears.
+Control Accessibility trait Spoken label · announced state
+Scan result ( S102 half-sheet) Button · modal opens "Scan result. Lulu Knit Crew, by Marlow. Wholesale and stock below. Last ordered two weeks ago, twelve units." On dismiss, focus returns to the viewfinder: "Scanner, ready."
+Price pair · masked Button "Your price, hidden. Double-tap to reveal." Rotor: "Reveal value".
+Price pair · revealed Button · value updated "Your price, 18 dollars wholesale. MSRP 42 dollars. Double-tap to mask." Rotor: "Mask value".
+Lifecycle stepper Adjustable · progress "Order progress. Step three of five, Shipped. Confirmed and packed are done. Out for delivery is next."
+Status pill Text · status "Renews soon." Or "Current" · "Expired" · "Past due." Icon and word always read; color is never spoken alone.
+Quantity stepper Adjustable "Quantity, twelve. Swipe up to add, swipe down to remove." After change: "Thirteen."
+Map pin (booth) Button "Booth 214, Marlow. On your route, two booths ahead. Double-tap for booth details."
+MAP chip Text · informative "MAP enforced. The minimum advertised price for this item is set by the brand."
+Confidence chip (photo match) Text · informative "Match confidence, high. I am fairly sure this is the right product. Double-tap a result to confirm."
+Masked / Privacy chip (canonical) Button "Your price, hidden. Double-tap to reveal." Rotor actions: "Reveal value" / "Mask value". This is the one string used on every masked field.
+Canonical masked-chip wording: the value string is "Your price, hidden. Double-tap to reveal." and the rotor actions are "Reveal value" / "Mask value". This replaces the older "Hidden, hold to preview" label and the "Hold to reveal" button aria, so the announced state and the aria label now match. Under VoiceOver, TalkBack, or Switch Control, reveal is a single rotor action with no hold and no countdown.
+Hecho mobile app · Design Brief · v1.1 Prepared for Hecho Trading Co. leadership. Internal use only. Build-ready specification of every screen, flow, and state in the prototype scope. v1.1 · Reconciled to one screen count (91). Recovered S211 and S212. Rewrote F1 to the onboarding IDs and corrected the F5, F8, F11, F12, F14 branch targets. Added metrics, market context, the tier model, the permission matrix, data and integration contracts, the Component Manifest, app visual direction, phasing, a screen-reader copy deck, and the load-bearing copy deck. Decisions tagged Confirmed or Inferred.
+v1.0 · Initial brief, inheriting v0.7 overview scope and decisions, six leadership answers baked in.
+Reach out
+sebz.munoz@gmail.com
+↑ Top of brief

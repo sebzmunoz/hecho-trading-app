@@ -1,0 +1,399 @@
+// ============================================================
+// Render helpers + interaction primitives. Every visual is a
+// composition of Design System v3.0 components/tokens.
+// Render functions return HTML strings; behavior is wired via
+// data-* delegation (app.js) and the mount helpers below.
+// ============================================================
+import { icon } from './icons.js';
+import { state } from './state.js';
+import * as D from './data.js';
+
+export const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+export const money = D.money;
+
+// ---- Product line illustrations (line-art, Terracotta, per §07b) ----
+const ILLO = {
+  sweater: '<path d="M16 14h48l-8 12v40H24V26z"/><path d="M16 14l-10 8 8 14M64 14l10 8-8 14"/>',
+  scarf: '<path d="M22 12h36v56H22z" /><path d="M22 24h36M22 56h36"/>',
+  jar: '<rect x="24" y="26" width="32" height="44" rx="6"/><path d="M28 26v-6h24v6"/><path d="M24 40h32"/>',
+  tube: '<rect x="30" y="14" width="20" height="56" rx="8"/><path d="M30 26h20"/>',
+  bar: '<rect x="18" y="30" width="44" height="26" rx="6"/><path d="M28 30v26M40 30v26"/>',
+  charm: '<circle cx="40" cy="46" r="18"/><path d="M40 28v-10M34 18h12"/>',
+  pen: '<path d="M30 12l8 0 0 44-4 12-4-12z"/><path d="M30 24h8"/>',
+  plush: '<circle cx="40" cy="44" r="22"/><circle cx="33" cy="40" r="2" fill="currentColor"/><circle cx="47" cy="40" r="2" fill="currentColor"/><path d="M34 50a8 6 0 0 0 12 0"/>',
+  candle: '<rect x="28" y="30" width="24" height="40" rx="4"/><path d="M40 30v-8M40 14c4 4 4 8 0 8s-4-4 0-8"/>',
+  incense: '<rect x="22" y="56" width="36" height="6" rx="2"/><path d="M30 56V20M40 56V14M50 56V22"/>',
+  hat: '<ellipse cx="40" cy="56" rx="30" ry="8"/><path d="M24 56c0-18 4-32 16-32s16 14 16 32"/>',
+  tote: '<path d="M22 28h36l-4 40H26z"/><path d="M30 28a10 8 0 0 1 20 0"/>',
+  mug: '<rect x="22" y="26" width="30" height="40" rx="6"/><path d="M52 36a10 10 0 0 1 0 20"/>',
+  bowl: '<path d="M16 38h48a24 18 0 0 1-48 0z"/><path d="M28 64h24"/>',
+  coat: '<path d="M28 14l-10 8 6 10 4-3v37h24V29l4 3 6-10-10-8z"/><path d="M40 19v45"/>',
+  bottle: '<path d="M34 12h12v10l4 8v40H30V30l4-8z"/><path d="M30 44h20"/>',
+  tin: '<rect x="24" y="28" width="32" height="38" rx="4"/><path d="M24 38h32"/>',
+};
+export function illo(kind, size = 80) {
+  const body = ILLO[kind] || ILLO.jar;
+  return `<svg viewBox="0 0 80 80" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
+}
+
+// Editorial line vignette for style guides / heroes / empty states.
+export function vignette() {
+  return `<svg viewBox="0 0 120 100" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="width:100%;max-height:200px">
+    <path d="M12 78h96"/><ellipse cx="34" cy="60" rx="14" ry="4"/><path d="M22 60l3 18h18l3-18"/>
+    <rect x="58" y="40" width="20" height="38" rx="4"/><path d="M58 52h20"/>
+    <path d="M90 78V52c0-8 4-12 8-12s8 4 8 12v26"/><circle cx="98" cy="34" r="6"/>
+    <path d="M16 30c6-8 14-8 20 0" opacity=".7"/></svg>`;
+}
+
+// ---- Status (icon + label + color, never color alone — §07-E) ----
+const STATUS = {
+  current:  { pill: 'positive', icon: 'check',   label: 'Current' },
+  paid:     { pill: 'positive', icon: 'check',   label: 'Paid' },
+  in:       { pill: 'positive', icon: 'check',   label: 'In stock' },
+  renews:   { pill: 'caution',  icon: 'clock',   label: 'Renews soon' },
+  low:      { pill: 'caution',  icon: 'warning', label: 'Low' },
+  expired:  { pill: 'critical', icon: 'warning', label: 'Expired' },
+  pastdue:  { pill: 'critical', icon: 'warning', label: 'Past due' },
+  pending:  { pill: '',         icon: 'clock',   label: 'Pending' },
+};
+export function statusPill(kind, labelOverride) {
+  const s = STATUS[kind] || { pill: '', icon: 'info', label: labelOverride || kind };
+  return `<span class="pill ${s.pill}">${icon(s.icon, 13)}${esc(labelOverride || s.label)}</span>`;
+}
+
+export function brandChip(bid, { go = true } = {}) {
+  const b = D.brandById[bid]; if (!b) return '';
+  const attr = go ? `data-go="S003?brand=${bid}"` : '';
+  return `<button class="chip" ${attr}>${esc(b.name)}</button>`;
+}
+export function tierBadge(tier) {
+  const map = { standard: 'Standard', mid: 'Mid tier', top: 'Top tier' };
+  return `<span class="tag">${esc(map[tier] || tier)}</span>`;
+}
+export function lockChip(label = 'Higher tier') {
+  return `<span class="lock-chip">${icon('lock', 12)}${esc(label)}</span>`;
+}
+
+// ---- Privacy on the floor (§07-D / §SR) ----
+// Inline masked value used inside cards/rows.
+const MASK_ARIA = 'Your price, hidden. Double-tap to reveal.';
+export function isRevealedDefault() {
+  const s = state.get();
+  return !s.privacyOn || s.gesture === 'off';
+}
+export function maskField(valueHTML, field, { sr = MASK_ARIA } = {}) {
+  if (isRevealedDefault()) return `<span class="mask-inline is-open" data-field="${field}"><span class="mv">${valueHTML}</span></span>`;
+  return `<span class="mask-inline" data-field="${field}" role="button" tabindex="0" aria-label="${esc(sr)}"><span class="mv">${valueHTML}</span><span class="mdots" aria-hidden="true">●●●</span></span>`;
+}
+// Full privacy row (label left, masked value + hold button right).
+export function privacyRow(label, valueHTML, field) {
+  const open = isRevealedDefault();
+  return `<div class="privacy-row ${open ? 'is-revealing' : 'is-masked'}" data-field="${field}">
+    <span class="label">${esc(label)}</span>
+    <span class="value"><span class="value-content">${valueHTML}</span>
+      <button class="hold-btn" aria-label="${esc(MASK_ARIA)}">${icon(open ? 'eye' : 'eye-off', 14)}</button>
+    </span></div>`;
+}
+
+// ---- Price pair (A1) ----
+export function pricePair(p, { masked = true, compact = false } = {}) {
+  const tier = state.get('tier');
+  const inner = `<span class="price ${compact ? 'compact' : ''}"><span class="v">${p.wholesale}</span><span class="currency">USD</span>${p.msrp ? `<span class="msrp">$${p.msrp}</span>` : ''}</span>`;
+  if (masked) return maskField(inner, 'wholesale');
+  return inner;
+}
+
+// ---- Stock check row (A3 + H3) ----
+export function stockRow(p, { masked = true } = {}) {
+  const pos = state.get('pos');
+  const st = D.stockState(p, pos);
+  const cls = st.kind === 'unknown' ? 'unknown' : st.kind;
+  const inner = `<span class="stock ${cls}"><span class="dot"></span>${esc(st.label)}</span>`;
+  const body = masked ? maskField(inner, 'stock') : inner;
+  return `<div class="row-between"><span class="muted">Stock</span>${body}</div>
+    <div class="muted" style="font-size:var(--fs-nano)">${esc(st.caption)}</div>`;
+}
+
+// ---- MOQ chip ----
+export function moqChip(bid, subtotal) {
+  const b = D.brandById[bid];
+  if (!b) return '';
+  if (subtotal >= b.moq) return `<span class="moq">${icon('check', 12)}MOQ met</span>`;
+  return `<span class="moq unmet">${icon('warning', 12)}MOQ $${b.moq} · $${b.moq - subtotal} to go</span>`;
+}
+
+// ---- List row ----
+export function listRow({ thumbIcon, thumb, pri, sec, trail, go, current, dense, attrs = '' }) {
+  const t = thumb ? `<span class="thumb">${thumb}</span>` : (thumbIcon ? `<span class="thumb">${icon(thumbIcon, 22)}</span>` : '');
+  const tr = trail !== undefined ? `<span class="trail">${trail}</span>` : `<span class="trail">${icon('chevron-right', 16)}</span>`;
+  const tag = go ? 'button' : 'div';
+  const goAttr = go ? `data-go="${go}"` : '';
+  return `<${tag} class="list-row ${dense ? 'dense' : ''}" ${current ? 'aria-current="true"' : ''} ${goAttr} ${attrs}>
+    ${t}<span class="body"><span class="pri">${pri}</span>${sec ? `<span class="sec">${sec}</span>` : ''}</span>${tr}
+  </${tag}>`;
+}
+
+// ---- Cards ----
+export function productCard(p, { go = true, lockedView = false } = {}) {
+  const b = D.brandById[p.brand];
+  if (lockedView) {
+    return `<div class="card product is-locked">
+      <div class="img thumb-illo">${illo(p.illo, 64)}</div>
+      <div class="lock-over">${lockChip('Higher tier')}<span class="price-hidden">Pricing hidden</span></div>
+      <div class="body"><span class="brand">${esc(b.name)}</span><span class="nm">${esc(p.name)}</span></div>
+    </div>`;
+  }
+  return `<${go ? 'button' : 'div'} class="card product" ${go ? `data-go="S004?p=${p.id}"` : ''} style="text-align:start">
+    <div class="img thumb-illo">${illo(p.illo, 64)}</div>
+    <div class="body"><span class="brand">${esc(b.name)}</span><span class="nm">${esc(p.name)}</span>
+      <div class="row">${pricePair(p, { compact: true })}<span class="muted" style="font-size:var(--fs-nano)">${esc(p.variant)}</span></div>
+    </div></${go ? 'button' : 'div'}>`;
+}
+
+export function draftCard(c) {
+  const total = D.cartTotal(c);
+  const tag = c.sync === 'pending'
+    ? `<span class="sync-tag"><span class="spin-dot"></span>Sync pending</span>`
+    : (c.awaiting ? `<span class="tag coral">Awaiting you</span>` : `<span class="tag">${esc(c.author === 'You' ? 'Solo' : 'Shared')}</span>`);
+  return `<button class="card draft" data-go="S202?cart=${c.id}" style="text-align:start">
+    <div class="head"><span class="nm">${esc(c.name)}</span>${tag}</div>
+    <div class="meta"><span>${D.cartBrandCount(c)} brands</span><span><b>${money(total)}</b></span><span>${esc(c.lastEdited)}</span></div>
+  </button>`;
+}
+
+export function orderCard(o) {
+  const idx = D.lifecycleIndex[o.status];
+  const pillKind = o.pastDue ? 'critical' : (o.status === 'settled' ? 'positive' : '');
+  const pillLabel = o.pastDue ? 'Past due' : D.lifecycleSteps[idx];
+  return `<button class="card order" data-go="S302?order=${o.id}" style="text-align:start">
+    <div class="row"><span class="id">Order #${o.id}</span><span class="pill ${pillKind}">${o.pastDue ? icon('warning', 13) : ''}${esc(pillLabel)}</span></div>
+    <div class="row"><span class="muted">${esc(o.brands.join(' · '))}</span></div>
+    <div class="row"><span class="muted">${esc(o.eta)}</span>${maskField(`<span class="total">${money(o.total)}</span>`, 'spend')}</div>
+  </button>`;
+}
+
+export function styleTile(g, { wide = false } = {}) {
+  return `<button class="card style-tile" data-go="S002?guide=${g.id}" style="${wide ? 'aspect-ratio:16/10;' : ''}text-align:start">
+    <div class="illo">${vignette()}</div>
+    <div class="lbl"><small>${esc(g.season)} · ${esc(g.theme)}</small><b>${esc(g.title)}</b></div>
+  </button>`;
+}
+
+export function brandCard(b, { locked = false } = {}) {
+  if (locked) {
+    return `<button class="card brand is-locked" data-go="S804?brand=${b.id}" style="text-align:start">
+      <div class="head"><span class="name">${esc(b.name)}</span>${lockChip()}</div>
+      <p class="muted">${esc(b.cats.join(' · '))}</p>
+    </button>`;
+  }
+  return `<button class="card brand" data-go="S003?brand=${b.id}" style="text-align:start">
+    <div class="head"><span class="name">${esc(b.name)}</span>${b.launching ? `<span class="tag coral">Launching</span>` : icon('chevron-right', 18)}</div>
+    <p class="muted">${esc(b.cats.join(' · '))} · MOQ $${b.moq}</p>
+  </button>`;
+}
+
+// ---- Generic states ----
+export function emptyState({ ic = 'draft', title, body, primary, secondary }) {
+  return `<div class="empty">${icon(ic, 42)}<h4>${esc(title)}</h4><p>${esc(body)}</p>
+    ${primary ? `<button class="btn" ${primary.go ? `data-go="${primary.go}"` : ''} ${primary.action ? `data-action="${primary.action}"` : ''}>${esc(primary.label)}</button>` : ''}
+    ${secondary ? `<button class="btn ghost sm" ${secondary.go ? `data-go="${secondary.go}"` : ''}>${esc(secondary.label)}</button>` : ''}
+  </div>`;
+}
+export function fullscreenState({ ic = 'info', title, body, actions = [] }) {
+  return `<div class="fullscreen-state"><div class="ico">${icon(ic, 48)}</div><h4>${esc(title)}</h4><p>${esc(body)}</p>
+    <div class="actions">${actions.map(a => `<button class="btn ${a.ghost ? 'ghost' : ''}" ${a.go ? `data-go="${a.go}"` : ''} ${a.action ? `data-action="${a.action}"` : ''}>${esc(a.label)}</button>`).join('')}</div></div>`;
+}
+export function skeleton(rows = 4) {
+  let h = '<div class="skeleton"><div class="s-bar lg"></div>';
+  for (let i = 0; i < rows; i++) h += `<div class="s-bar"></div><div class="s-bar sm"></div>`;
+  return h + '</div>';
+}
+export function banner(msg, { kind = '', ic = 'info', action } = {}) {
+  return `<div class="banner ${kind}">${icon(ic, 20)}<span class="msg">${msg}</span>${action ? `<button class="btn sm ghost" ${action.go ? `data-go="${action.go}"` : ''} ${action.action ? `data-action="${action.action}"` : ''}>${esc(action.label)}</button>` : ''}</div>`;
+}
+
+// ---- Quantity stepper ----
+export function stepper(value, { id = '', field = 'recommended', masked = false } = {}) {
+  const inner = `<div class="qty" data-stepper ${id ? `data-id="${id}"` : ''}>
+    <button data-step="-1" aria-label="Remove one">${icon('minus', 16)}</button>
+    <input type="text" inputmode="numeric" value="${value}" aria-label="Quantity" />
+    <button data-step="1" aria-label="Add one">${icon('plus', 16)}</button>
+  </div>`;
+  return masked ? maskField(inner, field) : inner;
+}
+
+// ---- Segmented control ----
+export function segmented(options, selected, name) {
+  return `<div class="segmented" role="tablist" data-seg="${name}">${options.map(o =>
+    `<button role="tab" aria-selected="${o.value === selected}" data-val="${o.value}">${esc(o.label)}</button>`).join('')}</div>`;
+}
+
+// ---- Timeline (lifecycle) ----
+export function timeline(steps, currentIndex, captions = {}) {
+  return `<div class="timeline"><span class="rail"></span>${steps.map((s, i) =>
+    `<div class="step ${i > currentIndex ? 'todo' : ''}"><span class="pip"></span><div><b>${esc(s)}</b>${captions[i] ? `<div class="caption">${esc(captions[i])}</div>` : ''}</div></div>`).join('')}</div>`;
+}
+
+// ---- Switch / toggle row ----
+export function switchRow(label, checked, { sub = '', action = '' } = {}) {
+  return `<div class="list-row dense"><span class="body"><span class="pri">${esc(label)}</span>${sub ? `<span class="sec">${esc(sub)}</span>` : ''}</span>
+    <span class="trail"><label class="switch"><input type="checkbox" ${checked ? 'checked' : ''} ${action ? `data-action="${action}"` : ''} aria-label="${esc(label)}" /><span class="track"></span><span class="thumb"></span></label></span></div>`;
+}
+
+// ---- Header action icons (search / bell / privacy / etc.) ----
+export function hActions(list) {
+  return list.map((a) => {
+    const attr = a.go ? `data-go="${a.go}"` : (a.action ? `data-action="${a.action}"` : '');
+    const badge = a.badge ? `<span class="badge">${esc(a.badge)}</span>` : '';
+    return `<button class="hicon" ${attr} aria-label="${esc(a.label || a.icon)}">${icon(a.icon, 22)}${badge}</button>`;
+  }).join('');
+}
+// Standard header for the five primary tabs: search + notifications + privacy quick-toggle.
+export function tabHeaderActions({ search = 'S005', bell = true, privacy = true } = {}) {
+  const list = [];
+  if (search) list.push({ icon: 'search', go: search, label: 'Search' });
+  if (bell) list.push({ icon: 'bell', go: 'S701', label: 'Notifications', badge: '3' });
+  if (privacy) list.push({ icon: state.get('privacyOn') ? 'eye-off' : 'eye', action: 'privacy-sheet', label: 'Privacy on the floor' });
+  return hActions(list);
+}
+export function sectionLabel(t) { return `<div class="section-label">${esc(t)}</div>`; }
+
+// Soft pitch card (E4) — connect a POS.
+export function softPitch() {
+  if (state.get('pos') === 'connected') return '';
+  return `<div class="banner" style="flex-direction:column;align-items:flex-start;gap:var(--s-2)">
+    <div class="row-between" style="width:100%">${icon('refresh', 20)}<b style="flex:1;margin-inline-start:var(--s-2)">Connect a POS for live stock</b></div>
+    <p class="muted">I'll show live on-hand and sharper reorder picks once a POS is linked.</p>
+    <button class="btn sm" data-go="S413">Connect a POS</button></div>`;
+}
+
+// ====================================================================
+//  OVERLAYS — scoped to the device. Sheets / modals / drawers / toasts.
+// ====================================================================
+let overlayRoot, toastHost;
+const overlayStack = [];
+export function initOverlays(root, toasts) { overlayRoot = root; toastHost = toasts; }
+
+function trapFocus(container, onEsc) {
+  const sel = 'a[href],button:not([disabled]),input:not([disabled]),select,textarea,[tabindex]:not([tabindex="-1"])';
+  function key(e) {
+    if (e.key === 'Escape') { e.preventDefault(); onEsc(); return; }
+    if (e.key !== 'Tab') return;
+    const f = [...container.querySelectorAll(sel)].filter(el => el.offsetParent !== null);
+    if (!f.length) return;
+    const first = f[0], last = f[f.length - 1];
+    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+  }
+  container.addEventListener('keydown', key);
+  return () => container.removeEventListener('keydown', key);
+}
+
+function mountOverlay(shellClass, innerHTML, { onMount, dismissible = true } = {}) {
+  const prevFocus = document.activeElement;
+  const wrap = document.createElement('div');
+  wrap.className = shellClass;
+  wrap.innerHTML = `<div class="scrim" data-dismiss></div>${innerHTML}`;
+  overlayRoot.appendChild(wrap);
+  const close = () => {
+    const untrap = wrap._untrap; if (untrap) untrap();
+    wrap.remove();
+    const i = overlayStack.indexOf(close); if (i >= 0) overlayStack.splice(i, 1);
+    if (prevFocus && prevFocus.focus) try { prevFocus.focus(); } catch {}
+  };
+  if (dismissible) wrap.querySelector('[data-dismiss]').addEventListener('click', close);
+  wrap._untrap = trapFocus(wrap, () => { if (dismissible) close(); });
+  overlayStack.push(close);
+  if (onMount) onMount(wrap, close);
+  // focus first control
+  const first = wrap.querySelector('button:not([data-dismiss]),input,select,textarea,a[href]');
+  if (first) setTimeout(() => first.focus(), 30);
+  return close;
+}
+
+export function openSheet({ title = '', html = '', onMount, dismissible = true } = {}) {
+  const inner = `<div class="sheet-shell"><div class="sheet" role="dialog" aria-modal="true" ${title ? 'aria-label="' + esc(title) + '"' : ''}>
+    <span class="grab" aria-hidden="true"></span>${title ? `<div class="row-between"><h4>${esc(title)}</h4><button class="modal close" data-dismiss aria-label="Close">${icon('close', 14)}</button></div>` : ''}
+    ${html}</div></div>`;
+  return mountOverlay('overlay-host', inner, { onMount, dismissible });
+}
+export function openModal({ title = '', html = '', actions = [], onMount, dismissible = true } = {}) {
+  const act = actions.length ? `<div class="actions">${actions.map(a => `<button class="btn ${a.ghost ? 'ghost' : ''} ${a.danger ? 'danger' : ''}" data-modal-act="${a.id || ''}" ${a.go ? `data-go="${a.go}"` : ''} ${a.action ? `data-action="${a.action}"` : ''}>${esc(a.label)}</button>`).join('')}</div>` : '';
+  const inner = `<div class="modal-shell"><div class="modal" role="alertdialog" aria-modal="true" aria-label="${esc(title)}">
+    <div class="head"><h4>${esc(title)}</h4><button class="close" data-dismiss aria-label="Close">${icon('close', 14)}</button></div>
+    ${html}${act}</div></div>`;
+  return mountOverlay('overlay-host', inner, { onMount, dismissible });
+}
+export function openDrawer({ title = '', html = '', onMount } = {}) {
+  const inner = `<div class="drawer-shell"><div class="drawer" role="dialog" aria-modal="true" aria-label="${esc(title)}">
+    <div class="row-between"><h4>${esc(title)}</h4><button class="close" data-dismiss aria-label="Close">${icon('close', 14)}</button></div>${html}</div></div>`;
+  return mountOverlay('overlay-host', inner, { onMount });
+}
+export function closeTopOverlay() { const c = overlayStack[overlayStack.length - 1]; if (c) c(); }
+export function closeAllOverlays() { while (overlayStack.length) overlayStack.pop()(); }
+
+export function toast(msg, { action, positive = false, ms = 4000 } = {}) {
+  const t = document.createElement('div');
+  t.className = `toast ${positive ? 'positive' : ''}`;
+  t.innerHTML = `${icon(positive ? 'check' : 'info', 20)}<span class="msg">${msg}</span>${action ? `<button class="act">${esc(action.label)}</button>` : ''}`;
+  toastHost.appendChild(t);
+  if (action) t.querySelector('.act').addEventListener('click', () => { action.fn && action.fn(); t.remove(); });
+  setTimeout(() => { t.style.transition = 'opacity .3s'; t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, ms);
+}
+
+// ---- Privacy wiring (called on every screen mount + on overlay mount) ----
+export function wirePrivacy(root) {
+  const s = state.get();
+  root.querySelectorAll('.mask-inline[data-field]').forEach((el) => {
+    if (el._wired) return; el._wired = true;
+    const field = el.dataset.field;
+    const reveal = () => { el.classList.add('is-open'); el.setAttribute('aria-label', 'Revealed. Double-tap to mask.'); state.telemetry('privacy.reveal', state.get('gesture'), field); };
+    const mask = () => { el.classList.remove('is-open'); el.setAttribute('aria-label', MASK_ARIA); };
+    if (isRevealedDefault()) { el.classList.add('is-open'); return; }
+    const g = s.gesture;
+    if (g === 'hold') {
+      el.addEventListener('pointerdown', (e) => { e.preventDefault(); reveal(); });
+      el.addEventListener('pointerup', mask);
+      el.addEventListener('pointerleave', mask);
+      el.addEventListener('pointercancel', mask);
+    } else if (g === 'tap') {
+      el.addEventListener('click', () => { el.classList.contains('is-open') ? mask() : reveal(); });
+    } else if (g === 'double') {
+      el.addEventListener('dblclick', () => { reveal(); setTimeout(mask, 5000); });
+      el.addEventListener('click', (e) => { if (e.detail === 1) {/* single tap noop */} });
+    }
+    el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.classList.contains('is-open') ? mask() : reveal(); } });
+  });
+  // full privacy rows (hold button)
+  root.querySelectorAll('.privacy-row[data-field]').forEach((row) => {
+    if (row._wired) return; row._wired = true;
+    const btn = row.querySelector('.hold-btn'); if (!btn) return;
+    const field = row.dataset.field;
+    const reveal = () => { row.classList.add('is-revealing'); row.classList.remove('is-masked'); btn.classList.add('is-holding'); state.telemetry('privacy.reveal', state.get('gesture'), field); };
+    const mask = () => { row.classList.remove('is-revealing'); row.classList.add('is-masked'); btn.classList.remove('is-holding'); };
+    if (isRevealedDefault()) return;
+    const g = s.gesture;
+    if (g === 'hold') {
+      btn.addEventListener('pointerdown', (e) => { e.preventDefault(); reveal(); });
+      btn.addEventListener('pointerup', mask); btn.addEventListener('pointerleave', mask); btn.addEventListener('pointercancel', mask);
+    } else if (g === 'tap') {
+      btn.addEventListener('click', () => row.classList.contains('is-revealing') ? mask() : reveal());
+    } else if (g === 'double') {
+      btn.addEventListener('dblclick', () => { reveal(); setTimeout(mask, 5000); });
+    }
+  });
+}
+
+// ---- Steppers wiring ----
+export function wireSteppers(root, onChange) {
+  root.querySelectorAll('[data-stepper]').forEach((q) => {
+    if (q._wired) return; q._wired = true;
+    const input = q.querySelector('input');
+    q.querySelectorAll('[data-step]').forEach((b) => b.addEventListener('click', () => {
+      let v = parseInt(input.value, 10) || 0;
+      v = Math.max(0, v + parseInt(b.dataset.step, 10));
+      input.value = v;
+      onChange && onChange(q.dataset.id, v);
+    }));
+  });
+}
