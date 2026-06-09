@@ -107,8 +107,8 @@ const META = {
   S705: { name: 'Style-guide gallery', group: 'System', tab: null, states: S('default') },
   S706: { name: 'Brand directory', group: 'System', tab: null, states: S('default') },
   S707: { name: 'Privacy holding state', group: 'System', tab: null, states: S('default') },
-  S708: { name: 'Showroom map / wayfinding', group: 'System', tab: null, states: S('default') },
-  S709: { name: 'Booth detail from QR', group: 'System', tab: null, states: S('default') },
+  S708: { name: 'Live stock board', group: 'System', tab: null, states: S('default', 'low', 'out') },
+  S709: { name: 'Brand from QR', group: 'System', tab: null, states: S('default') },
   S710: { name: 'Brand-launch arrival', group: 'System', tab: null, states: S('default') },
   // ---- Edge & state ----
   S801: { name: 'Offline (no cache)', group: 'Edge & states', tab: null, states: S('default') },

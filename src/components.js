@@ -77,22 +77,30 @@ export function lockChip(label = 'Higher tier') {
 // ---- Privacy on the floor (§07-D / §SR) ----
 // Inline masked value used inside cards/rows.
 const MASK_ARIA = 'Your price, hidden. Double-tap to reveal.';
-export function isRevealedDefault() {
+// A field is masked when Privacy is on, the gesture isn't "off", AND the field
+// is in the masked-fields checklist (§07-D / S412).
+export function fieldMasked(field) {
   const s = state.get();
-  return !s.privacyOn || s.gesture === 'off';
+  return s.privacyOn && s.gesture !== 'off' && state.isFieldMasked(field);
 }
 export function maskField(valueHTML, field, { sr = MASK_ARIA } = {}) {
-  if (isRevealedDefault()) return `<span class="mask-inline is-open" data-field="${field}"><span class="mv">${valueHTML}</span></span>`;
+  if (!fieldMasked(field)) return `<span class="mask-inline is-open" data-field="${field}"><span class="mv">${valueHTML}</span></span>`;
   return `<span class="mask-inline" data-field="${field}" role="button" tabindex="0" aria-label="${esc(sr)}"><span class="mv">${valueHTML}</span><span class="mdots" aria-hidden="true">●●●</span></span>`;
 }
-// Full privacy row (label left, masked value + hold button right).
+// Full privacy row (label left, masked value + reveal button right).
 export function privacyRow(label, valueHTML, field) {
-  const open = isRevealedDefault();
+  const open = !fieldMasked(field);
   return `<div class="privacy-row ${open ? 'is-revealing' : 'is-masked'}" data-field="${field}">
     <span class="label">${esc(label)}</span>
     <span class="value"><span class="value-content">${valueHTML}</span>
       <button class="hold-btn" aria-label="${esc(MASK_ARIA)}">${icon(open ? 'eye' : 'eye-off', 14)}</button>
     </span></div>`;
+}
+// Animated success mark for confirmation screens.
+export function successMark() {
+  return `<div class="success-mark" aria-hidden="true">
+    <svg viewBox="0 0 64 64"><circle class="ring" cx="32" cy="32" r="28"/><path class="tick" d="M20 33l9 9 16-18"/></svg>
+    <span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span><span class="spark s4"></span></div>`;
 }
 
 // ---- Price pair (A1) ----
@@ -180,14 +188,16 @@ export function styleTile(g, { wide = false } = {}) {
 }
 
 export function brandCard(b, { locked = false } = {}) {
+  const nameEl = `<span class="name" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.name)}</span>`;
   if (locked) {
     return `<button class="card brand is-locked" data-go="S804?brand=${b.id}" style="text-align:start">
-      <div class="head"><span class="name">${esc(b.name)}</span>${lockChip()}</div>
+      <div class="head">${nameEl}<span style="flex:0 0 auto;margin-inline-start:var(--s-2)">${lockChip()}</span></div>
       <p class="muted">${esc(b.cats.join(' · '))}</p>
     </button>`;
   }
+  const trail = b.launching ? `<span class="tag coral">Launching</span>` : `<span style="color:var(--fg-mute)">${icon('chevron-right', 18)}</span>`;
   return `<button class="card brand" data-go="S003?brand=${b.id}" style="text-align:start">
-    <div class="head"><span class="name">${esc(b.name)}</span>${b.launching ? `<span class="tag coral">Launching</span>` : icon('chevron-right', 18)}</div>
+    <div class="head">${nameEl}<span style="flex:0 0 auto;margin-inline-start:var(--s-2);display:inline-flex">${trail}</span></div>
     <p class="muted">${esc(b.cats.join(' · '))} · MOQ $${b.moq}</p>
   </button>`;
 }
@@ -234,10 +244,10 @@ export function timeline(steps, currentIndex, captions = {}) {
     `<div class="step ${i > currentIndex ? 'todo' : ''}"><span class="pip"></span><div><b>${esc(s)}</b>${captions[i] ? `<div class="caption">${esc(captions[i])}</div>` : ''}</div></div>`).join('')}</div>`;
 }
 
-// ---- Switch / toggle row ----
+// ---- Switch / toggle row (clean flex layout, no leading thumbnail) ----
 export function switchRow(label, checked, { sub = '', action = '' } = {}) {
-  return `<div class="list-row dense"><span class="body"><span class="pri">${esc(label)}</span>${sub ? `<span class="sec">${esc(sub)}</span>` : ''}</span>
-    <span class="trail"><label class="switch"><input type="checkbox" ${checked ? 'checked' : ''} ${action ? `data-action="${action}"` : ''} aria-label="${esc(label)}" /><span class="track"></span><span class="thumb"></span></label></span></div>`;
+  return `<div class="toggle-row"><span class="tl"><span class="pri">${esc(label)}</span>${sub ? `<span class="sec">${esc(sub)}</span>` : ''}</span>
+    <label class="switch"><input type="checkbox" ${checked ? 'checked' : ''} ${action ? `data-action="${action}"` : ''} aria-label="${esc(label)}" /><span class="track"></span><span class="thumb"></span></label></div>`;
 }
 
 // ---- Header action icons (search / bell / privacy / etc.) ----
@@ -257,6 +267,45 @@ export function tabHeaderActions({ search = 'S005', bell = true, privacy = true 
   return hActions(list);
 }
 export function sectionLabel(t) { return `<div class="section-label">${esc(t)}</div>`; }
+
+// Share sheet body — the full share flow for a brand / product / order.
+export function shareSheetBody(label) {
+  const opt = (ic, t, sub, action) => `<button class="opt" data-action="${action}">${icon(ic, 20)}<span style="flex:1;text-align:start"><b style="display:block;font-weight:600">${esc(t)}</b><span class="muted" style="font-size:var(--fs-nano)">${esc(sub)}</span></span>${icon('chevron-right', 16)}</button>`;
+  return `<p class="muted">Share <b>${esc(label)}</b></p>
+    <div class="opts">
+      ${opt('chat', 'Send to your rep', 'Dana Okafor · in-app chat', 'share-rep')}
+      ${opt('user', 'Send to a teammate', 'Pick a company user', 'share-team')}
+      ${opt('mail', 'Email a link', 'Opens your mail composer', 'share-email')}
+      ${opt('copy', 'Copy link', 'hecho.app/…', 'share-copy')}
+    </div>`;
+}
+
+// Recompute line + cart totals after a quantity change, in place.
+export function recomputeTotals(root) {
+  let grand = 0;
+  const brandSub = {};
+  root.querySelectorAll('[data-line]').forEach((row) => {
+    const price = parseFloat(row.dataset.price) || 0;
+    const brand = row.dataset.brand;
+    const input = row.querySelector('[data-stepper] input');
+    const qty = input ? (parseInt(input.value, 10) || 0) : (parseInt(row.dataset.qty, 10) || 0);
+    const lineTotal = price * qty;
+    grand += lineTotal;
+    if (brand) brandSub[brand] = (brandSub[brand] || 0) + lineTotal;
+    const lt = row.querySelector('[data-linetotal] .mv, [data-linetotal]');
+    if (lt) lt.textContent = '$' + lineTotal.toLocaleString('en-US');
+  });
+  const gt = root.querySelector('[data-carttotal] .mv, [data-carttotal]');
+  if (gt) gt.textContent = grand.toLocaleString('en-US');
+  // brand MOQ chips
+  root.querySelectorAll('[data-moq]').forEach((chip) => {
+    const b = chip.dataset.moq; const min = parseFloat(chip.dataset.min) || 0;
+    const sub = brandSub[b] || 0;
+    if (sub >= min) { chip.className = 'moq'; chip.innerHTML = `${icon('check', 12)}MOQ met`; }
+    else { chip.className = 'moq unmet'; chip.innerHTML = `${icon('warning', 12)}$${min} · $${min - sub} to go`; }
+  });
+  return grand;
+}
 
 // Soft pitch card (E4) — connect a POS.
 export function softPitch() {
@@ -289,23 +338,42 @@ function trapFocus(container, onEsc) {
   return () => container.removeEventListener('keydown', key);
 }
 
-function mountOverlay(shellClass, innerHTML, { onMount, dismissible = true } = {}) {
+function enableSwipeDown(sheetEl, close) {
+  const grab = sheetEl.querySelector('.grab');
+  if (!grab) return;
+  grab.style.touchAction = 'none';
+  let startY = null;
+  grab.addEventListener('pointerdown', (e) => { startY = e.clientY; try { grab.setPointerCapture(e.pointerId); } catch {} sheetEl.style.transition = 'none'; });
+  grab.addEventListener('pointermove', (e) => { if (startY == null) return; const dy = Math.max(0, e.clientY - startY); sheetEl.style.transform = `translateY(${dy}px)`; });
+  const end = (e) => { if (startY == null) return; const dy = Math.max(0, e.clientY - startY); sheetEl.style.transition = ''; if (dy > 90) close(); else sheetEl.style.transform = ''; startY = null; };
+  grab.addEventListener('pointerup', end);
+  grab.addEventListener('pointercancel', end);
+}
+
+function mountOverlay(_shellClass, innerHTML, { onMount, dismissible = true } = {}) {
   const prevFocus = document.activeElement;
   const wrap = document.createElement('div');
-  wrap.className = shellClass;
-  wrap.innerHTML = `<div class="scrim" data-dismiss></div>${innerHTML}`;
+  wrap.className = 'overlay-host';
+  wrap.innerHTML = `<div class="scrim"></div>${innerHTML}`;
   overlayRoot.appendChild(wrap);
+  const shell = wrap.querySelector('.sheet-shell,.modal-shell,.drawer-shell');
+  const panel = shell ? shell.querySelector('.sheet,.modal,.drawer') : null;
   const close = () => {
     const untrap = wrap._untrap; if (untrap) untrap();
     wrap.remove();
     const i = overlayStack.indexOf(close); if (i >= 0) overlayStack.splice(i, 1);
     if (prevFocus && prevFocus.focus) try { prevFocus.focus(); } catch {}
   };
-  if (dismissible) wrap.querySelector('[data-dismiss]').addEventListener('click', close);
+  // explicit close buttons
+  wrap.querySelectorAll('[data-dismiss]').forEach((b) => b.addEventListener('click', close));
+  if (dismissible && shell) {
+    // tap on the backdrop (the shell area outside the panel) closes
+    shell.addEventListener('click', (e) => { if (e.target === shell) close(); });
+    if (shell.classList.contains('sheet-shell') && panel) enableSwipeDown(panel, close);
+  }
   wrap._untrap = trapFocus(wrap, () => { if (dismissible) close(); });
   overlayStack.push(close);
   if (onMount) onMount(wrap, close);
-  // focus first control
   const first = wrap.querySelector('button:not([data-dismiss]),input,select,textarea,a[href]');
   if (first) setTimeout(() => first.focus(), 30);
   return close;
@@ -313,7 +381,7 @@ function mountOverlay(shellClass, innerHTML, { onMount, dismissible = true } = {
 
 export function openSheet({ title = '', html = '', onMount, dismissible = true } = {}) {
   const inner = `<div class="sheet-shell"><div class="sheet" role="dialog" aria-modal="true" ${title ? 'aria-label="' + esc(title) + '"' : ''}>
-    <span class="grab" aria-hidden="true"></span>${title ? `<div class="row-between"><h4>${esc(title)}</h4><button class="modal close" data-dismiss aria-label="Close">${icon('close', 14)}</button></div>` : ''}
+    <button class="grab" aria-label="Drag down or tap to close" data-dismiss></button>${title ? `<div class="row-between" style="margin-bottom:var(--s-1)"><h4>${esc(title)}</h4><button class="sheet-x" data-dismiss aria-label="Close">${icon('close', 16)}</button></div>` : ''}
     ${html}</div></div>`;
   return mountOverlay('overlay-host', inner, { onMount, dismissible });
 }
@@ -343,43 +411,36 @@ export function toast(msg, { action, positive = false, ms = 4000 } = {}) {
 
 // ---- Privacy wiring (called on every screen mount + on overlay mount) ----
 export function wirePrivacy(root) {
-  const s = state.get();
   root.querySelectorAll('.mask-inline[data-field]').forEach((el) => {
     if (el._wired) return; el._wired = true;
     const field = el.dataset.field;
-    const reveal = () => { el.classList.add('is-open'); el.setAttribute('aria-label', 'Revealed. Double-tap to mask.'); state.telemetry('privacy.reveal', state.get('gesture'), field); };
+    const reveal = () => { el.classList.add('is-open'); el.setAttribute('aria-label', 'Revealed. Activate to mask.'); state.telemetry('privacy.reveal', state.get('gesture'), field); };
     const mask = () => { el.classList.remove('is-open'); el.setAttribute('aria-label', MASK_ARIA); };
-    if (isRevealedDefault()) { el.classList.add('is-open'); return; }
-    const g = s.gesture;
-    if (g === 'hold') {
+    if (!fieldMasked(field)) { el.classList.add('is-open'); return; }
+    const g = state.get('gesture');
+    if (g === 'tap') {
+      el.addEventListener('click', () => { el.classList.contains('is-open') ? mask() : reveal(); });
+    } else { // hold (default)
       el.addEventListener('pointerdown', (e) => { e.preventDefault(); reveal(); });
       el.addEventListener('pointerup', mask);
       el.addEventListener('pointerleave', mask);
       el.addEventListener('pointercancel', mask);
-    } else if (g === 'tap') {
-      el.addEventListener('click', () => { el.classList.contains('is-open') ? mask() : reveal(); });
-    } else if (g === 'double') {
-      el.addEventListener('dblclick', () => { reveal(); setTimeout(mask, 5000); });
-      el.addEventListener('click', (e) => { if (e.detail === 1) {/* single tap noop */} });
     }
     el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); el.classList.contains('is-open') ? mask() : reveal(); } });
   });
-  // full privacy rows (hold button)
   root.querySelectorAll('.privacy-row[data-field]').forEach((row) => {
     if (row._wired) return; row._wired = true;
     const btn = row.querySelector('.hold-btn'); if (!btn) return;
     const field = row.dataset.field;
     const reveal = () => { row.classList.add('is-revealing'); row.classList.remove('is-masked'); btn.classList.add('is-holding'); state.telemetry('privacy.reveal', state.get('gesture'), field); };
     const mask = () => { row.classList.remove('is-revealing'); row.classList.add('is-masked'); btn.classList.remove('is-holding'); };
-    if (isRevealedDefault()) return;
-    const g = s.gesture;
-    if (g === 'hold') {
+    if (!fieldMasked(field)) return;
+    const g = state.get('gesture');
+    if (g === 'tap') {
+      btn.addEventListener('click', () => row.classList.contains('is-revealing') ? mask() : reveal());
+    } else {
       btn.addEventListener('pointerdown', (e) => { e.preventDefault(); reveal(); });
       btn.addEventListener('pointerup', mask); btn.addEventListener('pointerleave', mask); btn.addEventListener('pointercancel', mask);
-    } else if (g === 'tap') {
-      btn.addEventListener('click', () => row.classList.contains('is-revealing') ? mask() : reveal());
-    } else if (g === 'double') {
-      btn.addEventListener('dblclick', () => { reveal(); setTimeout(mask, 5000); });
     }
   });
 }

@@ -5,6 +5,7 @@ import { icon } from '../icons.js';
 import { base } from './shop.js';
 
 const retById = Object.fromEntries(D.repRetailers.map((r) => [r.id, r]));
+const initials = (name) => name.split(' ').map((w) => w[0]).slice(0, 2).join('');
 
 export const rep = {
   // S601 Rep account picker
@@ -19,14 +20,17 @@ export const rep = {
   S602() {
     const cur = retById[state.get('repAccount')] || D.repRetailers[0];
     const live = D.repRetailers.filter((r) => r.liveCart);
+    const pending = D.repRetailers.filter((r) => r.status === 'pending');
+    const approved = D.repRetailers.filter((r) => r.status !== 'pending');
     const body = `
       <button class="card" style="max-width:none" data-go="S601"><div class="row-between"><span><span class="muted" style="font-size:var(--fs-nano)">CO-SHOPPING</span><br/><b>${cur.name}</b></span>${icon('swap', 20)}</div></button>
       ${C.sectionLabel("Today's appointments")}
       <div class="stack tight">${D.repAppointments.map((a) => C.listRow({ thumbIcon: 'clock', pri: a.retailer, sec: `${a.kind} · ${a.when}` , go: '', attrs: `data-action="pick-retailer-name" data-n="${a.retailer}"` })).join('')}</div>
       ${C.sectionLabel('Live carts')}
       <div class="stack tight">${live.map((r) => C.listRow({ thumbIcon: 'cart', pri: r.liveCart, sec: r.name, trail: '<span class="tag coral">Live</span>', go: 'S604' })).join('')}</div>
+      ${pending.length ? `${C.sectionLabel('Pending approval')}<div class="stack tight">${pending.map((r) => C.listRow({ thumb: `<span class="avatar sm">${initials(r.name)}</span>`, pri: r.name, sec: `${r.city} · new application`, trail: `<button class="btn sm" data-action="approve-retailer" data-r="${r.id}">Review</button>`, go: '', attrs: `data-action="pick-retailer" data-r="${r.id}" data-then="S603"` })).join('')}</div>` : ''}
       ${C.sectionLabel('Assigned retailers')}
-      <div class="stack tight">${D.repRetailers.map((r) => C.listRow({ thumb: `<span class="avatar sm">${r.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}</span>`, pri: r.name, sec: r.city, trail: r.taxId === 'Expired' ? C.statusPill('expired') : C.statusPill('current'), go: '', attrs: `data-action="pick-retailer" data-r="${r.id}" data-then="S603"` })).join('')}</div>`;
+      <div class="stack tight">${approved.map((r) => C.listRow({ thumb: `<span class="avatar sm">${initials(r.name)}</span>`, pri: r.name, sec: r.city, trail: r.taxId === 'Expired' ? C.statusPill('expired') : C.statusPill('current'), go: '', attrs: `data-action="pick-retailer" data-r="${r.id}" data-then="S603"` })).join('')}</div>`;
     return base('Rep dashboard', { tab: 'retailers', headerRight: C.hActions([{ icon: 'chat', go: 'S606' }, { icon: 'swap', action: 'role-switch' }]), body });
   },
 
@@ -34,8 +38,10 @@ export const rep = {
   S603() {
     const r = retById[state.get('repAccount')] || D.repRetailers[0];
     return base(r.name, { back: true, body: `
-      <div class="row-between"><h3>${r.name}</h3>${C.tierBadge(r.tier)}</div>
+      <h3>${r.name}</h3>
+      ${r.status === 'pending' ? C.banner('<b>New application.</b> Review the resale cert, then approve to onboard this retailer.', { kind: 'caution', ic: 'shield', action: { label: 'Approve', action: 'approve-retailer' } }) : ''}
       <p class="muted">${r.city} · ${r.note}</p>
+      <div class="row-between"><span class="muted">Account status</span>${r.status === 'pending' ? C.statusPill('pending', 'Pending approval') : C.statusPill('current', 'Approved')}</div>
       <div class="grid-2">
         <div class="card" style="max-width:none"><span class="muted">Tax-ID</span>${C.statusPill(r.taxId === 'Expired' ? 'expired' : (r.taxId === 'Renews soon' ? 'renews' : 'current'))}</div>
         <div class="card" style="max-width:none"><span class="muted">Credit</span><b>${r.credit}</b></div>

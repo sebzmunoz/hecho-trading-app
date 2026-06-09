@@ -5,19 +5,25 @@
 
 const KEY = 'hecho-proto-state-v1';
 
+const ALL_MASK_FIELDS = ['wholesale', 'stock', 'spend', 'credit', 'recommended'];
+
 const DEFAULTS = {
   role: 'owner',        // owner | manager | member | rep   (§02b)
   privacyOn: true,      // Privacy on the floor — ON by default (§07-D)
-  gesture: 'hold',      // hold | tap | double | off
+  gesture: 'hold',      // hold | tap | off  (double-tap removed)
+  maskFields: ALL_MASK_FIELDS.slice(), // which sensitive fields are masked (checklist)
   pos: 'connected',     // connected | connecting | disconnected (§07-H H3)
-  tier: 'mid',          // standard | mid | top  (§TM)
+  tier: 'top',          // standard | mid | top  (§TM) — top = you manage all 9 brands
   taxId: 'renews',      // current | renews | expired (F10)
   network: 'online',    // online | offline | slow (§07-A)
   theme: 'light',       // light | dark
   reducedMotion: false,
   repAccount: 'r-marfa',// current retailer in Rep mode
+  savedBrands: [],      // brand ids the buyer saved
+  cards: [],            // payment cards added in-session
   stateOverride: null,  // per-screen state forced from the panel
 };
+export { ALL_MASK_FIELDS };
 
 // Capabilities per role (§02b roles & capabilities matrix)
 const CAPS = {
@@ -82,8 +88,28 @@ export const state = {
   subscribeTelemetry(fn) { telSubs.add(fn); return () => telSubs.delete(fn); },
   clearTelemetry() { telemetryLog.length = 0; telSubs.forEach((fn) => fn(telemetryLog)); },
 
+  // ---- saved brands ----
+  isBrandSaved(id) { return data.savedBrands.includes(id); },
+  toggleSavedBrand(id) {
+    const i = data.savedBrands.indexOf(id);
+    if (i >= 0) data.savedBrands.splice(i, 1); else data.savedBrands.push(id);
+    persist();
+    return this.isBrandSaved(id);
+  },
+
+  // ---- masked-fields checklist ----
+  isFieldMasked(field) { return data.maskFields.includes(field); },
+  toggleMaskField(field) {
+    const i = data.maskFields.indexOf(field);
+    if (i >= 0) data.maskFields.splice(i, 1); else data.maskFields.push(field);
+    persist(); this.emit();
+  },
+
+  // ---- payment cards ----
+  addCard(card) { data.cards.push(card); persist(); },
+
   reset() {
-    Object.assign(data, DEFAULTS);
+    Object.assign(data, JSON.parse(JSON.stringify(DEFAULTS)));
     persist();
     this.emit();
   },

@@ -82,7 +82,7 @@ export const orders = {
   // S305 Payment success
   S305() {
     return base('Paid', { back: true, noTabbar: true, body: `
-      <div class="center-col pad-block">${icon('check', 56)}<h3>Paid</h3><p class="muted">Reference HX-90431. Your order moves to settled.</p></div>
+      <div class="center-col pad-block">${C.successMark()}<h3>Paid</h3><p class="muted">Reference HX-90431. Your order moves to settled.</p></div>
       <div class="card" style="max-width:none"><div class="row-between"><span class="muted">Amount</span><b>${C.money(2080)}</b></div><div class="row-between"><span class="muted">Method</span><span>ACH · Plaid</span></div></div>
       <button class="btn ghost full" data-action="email-receipt">Email receipt</button>
       <button class="btn full" data-go="S301">Back to Orders</button>` });
@@ -131,7 +131,7 @@ export const orders = {
     const o = D.orderById[params.order] || D.orders[2];
     const brand = D.brandById[D.productById[o.lines[0][0]].brand];
     return base('Claim filed', { back: true, body: `
-      <div class="center-col pad-block">${icon('check', 56)}<h3>Claim RMA-319 is in</h3><p class="muted">Routed to the ${brand.name} returns queue. I'll update you here.</p></div>
+      <div class="center-col pad-block">${C.successMark()}<h3>Claim RMA-319 is in</h3><p class="muted">Routed to the ${brand.name} returns queue. I'll update you here.</p></div>
       <button class="btn ghost full" data-go="S302?order=${o.id}">Back to order</button>
       <button class="btn full" data-go="S310">View claim history</button>` });
   },
@@ -149,15 +149,31 @@ export const orders = {
 export function paymentBody(orderId) {
   const o = D.orderById[orderId] || D.orders[0];
   const offline = state.get('network') !== 'online';
+  const methods = [...D.paymentMethods, ...state.get('cards')];
+  const methodRow = (m, i) => `<label class="list-row" style="cursor:pointer"><span class="thumb">${icon(m.icon, 22)}</span><span class="body"><span class="pri">${C.esc(m.label)}</span><span class="sec">${C.esc(m.sub)}</span></span><span class="trail"><span class="choice"><input type="radio" name="pay" ${i === 0 ? 'checked' : ''} /><span class="box round"></span></span></span></label>`;
   return `
     <div class="card" style="max-width:none"><div class="row-between"><span class="muted">Amount due</span><span class="price"><span class="v">${D.usd(o.total)}</span><span class="currency">USD</span></span></div><span class="muted">${o.invoice} · ${o.due}</span></div>
     ${C.sectionLabel('Method')}
-    <div class="stack tight">
-      <label class="list-row" style="cursor:pointer"><span class="thumb">${icon('bank', 22)}</span><span class="body"><span class="pri">ACH bank transfer</span><span class="sec">Lowest fee · 1–2 days</span></span><span class="trail"><span class="choice"><input type="radio" name="pay" checked /><span class="box round"></span></span></span></label>
-      <label class="list-row" style="cursor:pointer"><span class="thumb">${icon('card', 22)}</span><span class="body"><span class="pri">Saved card</span><span class="sec">•••• 4242</span></span><span class="trail"><span class="choice"><input type="radio" name="pay" /><span class="box round"></span></span></span></label>
-    </div>
-    <button class="btn ghost sm full" data-go="S304a">+ Add a new method</button>
+    <div class="stack tight">${methods.map(methodRow).join('')}</div>
+    <button class="btn ghost sm full" data-action="add-method">+ Add a payment method</button>
     ${offline ? C.banner("You're offline — pay needs a connection.", { kind: 'caution', ic: 'wifi_off' }) : ''}
     <p class="muted" style="font-size:var(--fs-nano)">Partial payment isn't supported — the amount is fixed.</p>
     <button class="btn full" data-action="confirm-pay" data-order="${o.id}" ${offline ? 'aria-disabled="true"' : ''}>Pay ${C.money(o.total)}</button>`;
+}
+
+// Add-method chooser + card form (opened as sheets)
+export function addMethodBody() {
+  return `<p class="muted">How would you like to pay?</p>
+    <div class="opts">
+      <button class="opt" data-go="S304a">${icon('bank', 20)}<span style="flex:1;text-align:start">Link a bank (ACH)</span>${icon('chevron-right', 16)}</button>
+      <button class="opt" data-action="add-card">${icon('card', 20)}<span style="flex:1;text-align:start">Add a credit / debit card</span>${icon('chevron-right', 16)}</button>
+    </div>`;
+}
+export function addCardBody() {
+  return `
+    <div class="input-group"><label>Card number</label><input class="input" inputmode="numeric" placeholder="1234 5678 9012 3456" /></div>
+    <div class="grid-2"><div class="input-group"><label>Expiry</label><input class="input" placeholder="MM / YY" /></div><div class="input-group"><label>CVC</label><input class="input" inputmode="numeric" placeholder="123" /></div></div>
+    <div class="input-group"><label>Name on card</label><input class="input" placeholder="${C.esc(D.account.owner)}" /></div>
+    <div class="input-group"><label>Billing ZIP</label><input class="input" inputmode="numeric" placeholder="79843" /></div>
+    <button class="btn full" data-action="save-card">Add card</button>`;
 }

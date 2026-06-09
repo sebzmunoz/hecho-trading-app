@@ -9,7 +9,9 @@ import { icon } from './icons.js';
 import * as C from './components.js';
 import { newCartBody, shareBody, addToCartBody, shopLookBody, privacyBody } from './screens/carts.js';
 import { filtersBody } from './screens/shop.js';
-import { paymentBody } from './screens/orders.js';
+import { paymentBody, addMethodBody, addCardBody } from './screens/orders.js';
+import { registrationBody } from './screens/onboarding.js';
+import * as D from './data.js';
 
 const $ = (s) => document.querySelector(s);
 const screenFrame = $('#screenFrame');
@@ -68,7 +70,7 @@ function renderRoute(route, { direction } = {}) {
 
   // wiring
   C.wirePrivacy(screenBody);
-  C.wireSteppers(screenBody, (id, v) => { /* qty changes are local to the prototype */ });
+  C.wireSteppers(screenBody, () => C.recomputeTotals(screenBody));
   if (spec.onMount) try { spec.onMount(screenBody); } catch (e) { console.error(e); }
 
   onRouteChange(route);
@@ -97,7 +99,13 @@ screenFrame.addEventListener('click', (e) => {
   if (backEl) { e.preventDefault(); if (!nav.back()) nav.go('S001'); return; }
   const segEl = e.target.closest('.segmented [data-val]');
   if (segEl && segEl.closest('[data-seg]')) { const seg = segEl.closest('[data-seg]'); seg.querySelectorAll('[role=tab]').forEach((b) => b.setAttribute('aria-selected', String(b === segEl))); }
-  const chipSel = e.target.closest('.chip[data-action="set-gesture"]');
+  // chip-group single-select (destination chips, snooze, generic)
+  const groupChip = e.target.closest('[data-chipgroup] .chip, .chip[data-snooze]');
+  if (groupChip) {
+    const group = groupChip.closest('[data-chipgroup]') || groupChip.parentElement;
+    group.querySelectorAll('.chip').forEach((c) => c.classList.toggle('is-selected', c === groupChip));
+    if (groupChip.dataset.snooze) C.toast(groupChip.dataset.snooze === 'off' ? 'Snooze off' : 'Snoozed');
+  }
   const actEl = e.target.closest('[data-action]');
   if (actEl) { e.preventDefault(); handleAction(actEl.dataset.action, actEl, e); }
 });
@@ -158,16 +166,47 @@ function handleAction(action, el) {
     case 'set-gesture': state.set({ gesture: el.dataset.g }); nav.refresh(); break;
 
     // ---- scanning ----
-    case 'simulate-scan': T('scan.result.shown', 'barcode', 'p-lulu'); nav.go('S102?p=p-lulu'); break;
+    case 'simulate-scan': T('scan.result.shown', 'barcode', 'p-throw'); nav.go('S102?p=p-throw'); break;
     case 'capture-photo': nav.go('S104'); break;
     case 'flash': C.toast('Flash toggled'); break;
     case 'library': C.toast('Opening photo library…'); break;
 
     // ---- tier / brand ----
-    case 'request-access': T('brand.requested_access', 'brand', 'marquee'); state.setEphemeral('_state', 'requested'); nav.refresh(); C.toast('Request sent — your rep will follow up', { positive: true }); break;
-    case 'save-brand': C.toast('Brand saved'); break;
+    case 'request-access': T('brand.requested_access', 'brand', 'savant'); state.setEphemeral('_state', 'requested'); nav.refresh(); C.toast('Request sent — your rep will follow up', { positive: true }); break;
+    case 'save-brand': { const saved = state.toggleSavedBrand(el.dataset.brand); T('brand.saved', 'brand', el.dataset.brand); nav.refresh(); C.toast(saved ? 'Brand saved' : 'Removed from saved'); break; }
     case 'save-template': C.toast('Saved as a personal template', { positive: true }); break;
     case 'remind': C.toast('I\'ll remind you'); break;
+
+    // ---- sharing (full flow) ----
+    case 'share': { const label = (document.querySelector('.app-header .title')?.textContent || 'this').trim(); C.openSheet({ title: 'Share', html: C.shareSheetBody(label) }); break; }
+    case 'share-rep': C.closeAllOverlays(); nav.go('S606'); C.toast('Shared with your rep', { positive: true }); break;
+    case 'share-team': C.openSheet({ title: 'Send to a teammate', html: shareTeamBody() }); break;
+    case 'share-team-send': C.closeAllOverlays(); C.toast('Sent', { positive: true }); break;
+    case 'share-email': C.closeAllOverlays(); C.toast('Opening your mail composer…'); break;
+    case 'share-copy': C.closeAllOverlays(); C.toast('Link copied', { positive: true }); break;
+
+    // ---- payment methods ----
+    case 'add-method': C.openSheet({ title: 'Add a payment method', html: addMethodBody() }); break;
+    case 'add-card': C.closeAllOverlays(); C.openSheet({ title: 'Add a card', html: addCardBody() }); break;
+    case 'save-card': state.addCard({ id: 'm-card2', kind: 'card', label: 'Credit / debit card', sub: '•••• 8210', icon: 'card' }); C.closeAllOverlays(); nav.refresh(); C.toast('Card added', { positive: true }); break;
+
+    // ---- privacy masked-fields checklist ----
+    case 'toggle-mask': state.toggleMaskField(el.dataset.field); break;
+
+    // ---- notifications ----
+    case 'snooze-custom': C.openSheet({ title: 'Snooze for…', html: snoozeCustomBody() }); break;
+    case 'snooze-apply': C.closeAllOverlays(); C.toast('Snoozed'); break;
+
+    // ---- registration & approval ----
+    case 'register': C.openSheet({ title: 'Apply to become a retailer', html: registrationBody() }); break;
+    case 'submit-registration': C.closeAllOverlays(); C.openModal({ title: 'Application sent', html: '<p>Hecho reviews every new retailer. I\'ll email you the moment your store is approved, then you can place your first order.</p>', actions: [{ label: 'Got it', action: 'close-overlay' }] }); break;
+    case 'approve-retailer': { const r = D.repRetailers.find((x) => x.id === (el.dataset.r || state.get('repAccount'))); if (r) { r.status = 'approved'; r.taxId = 'Current'; r.credit = 'Headroom $12k'; } C.closeAllOverlays(); nav.refresh(); C.toast('Retailer approved', { positive: true }); break; }
+
+    // ---- live stock ----
+    case 'refresh-stock': C.toast('Stock refreshed', { positive: true }); break;
+
+    case 'close-overlay': C.closeTopOverlay(); break;
+    case 'noop': break;
 
     // ---- POS ----
     case 'connect-pos': state.set({ pos: 'connected' }); nav.go('S413'); C.toast('Shopify connected', { positive: true }); break;
@@ -228,6 +267,18 @@ function handleAction(action, el) {
 
     default: C.toast('Done'); break;
   }
+}
+
+// ---- small sheet bodies used by actions ----
+function shareTeamBody() {
+  return `<div class="stack tight">${D.companyUsers.filter((u) => !u.self).map((u) =>
+    `<label class="share-rec" style="grid-template-columns:auto auto 1fr"><label class="choice" style="margin:0"><input type="checkbox" /><span class="box"></span></label><span class="avatar sm">${u.initials}</span><span class="body"><span class="pri">${C.esc(u.name)}</span><span class="sec">${C.esc(u.role)}</span></span></label>`).join('')}</div>
+    <button class="btn full" data-action="share-team-send">Send</button>`;
+}
+function snoozeCustomBody() {
+  return `<p class="muted">Pause all notifications for a custom window.</p>
+    <div class="chip-row" data-chipgroup><button class="chip is-selected">2 hours</button><button class="chip">4 hours</button><button class="chip">8 hours</button><button class="chip">2 days</button><button class="chip">3 days</button></div>
+    <button class="btn full" data-action="snooze-apply">Apply snooze</button>`;
 }
 
 // ---------- chrome (device tools + console drawer) ----------

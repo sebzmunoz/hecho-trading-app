@@ -25,7 +25,7 @@ export const shop = {
       ${rail('Continue shopping', D.carts.slice(0, 2).map((c) => `<div style="width:240px">${C.draftCard(c)}</div>`).join(''))}
       ${C.softPitch()}
       <button class="btn ghost full" data-go="S705">See all style guides</button>`;
-    return base('Shop', { tab: 'shop', headerRight: C.tabHeaderActions(), body });
+    return base('Shop', { tab: 'shop', headerRight: C.tabHeaderActions({ search: false }), body });
   },
 
   // S002 Style guide detail
@@ -50,12 +50,14 @@ export const shop = {
     const b = D.brandById[params.brand] || D.brands[0];
     if (!D.canSee(b, state.get('tier'))) return shop.S804({ brand: b.id });
     const prods = D.productsByBrand(b.id);
+    const saved = state.isBrandSaved(b.id);
     const body = `
       <div class="thumb-illo" style="border-radius:var(--r-4);padding:var(--s-6)">${C.illo(prods[0]?.illo || 'jar', 96)}</div>
-      <div class="row-between"><h3>${b.name}</h3>${C.tierBadge(b.tier)}</div>
+      <h3>${b.name}</h3>
       ${b.launching ? C.banner(`<b>First-look open now.</b> New collection pinned below.`, { kind: '', ic: 'sparkle', action: { label: 'The drop', go: `S009?brand=${b.id}` } }) : ''}
       <p class="muted">${b.story}</p>
-      <div class="row-between"><span class="moq">${icon('cart', 12)}MOQ $${b.moq}</span><button class="chip" data-action="save-brand">${icon('star', 13)} Save brand</button></div>
+      <div class="row-between"><span class="moq">${icon('cart', 12)}MOQ $${b.moq}</span>
+        <button class="chip ${saved ? 'is-selected' : ''}" data-action="save-brand" data-brand="${b.id}" aria-pressed="${saved}">${icon('star', 13)} ${saved ? 'Saved' : 'Save brand'}</button></div>
       ${C.sectionLabel('Catalog')}
       <div class="grid-2">${prods.map((p) => C.productCard(p)).join('')}</div>`;
     return base(b.name, { back: true, headerRight: C.hActions([{ icon: 'search', go: 'S005' }, { icon: 'share', action: 'share' }]), body });
@@ -79,7 +81,7 @@ export const shop = {
         <div class="row-between"><span></span>${C.pricePair(p)}</div>
         ${C.stockRow(p)}
         <div class="hairline"></div>
-        ${C.privacyRow('Margin at MSRP', `${Math.round((1 - p.wholesale / p.msrp) * 100)}%`, 'spend')}
+        <div class="row-between"><span class="muted">Margin at MSRP</span>${C.maskField(`${Math.round((1 - p.wholesale / p.msrp) * 100)}%`, 'spend')}</div>
         <p class="muted" style="font-size:var(--fs-nano)">${rec ? `Behavior model: ${C.esc(D.whyString(p, state.get('pos') === 'connected'))}` : 'Connect a POS for a reorder recommendation.'}</p>
       </div>
       ${state.get('pos') !== 'connected' ? C.softPitch() : ''}
@@ -133,7 +135,7 @@ export const shop = {
 
   // S009 Brand launch detail
   S009(params) {
-    const b = D.brandById[params.brand] || D.brandById['mirador'];
+    const b = D.brandById[params.brand] || D.brandById['pompom'];
     const closed = state.get('_state') === 'closed';
     if (closed) {
       return base(b.name, { back: true, body: C.fullscreenState({ ic: 'lock', title: 'First-look has closed', body: `Join the waitlist and I'll open ${b.name} to you the moment your tier clears.`, actions: [{ label: 'Join the waitlist', action: 'request-access' }, { label: 'Back', ghost: true, action: 'back' }] }) });
@@ -151,7 +153,7 @@ export const shop = {
 
   // S804 Locked · tier-gated (lives in edge but reused heavily from shop)
   S804(params) {
-    const b = D.brandById[params.brand] || D.brandById['marquee'];
+    const b = D.brandById[params.brand] || D.brandById['savant'];
     const requested = state.get('_state') === 'requested';
     return base(b.name, { back: true, body:
       C.fullscreenState({ ic: 'lock', title: 'This brand opens at a higher tier',

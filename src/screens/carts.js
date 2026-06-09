@@ -51,15 +51,16 @@ export const carts = {
       ${Object.entries(groups).map(([bid, lines]) => {
         const b = D.brandById[bid];
         const sub = lines.reduce((s, [p, q]) => s + p.wholesale * q, 0);
+        const met = sub >= b.moq;
         return `<div class="card" style="max-width:none;gap:var(--s-2)">
-          <div class="row-between"><b>${b.name}</b>${C.moqChip(bid, sub)}</div>
-          ${lines.map(([p, q]) => `<div class="list-row dense" style="border:0;background:none;padding-inline:0">
-            <span class="thumb thumb-illo" style="width:40px;height:40px">${C.illo(p.illo, 22)}</span>
-            <span class="body"><span class="pri">${p.name}</span><span class="sec">${p.variant}${p.map ? ' · MAP' : ''}</span></span>
-            <span class="trail" style="flex-direction:column;align-items:flex-end;gap:var(--s-1)">${C.stepper(q, { id: p.id })}${C.maskField(C.money(p.wholesale * q), 'spend')}</span></div>`).join('')}
+          <div class="row-between"><b>${b.name}</b><span class="moq ${met ? '' : 'unmet'}" data-moq="${bid}" data-min="${b.moq}">${met ? icon('check', 12) + 'MOQ met' : icon('warning', 12) + '$' + b.moq + ' · $' + (b.moq - sub) + ' to go'}</span></div>
+          ${lines.map(([p, q]) => `<div class="line-row" data-line data-price="${p.wholesale}" data-brand="${bid}">
+            <span class="thumb thumb-illo" style="width:40px;height:40px;flex:0 0 auto">${C.illo(p.illo, 22)}</span>
+            <span class="body" style="flex:1;min-width:0"><span class="pri">${p.name}</span><span class="sec">${p.variant}${p.map ? ' · MAP' : ''}</span></span>
+            <span class="line-trail">${C.stepper(q, { id: p.id })}<span data-linetotal class="muted" style="font-size:var(--fs-caption)">${C.maskField(C.money(p.wholesale * q), 'spend')}</span></span></div>`).join('')}
         </div>`;
       }).join('')}
-      <div class="card" style="max-width:none"><div class="row-between"><b>Cart total</b>${C.maskField(`<span class="price compact"><span class="v">${D.usd(total)}</span><span class="currency">USD</span></span>`, 'spend')}</div></div>
+      <div class="card" style="max-width:none"><div class="row-between"><b>Cart total</b>${C.maskField(`<span class="price compact"><span class="v" data-carttotal>${D.usd(total)}</span><span class="currency">USD</span></span>`, 'spend')}</div></div>
       <div class="sticky-actions">
         <button class="btn ghost" data-action="share-cart" data-cart="${c.id}">${icon('share', 16)} Share</button>
         ${role === 'owner'
@@ -111,7 +112,7 @@ export const carts = {
   // S206 Share confirmation
   S206() {
     return base('Shared', { back: true, body: `
-      <div class="center-col pad-block">${icon('check', 48)}<h3>Sent</h3><p class="muted">I sent the draft to Priya N. with “Approve to submit”. You'll see status here.</p></div>
+      <div class="center-col pad-block">${C.successMark()}<h3>Sent</h3><p class="muted">I sent the draft to Priya N. with “Approve to submit”. You'll see status here.</p></div>
       <div class="card" style="max-width:none"><div class="drawer-row row-between" style="padding:var(--s-2) 0"><span class="muted">Delivery</span><b>Delivered</b></div><div class="row-between" style="padding:var(--s-2) 0"><span class="muted">Status</span>${C.statusPill('pending', 'Awaiting review')}</div></div>
       <button class="btn ghost full" data-action="revoke">Revoke share</button>
       <button class="btn full" data-go="S201">Done</button>` });
@@ -161,10 +162,10 @@ export const carts = {
   S210() { return base('Privacy on the floor', { back: true, body: privacyBody() }); },
 
   // S211 Add to cart (sheet, also screen)
-  S211(params) { return base('Add to cart', { back: true, body: addToCartBody(params.p || 'p-lulu') }); },
+  S211(params) { return base('Add to cart', { back: true, body: addToCartBody(params.p || 'p-throw') }); },
 
   // S212 Shop the look (sheet, also screen)
-  S212(params) { return base('Shop the look', { back: true, body: shopLookBody(params.guide || 'sg-desert') }); },
+  S212(params) { return base('Shop the look', { back: true, body: shopLookBody(params.guide || 'sg-table') }); },
 };
 
 // ---- shared bodies (used by screens AND by sheets) ----
@@ -181,16 +182,27 @@ export function newCartBody() {
       <button class="list-row" data-action="smart-reorder"><span class="thumb">${icon('sparkle', 22)}</span><span class="body"><span class="pri">Smart reorder</span><span class="sec">Behavior-ranked picks</span></span><span class="trail">${icon('chevron-right', 16)}</span></button>
     </div>`;
 }
+function shareRecipient(initials, name, role, canGrant, dark) {
+  return `<div class="share-rec">
+    <label class="choice" style="margin:0"><input type="checkbox" data-share-check /><span class="box"></span></label>
+    <span class="avatar sm ${dark ? 'dark' : ''}">${initials}</span>
+    <span class="body" style="display:flex;flex-direction:column"><span class="pri">${C.esc(name)}</span><span class="sec">${C.esc(role)}</span></span>
+    <select class="select share-perm" aria-label="Permission for ${C.esc(name)}">
+      <option value="edit">Can edit</option>
+      <option value="approve" ${canGrant ? '' : 'disabled'}>Approve to submit${canGrant ? '' : ' (owners)'}</option>
+    </select>
+  </div>`;
+}
 export function shareBody() {
   const canGrant = state.get('role') === 'owner';
   return `
-    ${C.sectionLabel('Send to')}
-    <div class="stack tight">${D.companyUsers.filter((u) => !u.self).map((u) => `<label class="list-row dense" style="cursor:pointer"><span class="avatar sm">${u.initials}</span><span class="body"><span class="pri">${u.name}</span><span class="sec">${u.role}</span></span><span class="trail"><span class="choice"><input type="radio" name="recipient" ${u.role === 'Manager' ? 'checked' : ''}/><span class="box round"></span></span></span></label>`).join('')}
-    <label class="list-row dense" style="cursor:pointer"><span class="avatar sm dark">DO</span><span class="body"><span class="pri">${D.account.rep}</span><span class="sec">Hecho rep</span></span><span class="trail"><span class="choice"><input type="radio" name="recipient"/><span class="box round"></span></span></span></label></div>
-    ${C.sectionLabel('Permission')}
-    <div class="chip-row"><button class="chip is-selected">Can edit</button><button class="chip" ${canGrant ? '' : 'aria-disabled="true" style="opacity:.5"'}>Approve to submit${canGrant ? '' : ' · owners only'}</button></div>
+    ${C.sectionLabel('Send to — pick one or more')}
+    <div class="stack tight">
+      ${D.companyUsers.filter((u) => !u.self).map((u) => shareRecipient(u.initials, u.name, u.role, canGrant)).join('')}
+      ${shareRecipient('DO', D.account.rep, 'Hecho rep', canGrant, true)}
+    </div>
     <div class="input-group"><label>Note</label><textarea class="textarea" placeholder="Optional note"></textarea></div>
-    <button class="btn full" data-action="send-share">Send</button>`;
+    <button class="btn full" data-action="send-share">Send to selected</button>`;
 }
 export function privacyBody() {
   const s = state.get();
@@ -198,18 +210,27 @@ export function privacyBody() {
   return `
     ${C.switchRow('Privacy on the floor', s.privacyOn, { sub: 'Mask price, stock, spend, credit', action: 'toggle-privacy' })}
     ${C.sectionLabel('Reveal gesture')}
-    <div class="chip-row">${opt('hold', 'Hold')}${opt('tap', 'Tap-to-toggle')}${opt('double', 'Double-tap')}${opt('off', 'Off')}</div>
-    <p class="muted">Under VoiceOver / TalkBack I switch to Tap-to-toggle automatically. Reduced motion forces Double-tap.</p>
+    <div class="chip-row">${opt('hold', 'Hold')}${opt('tap', 'Tap-to-toggle')}${opt('off', 'Off')}</div>
+    <p class="muted">Under VoiceOver, TalkBack, or Switch Control I switch to Tap-to-toggle automatically.</p>
     <button class="btn ghost full" data-go="S412">More privacy settings</button>`;
 }
 export function addToCartBody(pid) {
   const p = D.productById[pid] || D.products[0];
+  const b = D.brandById[p.brand];
   const rec = D.recommendedQty(p, state.get('pos') === 'connected') || 12;
   return `
-    <div class="list-row dense" style="border:0;padding-inline:0"><span class="thumb thumb-illo">${C.illo(p.illo, 24)}</span><span class="body"><span class="pri">${p.name}</span><span class="sec">${D.brandById[p.brand].name} · ${p.variant}</span></span><span class="trail">${C.pricePair(p, { compact: true })}</span></div>
-    <div class="row-between"><span class="muted">Quantity${rec ? ' (recommended)' : ''}</span>${C.stepper(rec, { id: pid, field: 'recommended', masked: state.get('privacyOn') })}</div>
+    <div class="card" style="max-width:none;gap:var(--s-3)" data-line data-price="${p.wholesale}">
+      <div style="display:flex;gap:var(--s-3);align-items:center">
+        <span class="thumb thumb-illo" style="width:48px;height:48px;border-radius:var(--r-2);flex:0 0 auto">${C.illo(p.illo, 28)}</span>
+        <div style="flex:1;min-width:0"><div style="font-weight:600;line-height:1.25">${p.name}</div><div class="muted" style="font-size:var(--fs-caption)">${b.name} · ${p.variant}</div></div>
+        ${C.pricePair(p, { compact: true, masked: false })}
+      </div>
+      <div class="hairline"></div>
+      <div class="row-between"><span class="muted">Quantity${rec ? ' · recommended' : ''}</span>${C.stepper(rec, { id: pid })}</div>
+      <div class="row-between"><span class="muted">Line subtotal</span><b style="font-feature-settings:'tnum' 1">$<span data-carttotal>${(p.wholesale * rec).toLocaleString('en-US')}</span></b></div>
+    </div>
     ${C.sectionLabel('Add to')}
-    <div class="chip-row"><button class="chip is-selected">Back wall refresh</button><button class="chip">Holiday 2026</button><button class="chip" data-action="new-cart">+ New draft</button></div>
+    <div class="chip-row" data-chipgroup><button class="chip is-selected">Back wall refresh</button><button class="chip">Holiday 2026</button><button class="chip" data-action="new-cart">+ New draft</button></div>
     <button class="btn full" data-action="confirm-add" data-p="${pid}">Confirm</button>`;
 }
 export function shopLookBody(gid) {

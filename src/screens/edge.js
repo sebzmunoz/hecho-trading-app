@@ -41,7 +41,7 @@ export const edge = {
 
   // S807 Sync conflict resolver
   S807() {
-    const p = D.productById['p-lulu'];
+    const p = D.productById['p-throw'];
     return base('Resolve conflict', { noTabbar: true, body: `
       <p class="muted">This draft changed in two places. Pick a value per line, or keep both.</p>
       <div class="conflict">

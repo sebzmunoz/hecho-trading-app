@@ -28,7 +28,7 @@ export const you = {
       <div class="grid-2">${tiles.map((t) => `<button class="card" style="max-width:none;flex-direction:row;align-items:center;gap:var(--s-3)" data-go="${t.go}"><span style="color:var(--accent)">${icon(t.ic, 22)}</span><b style="font-size:var(--fs-caption)">${t.label}</b></button>`).join('')}</div>
       <button class="btn ghost full" data-go="S416">${icon('list', 16)} Reports</button>
       <button class="btn ghost full" data-action="sign-out">Sign out</button>`;
-    return base('You', { tab: 'you', headerRight: C.hActions([{ icon: 'settings', go: 'S411' }]), body });
+    return base('You', { tab: 'you', headerRight: C.hActions([{ icon: 'bell', go: 'S701', label: 'Notifications', badge: '3' }]), body });
   },
 
   // S402 My details
@@ -132,13 +132,18 @@ export const you = {
   S412() {
     const s = state.get();
     const opt = (g, label) => `<button class="chip ${s.gesture === g ? 'is-selected' : ''}" data-action="set-gesture" data-g="${g}">${label}</button>`;
+    const FIELDS = [['wholesale', 'Negotiated wholesale'], ['stock', 'On-hand stock'], ['spend', 'Past spend & margin'], ['credit', 'Credit balance'], ['recommended', 'Reorder quantity']];
+    const checkRow = (key, label) => {
+      const on = s.maskFields.includes(key);
+      return `<label class="check-row"><span class="body"><span class="pri">${label}</span></span><span class="choice"><input type="checkbox" ${on ? 'checked' : ''} data-action="toggle-mask" data-field="${key}" /><span class="box"></span></span></label>`;
+    };
     return base('Privacy on the floor', { back: true, body: `
       ${C.switchRow('Privacy on the floor', s.privacyOn, { sub: 'On by default on the showroom floor', action: 'toggle-privacy' })}
       ${C.sectionLabel('Reveal mode')}
-      <div class="chip-row">${opt('hold', 'Hold')}${opt('tap', 'Tap-to-toggle')}${opt('double', 'Double-tap (5s)')}${opt('off', 'Always off')}</div>
-      <p class="muted">I auto-switch to Tap-to-toggle under VoiceOver, TalkBack, or Switch Control. Reduced motion forces Double-tap.</p>
+      <div class="chip-row">${opt('hold', 'Hold to preview')}${opt('tap', 'Tap-to-toggle')}${opt('off', 'Always off')}</div>
+      <p class="muted">I auto-switch to Tap-to-toggle under VoiceOver, TalkBack, or Switch Control.</p>
       ${C.sectionLabel('Masked fields')}
-      <div class="chip-row"><span class="chip">Wholesale</span><span class="chip">On-hand stock</span><span class="chip">Past spend</span><span class="chip">Credit</span><span class="chip">Reorder qty</span></div>
+      <div class="check-list">${FIELDS.map(([k, l]) => checkRow(k, l)).join('')}</div>
       ${C.switchRow('Watermark screenshots', true, { sub: '"For buyer eyes" overlay where the OS supports it' })}` });
   },
 
@@ -192,6 +197,6 @@ export function notifSettingsBody() {
     ${C.switchRow('System permission', true, { sub: 'Allowed in iOS Settings' })}
     ${C.sectionLabel('Categories')}
     <div class="stack tight">${D.pushCategories.map((c) => C.switchRow(c.label, c.id !== 'lowstock')).join('')}</div>
-    ${C.sectionLabel('Snooze')}
-    <div class="chip-row"><button class="chip is-selected">Off</button><button class="chip">1 hour</button><button class="chip">Today</button></div>`;
+    ${C.sectionLabel('Snooze all')}
+    <div class="chip-row"><button class="chip is-selected" data-snooze="off">Off</button><button class="chip" data-snooze="1h">1 hour</button><button class="chip" data-snooze="3h">3 hours</button><button class="chip" data-snooze="tonight">Until tonight</button><button class="chip" data-snooze="tomorrow">Until tomorrow</button><button class="chip" data-snooze="week">1 week</button><button class="chip" data-action="snooze-custom">Custom…</button></div>`;
 }

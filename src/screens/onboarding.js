@@ -1,46 +1,52 @@
 import * as C from '../components.js';
 import * as D from '../data.js';
+import { state } from '../state.js';
 import { icon } from '../icons.js';
-import { logoMark } from '../icons.js';
 import { base } from './shop.js';
+
+const mark = (w) => `<svg viewBox="0 0 463 168" style="width:${w};height:auto;color:var(--accent);display:block" aria-label="HECHO"><use href="#hecho-mark"/></svg>`;
 
 export const onboarding = {
   // S501 Splash
   S501() {
     return base('', { noTabbar: true, hideHeader: true, camera: false, body: `
-      <div class="center-col" style="justify-content:center;height:100%;gap:var(--s-6)">
-        <div style="color:var(--accent);width:200px">${logoMark()}</div>
-        <div class="skeleton" style="max-width:120px"><div class="s-bar sm" style="width:100%"></div></div>
+      <div class="center-col" style="justify-content:center;height:100%;gap:var(--s-7)">
+        ${mark('min(260px, 64%)')}
+        <div class="splash-bar" aria-hidden="true"><i></i></div>
       </div>`, flush: false });
   },
 
-  // S502 Welcome (3 cards)
+  // S502 Welcome (3-card carousel)
   S502() {
     const cards = [
       { ic: 'scan', t: 'Scan the shelf', b: 'Point at any product on the floor. I resolve it to your live stock.' },
       { ic: 'draft', t: 'Build a draft', b: 'Drop lines into a named draft cart from scan, search, or a style guide.' },
       { ic: 'reorder', t: 'Reorder smart', b: 'Past orders become starting points, ranked by what actually sells.' },
     ];
-    return base('', { noTabbar: true, hideHeader: true, body: `
-      <div class="center-col" style="height:100%;justify-content:space-between;padding:var(--s-5) 0">
-        <div style="color:var(--accent);width:120px">${logoMark()}</div>
-        <div class="rail" style="scroll-snap-type:x mandatory;width:100%">${cards.map((c) => `<div style="width:100%;flex:0 0 100%;scroll-snap-align:center;display:flex;flex-direction:column;align-items:center;gap:var(--s-4);padding:0 var(--s-4)"><div style="color:var(--accent)">${icon(c.ic, 64)}</div><h3>${c.t}</h3><p class="muted" style="text-align:center;max-width:30ch">${c.b}</p></div>`).join('')}</div>
-        <div style="display:flex;gap:6px">${cards.map((_, i) => `<span style="width:7px;height:7px;border-radius:50%;background:${i === 0 ? 'var(--accent)' : 'var(--surface-dim)'}"></span>`).join('')}</div>
+    const body = `
+      <div class="welcome">
+        ${mark('108px')}
+        <div class="carousel" id="welcomeCarousel">
+          <div class="carousel-track">${cards.map((c) => `<div class="slide"><div class="slide-ic">${icon(c.ic, 56)}</div><h3>${c.t}</h3><p class="muted">${c.b}</p></div>`).join('')}</div>
+        </div>
+        <div class="dots" id="welcomeDots">${cards.map((_, i) => `<button class="dot ${i === 0 ? 'is-on' : ''}" data-slide="${i}" aria-label="Card ${i + 1}"></button>`).join('')}</div>
         <div class="stack" style="width:100%"><button class="btn full" data-go="S503">Sign in</button><button class="btn ghost full" data-go="S503">Skip</button></div>
-      </div>` });
+      </div>`;
+    return base('', { noTabbar: true, hideHeader: true, body, onMount: wireCarousel });
   },
 
   // S503 Sign in
   S503() {
     return base('Sign in', { noTabbar: true, body: `
-      <div style="color:var(--accent);width:120px;margin:var(--s-4) auto">${logoMark()}</div>
+      <div style="margin:var(--s-4) auto;display:flex;justify-content:center">${mark('120px')}</div>
       <div class="input-group"><label>Email</label><input class="input" placeholder="you@store.com" inputmode="email" value="${D.account.email}" /></div>
       <button class="btn full" data-go="S504">Send magic link</button>
       <div class="row-between"><span class="hairline" style="flex:1"></span><span class="muted" style="padding:0 var(--s-3)">or</span><span class="hairline" style="flex:1"></span></div>
       <button class="btn ghost full" data-go="S505">Continue with Apple</button>
       <button class="btn ghost full" data-go="S505">Continue with Google</button>
       <button class="btn ghost full" data-go="S505">Hecho SSO</button>
-      <button class="btn ghost sm full" data-go="S506">I have an invite</button>` });
+      <div class="hairline"></div>
+      <div class="center-col" style="gap:var(--s-2)"><span class="muted">New to Hecho?</span><button class="btn ghost full" data-action="register">Apply to become a retailer</button><button class="btn ghost sm full" data-go="S506">I have an invite</button></div>` });
   },
 
   // S504 Magic link sent
@@ -55,7 +61,7 @@ export const onboarding = {
   // S505 Email verification
   S505() {
     return base('', { noTabbar: true, hideHeader: true, body: `
-      <div class="center-col" style="height:100%;justify-content:center;gap:var(--s-5)">${icon('check', 56)}<h3>Signing you in</h3><p class="muted">One moment.</p>
+      <div class="center-col" style="height:100%;justify-content:center;gap:var(--s-5)"><div class="proto-spinner"></div><h3>Signing you in</h3><p class="muted">One moment.</p>
       <button class="btn" data-go="S506">Continue</button></div>` });
   },
 
@@ -102,11 +108,41 @@ export const onboarding = {
       <div style="height:100%;display:flex;flex-direction:column;justify-content:flex-end">
         <div class="thumb-illo" style="flex:1;border-radius:0">${C.vignette()}</div>
         <div class="sheet" style="border-radius:var(--r-4) var(--r-4) 0 0;position:static;box-shadow:none"><span class="grab"></span>
-          <h4>Welcome to the showroom</h4><p class="muted">Looks like you're at a Hecho showroom. Want the floor map?</p>
-          <button class="btn full" data-go="S708">Open floor map</button>
+          <h4>You're all set</h4><p class="muted">Want to see live stock across the 9 brands you manage?</p>
+          <button class="btn full" data-go="S708">See live stock</button>
           <button class="btn ghost full" data-action="new-cart">Start a draft</button>
           <button class="btn ghost sm full" data-go="S001">Dismiss</button>
         </div>
       </div>`, flush: true });
   },
 };
+
+// Welcome carousel wiring: clickable dots, swipe, gentle auto-advance.
+function wireCarousel(root) {
+  const car = root.querySelector('#welcomeCarousel');
+  if (!car) return;
+  const track = car.querySelector('.carousel-track');
+  const dots = [...root.querySelectorAll('#welcomeDots .dot')];
+  const n = track.children.length;
+  let i = 0;
+  const go = (k) => { i = (k + n) % n; track.style.transform = `translateX(-${i * 100}%)`; dots.forEach((d, j) => d.classList.toggle('is-on', j === i)); };
+  dots.forEach((d) => d.addEventListener('click', () => { go(parseInt(d.dataset.slide, 10)); restart(); }));
+  let sx = null;
+  car.addEventListener('pointerdown', (e) => { sx = e.clientX; });
+  car.addEventListener('pointerup', (e) => { if (sx == null) return; const dx = e.clientX - sx; if (dx < -40) go(i + 1); else if (dx > 40) go(i - 1); sx = null; restart(); });
+  if (window._welcomeTimer) clearInterval(window._welcomeTimer);
+  const auto = () => { if (state.get('reducedMotion')) return; window._welcomeTimer = setInterval(() => go(i + 1), 3600); };
+  const restart = () => { if (window._welcomeTimer) clearInterval(window._welcomeTimer); auto(); };
+  auto();
+}
+
+// Retailer registration (apply for an account, then await Hecho approval).
+export function registrationBody() {
+  return `
+    <p class="muted">Tell me about your store. Hecho reviews every application and approves your account before you can order.</p>
+    <div class="input-group"><label>Store name</label><input class="input" placeholder="Your shop" /></div>
+    <div class="input-group"><label>Website or Instagram</label><input class="input" placeholder="@yourshop" /></div>
+    <div class="input-group"><label>Resale certificate #</label><input class="input" /></div>
+    <div class="input-group"><label>Business email</label><input class="input" inputmode="email" /></div>
+    <button class="btn full" data-action="submit-registration">Submit application</button>`;
+}

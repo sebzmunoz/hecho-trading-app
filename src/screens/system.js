@@ -7,6 +7,18 @@ import { notifSettingsBody } from './you.js';
 
 const visibleBrands = () => D.brands.filter((b) => D.canSee(b, state.get('tier')));
 
+function stockCard(b) {
+  const s = D.brandStock(b.id);
+  return `<div class="card" style="max-width:none;gap:var(--s-2)">
+    <button class="row-between" data-go="S003?brand=${b.id}" style="background:none;border:0;padding:0;text-align:start;cursor:pointer;width:100%">
+      <span><b>${b.name}</b><br/><span class="muted" style="font-size:var(--fs-nano)">Stock set by ${b.steward} · ${b.name}</span></span>
+      <span style="color:var(--fg-mute)">${icon('chevron-right', 18)}</span>
+    </button>
+    <div class="chip-row"><span class="pill positive">${icon('check', 12)} ${s.skus} SKUs</span>${s.low ? `<span class="pill caution">${icon('warning', 12)} ${s.low} low</span>` : ''}${s.out ? `<span class="pill critical">${icon('warning', 12)} ${s.out} out</span>` : ''}</div>
+    ${s.outItems.map((p) => `<div class="row-between" style="padding-top:var(--s-1)"><span class="muted">${p.name}</span><span class="sync-tag" style="color:var(--caution)">${icon('clock', 12)} ${p.restock || 'restock pending'}</span></div>`).join('')}
+  </div>`;
+}
+
 export const system = {
   // S701 Notifications center
   S701() {
@@ -65,31 +77,34 @@ export const system = {
       <div class="center-col" style="height:100%;justify-content:center;gap:var(--s-4)">${icon('eye', 56)}<h3>$18 wholesale</h3><p class="muted">Release to mask</p></div>` });
   },
 
-  // S708 Showroom map / wayfinding
+  // S708 Live stock — the 9 brands you manage (replaces the floor map)
   S708() {
-    const pins = D.booths.map((b) => `<button class="map-pin ${b.current ? 'current' : (b.visited ? 'visited' : '')}" data-action="pick-booth" data-b="${b.id}" style="left:${b.x}%;top:${b.y}%" aria-label="Booth ${b.n}, ${b.brand}">${b.n}</button>`).join('');
-    return base('Floor map', { back: true, body: `
-      <div class="floorplan">${C.vignette()}<div class="pins">${pins}</div></div>
-      <div class="card" style="max-width:none"><div class="row-between"><b>Booth 214 · Mirador</b><span class="tag coral">You're here</span></div><span class="muted">On your route · 2 booths to Cedar House</span><button class="btn sm full" data-go="S709?booth=b-214">Open booth</button></div>
-      ${C.sectionLabel('Breadcrumb')}
-      <div class="chip-row">${D.booths.filter((b) => b.visited).map((b) => `<span class="chip">${b.n} · ${b.brand}</span>`).join('')}</div>
-      <button class="btn ghost full" data-action="reset-breadcrumb">Reset trail</button>` });
+    const f = state.get('_state'); // 'low' | 'out' | null
+    let list = D.brands;
+    if (f === 'low') list = D.brands.filter((b) => D.brandStock(b.id).low > 0);
+    if (f === 'out') list = D.brands.filter((b) => D.brandStock(b.id).out > 0);
+    const chip = (v, l) => `<button class="chip ${(f || 'all') === v ? 'is-selected' : ''}" data-go="S708${v === 'all' ? '' : '?_=' + v}" data-stockfilter="${v}">${l}</button>`;
+    return base('Live stock', { back: true, headerRight: C.hActions([{ icon: 'refresh', action: 'refresh-stock', label: 'Refresh' }]), body: `
+      <p class="muted">Live on-hand across the 9 brands you manage. Each brand keeps its own counts current — out-of-stock lines show a restock window.</p>
+      <div class="chip-row">${chip('all', 'All 9 brands')}${chip('low', 'Low')}${chip('out', 'Out of stock')}</div>
+      <div class="stack tight">${list.map((b) => stockCard(b)).join('')}</div>` });
   },
 
-  // S709 Booth detail from QR
+  // S709 Brand from QR (a brand tag scanned on the floor)
   S709(params) {
-    const b = D.booths.find((x) => x.id === params.booth) || D.booths[4];
-    const brand = D.brands.find((x) => x.name === b.brand);
-    return base(`Booth ${b.n}`, { back: true, body: `
-      <div class="thumb-illo" style="border-radius:var(--r-4);padding:var(--s-6)">${C.illo('hat', 80)}</div>
-      <div class="row-between"><h3>${b.brand}</h3><span class="pill">Booth ${b.n}</span></div>
-      <p class="muted">${brand ? brand.story : 'Scan a booth QR to land here with full brand context.'}</p>
-      <div class="sticky-actions"><button class="btn ghost" data-go="S003?brand=${brand ? brand.id : 'mirador'}">Open brand</button><button class="btn" data-action="new-cart">Sampler cart</button></div>` });
+    const b = D.brandById[params.brand] || D.brands.find((x) => D.canSee(x, state.get('tier'))) || D.brands[0];
+    const s = D.brandStock(b.id);
+    return base(b.name, { back: true, body: `
+      <div class="thumb-illo" style="border-radius:var(--r-4);padding:var(--s-6)">${C.illo(D.productsByBrand(b.id)[0]?.illo || 'jar', 80)}</div>
+      <h3>${b.name}</h3>
+      <p class="muted">You scanned ${b.name}'s tag. Here's the live line and stock.</p>
+      <div class="chip-row"><span class="pill positive">${s.skus} SKUs</span>${s.low ? `<span class="pill caution">${s.low} low</span>` : ''}${s.out ? `<span class="pill critical">${s.out} out</span>` : ''}</div>
+      <div class="sticky-actions"><button class="btn ghost" data-action="new-cart">Sampler cart</button><button class="btn" data-go="S003?brand=${b.id}">Open brand</button></div>` });
   },
 
   // S710 Brand-launch arrival (push deep link)
   S710(params) {
-    const b = D.brandById[params.brand] || D.brandById['mirador'];
+    const b = D.brandById[params.brand] || D.brandById['pompom'];
     return base('First-look', { back: true, body: `
       <div class="thumb-illo" style="border-radius:var(--r-4);padding:var(--s-6)">${C.illo('tote', 88)}</div>
       <span class="pill coral">${icon('sparkle', 13)} First-look open now</span>

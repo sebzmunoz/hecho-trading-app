@@ -20,28 +20,29 @@ export const scan = {
     if (state.get('_state') === 'perm') return scan.S105();
     const controls = `
       <div style="position:absolute;top:var(--s-3);left:var(--s-3);right:var(--s-3);display:flex;justify-content:space-between;z-index:5">
-        <button class="btn sm icon-only" data-go="S708" aria-label="Floor map" style="background:var(--a-ink-60);border-color:transparent;color:var(--on-viewfinder)">${icon('map', 16)}</button>
-        <button class="btn sm icon-only" data-action="flash" aria-label="Flash" style="background:var(--a-ink-60);border-color:transparent;color:var(--on-viewfinder)">${icon('flash', 16)}</button>
+        <button class="cam-btn" data-go="S708" aria-label="Live stock">${icon('layers', 18)}</button>
+        <button class="cam-btn" data-action="flash" aria-label="Flash">${icon('flash', 18)}</button>
       </div>
-      <div style="position:absolute;bottom:var(--s-5);left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:var(--s-3);z-index:5">
-        <div class="segmented" data-seg="mode" style="background:var(--a-ink-60)"><button role="tab" aria-selected="true" data-val="barcode" style="color:var(--on-viewfinder)">Barcode</button><button role="tab" aria-selected="false" data-val="photo" data-go="S103" style="color:var(--on-viewfinder)">Photo</button></div>
-        <button class="btn" data-action="simulate-scan">Simulate a scan</button>
-        <button class="btn ghost sm" data-go="S106" style="color:var(--on-viewfinder);border-color:var(--a-cream-28)">Enter SKU by hand</button>
+      <div style="position:absolute;bottom:var(--s-6);left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:var(--s-4);z-index:5;padding:0 var(--s-4)">
+        <div class="segmented on-camera" data-seg="mode"><button role="tab" aria-selected="true" data-val="barcode">Barcode</button><button role="tab" aria-selected="false" data-val="photo" data-go="S103">Photo</button></div>
+        <button class="btn lg" data-action="simulate-scan">Simulate a scan</button>
+        <button class="cam-link" data-go="S106">Enter SKU by hand</button>
       </div>`;
     return base('Scan', { tab: 'scan', camera: true, flush: true, body: `<div style="position:relative;display:flex;flex-direction:column;height:100%">${viewfinder(controls)}</div>` });
   },
 
   // S102 Scan result (half-sheet over camera)
   S102(params) {
-    const p = D.productById[params.p] || D.productById['p-lulu'];
+    const p = D.productById[params.p] || D.productById['p-throw'];
     const b = D.brandById[p.brand];
     const rec = D.recommendedQty(p, state.get('pos') === 'connected');
     const st = D.stockState(p, state.get('pos'));
+    const stockVal = st.kind === 'out' ? 'Out' : (st.kind === 'unknown' ? String(st.value) : String(st.value));
     const card = `<div class="scan-result" style="position:absolute;left:var(--s-3);right:var(--s-3);bottom:var(--s-3);z-index:6">
       <div class="top"><div class="info"><span class="brand">${b.name}</span><span class="nm">${p.name}</span><span class="muted" style="font-size:var(--fs-nano)">${p.variant}</span></div>${p.map ? `<span class="pill">${icon('info', 12)} MAP</span>` : ''}</div>
       <div class="grid-info">
         <div class="col"><span class="l">Your price</span><span class="v">${C.pricePair(p, { compact: true })}</span></div>
-        <div class="col"><span class="l">Your stock</span><span class="v">${C.maskField(st.label.replace(/^.*· /, '') || String(st.value), 'stock')}</span></div>
+        <div class="col"><span class="l">Your stock</span><span class="v">${C.maskField(stockVal, 'stock')}</span></div>
         <div class="col"><span class="l">Last order</span><span class="v">${p.lastOrder ? `${p.lastOrderQty} · ${p.lastOrder}` : 'First time'}</span></div>
         <div class="col"><span class="l">Reorder rec</span><span class="v rec">${rec ? C.maskField(String(rec), 'recommended') : '<span class="manual-link">Reorder?</span>'}</span></div>
       </div>
@@ -54,7 +55,7 @@ export const scan = {
   S103() {
     const controls = `
       <div style="position:absolute;bottom:var(--s-5);left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:var(--s-3);z-index:5">
-        <div class="segmented" data-seg="mode" style="background:var(--a-ink-60)"><button role="tab" aria-selected="false" data-val="barcode" data-go="S101" style="color:var(--on-viewfinder)">Barcode</button><button role="tab" aria-selected="true" data-val="photo" style="color:var(--on-viewfinder)">Photo</button></div>
+        <div class="segmented on-camera" data-seg="mode"><button role="tab" aria-selected="false" data-val="barcode" data-go="S101">Barcode</button><button role="tab" aria-selected="true" data-val="photo">Photo</button></div>
         <div class="row" style="display:flex;gap:var(--s-4);align-items:center">
           <button class="hicon" data-action="library" aria-label="Pick from library" style="color:var(--on-viewfinder)">${icon('image', 22)}</button>
           <button data-action="capture-photo" aria-label="Capture" style="width:68px;height:68px;border-radius:50%;border:4px solid var(--on-viewfinder);background:var(--on-viewfinder)"></button>
@@ -101,7 +102,7 @@ export const scan = {
       <div class="input-group"><label>SKU or barcode</label><input class="input" inputmode="numeric" placeholder="e.g. 4821-OAT" aria-invalid="${err}" />${err ? `<span class="help err">${icon('warning', 16)} SKU not found. Check the digits.</span>` : ''}</div>
       ${C.sectionLabel('Recent SKUs')}
       <div class="chip-row">${['4821-OAT', '3390-MNT', '1107-PNK'].map((s) => `<button class="chip">${s}</button>`).join('')}</div>
-      <button class="btn full" data-go="S004?p=p-lulu">Look up</button>
+      <button class="btn full" data-go="S004?p=p-throw">Look up</button>
       <button class="btn ghost full" data-go="S005">Open search</button>`;
     return base('Enter SKU', { back: true, body });
   },
