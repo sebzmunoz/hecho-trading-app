@@ -7,7 +7,7 @@ import { registry } from './registry.js';
 import { initPanel, onRouteChange } from './panel.js';
 import { icon } from './icons.js';
 import * as C from './components.js';
-import { newCartBody, shareBody, addToCartBody, shopLookBody, privacyBody } from './screens/carts.js';
+import { newCartBody, shareBody, addToCartBody, shopLookBody } from './screens/carts.js';
 import { filtersBody } from './screens/shop.js';
 import { paymentBody, addMethodBody, addCardBody } from './screens/orders.js';
 import { registrationBody } from './screens/onboarding.js';
@@ -68,8 +68,16 @@ function renderRoute(route, { direction } = {}) {
   if (spec.noTabbar) tabbarWrap.hidden = true;
   else { tabbarWrap.hidden = false; tabbarWrap.innerHTML = tabbar(spec.tab); }
 
+  // privacy eye — appears only when the screen actually shows sensitive info
+  if (!spec.hideHeader && screenBody.querySelector('.mask-inline, .privacy-row')) {
+    const on = state.get('privacyOn');
+    const actions = appHeader.lastElementChild;
+    actions.insertAdjacentHTML('beforeend',
+      `<button class="hicon" data-action="privacy-toggle" aria-pressed="${on}"
+        aria-label="${on ? 'Privacy on the floor is on. Tap to reveal sensitive values.' : 'Privacy is off. Tap to mask sensitive values.'}">${icon(on ? 'eye-off' : 'eye', 22)}</button>`);
+  }
+
   // wiring
-  C.wirePrivacy(screenBody);
   C.wireScene(screenBody);
   C.wireSteppers(screenBody, () => C.recomputeTotals(screenBody));
   if (spec.onMount) try { spec.onMount(screenBody); } catch (e) { console.error(e); }
@@ -124,7 +132,13 @@ function handleAction(action, el) {
   const T = state.telemetry.bind(state);
   switch (action) {
     // ---- navigation-ish ----
-    case 'privacy-sheet': C.openSheet({ title: 'Privacy on the floor', html: privacyBody(), onMount: C.wirePrivacy }); break;
+    case 'privacy-toggle': {
+      const revealing = state.get('privacyOn');
+      state.set({ privacyOn: !revealing });
+      if (revealing) T('privacy.reveal', 'toggle', nav.current().id);
+      nav.refresh();
+      break;
+    }
     case 'new-cart': C.openSheet({ title: 'New cart', html: newCartBody() }); break;
     case 'create-cart': C.closeAllOverlays(); T('cart.created', 'manual', 'c-new'); nav.go('S202?cart=c-back'); C.toast('Draft created', { positive: true }); break;
     case 'smart-reorder': C.closeAllOverlays(); T('cart.smart_reorder.accepted', 'order', 'c-back'); nav.go('S202?cart=c-back'); C.toast('Smart reorder ready — accept lines', { positive: true }); break;
@@ -164,7 +178,6 @@ function handleAction(action, el) {
 
     // ---- privacy ----
     case 'toggle-privacy': state.set({ privacyOn: !state.get('privacyOn') }); nav.refresh(); break;
-    case 'set-gesture': state.set({ gesture: el.dataset.g }); nav.refresh(); break;
 
     // ---- scanning ----
     case 'simulate-scan': T('scan.result.shown', 'barcode', 'p-throw'); nav.go('S102?p=p-throw'); break;
@@ -192,7 +205,6 @@ function handleAction(action, el) {
     case 'save-card': state.addCard({ id: 'm-card2', kind: 'card', label: 'Credit / debit card', sub: '•••• 8210', icon: 'card' }); C.closeAllOverlays(); nav.refresh(); C.toast('Card added', { positive: true }); break;
 
     // ---- privacy masked-fields checklist ----
-    case 'toggle-mask': state.toggleMaskField(el.dataset.field); break;
 
     // ---- notifications ----
     case 'snooze-custom': C.openSheet({ title: 'Snooze for…', html: snoozeCustomBody() }); break;

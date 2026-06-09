@@ -162,7 +162,7 @@ body.proto {
 .overlay-host .drawer { width: min(280px, 80%); }
 
 /* inline masked value (Privacy on the floor) — coral underline, dots overlay */
-.mask-inline { position: relative; display: inline-flex; align-items: center; cursor: pointer; border: 0; background: none;
+.mask-inline { position: relative; display: inline-flex; align-items: center; cursor: default; border: 0; background: none;
   padding: 0; font: inherit; color: inherit; border-bottom: 1.5px solid var(--accent); line-height: 1.1; }
 .mask-inline .mv { visibility: hidden; }
 .mask-inline .mdots { position: absolute; inset: 0; display: inline-flex; align-items: center; justify-content: center;
@@ -310,6 +310,34 @@ body.proto {
 .scene-pop .sp-acts { display: flex; gap: var(--s-1); flex: 0 0 auto; }
 .scene-hint { display: inline-flex; align-items: center; gap: var(--s-1); font-size: var(--fs-nano); letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--accent-text); }
 .scene-hint i { width: 8px; height: 8px; border-radius: 50%; border: var(--bw-2) solid var(--accent); }
+
+/* Resume tile — "Pick up where you left off" */
+.resume-card { display: flex; flex-direction: column; gap: var(--s-1); width: 220px; padding: var(--s-3) var(--s-4); background: var(--surface); border: var(--bw-1) solid var(--line); border-radius: var(--r-3); text-align: start; cursor: pointer; transition: transform var(--d-fast) var(--e-out-expo), border-color var(--d-fast); }
+.resume-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+.resume-card:focus-visible { outline: var(--focus-w) solid var(--focus); outline-offset: var(--focus-offset); }
+.resume-card .rc-head { display: flex; align-items: center; justify-content: space-between; gap: var(--s-2); width: 100%; }
+.resume-card .rc-head b { font-size: var(--fs-body); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.resume-card .rc-line { display: flex; align-items: baseline; gap: var(--s-1); font-size: var(--fs-caption); font-feature-settings: "tnum" 1; }
+.resume-card .rc-time { display: inline-flex; align-items: center; gap: var(--s-1); font-size: var(--fs-nano); color: var(--fg-mute); }
+
+/* Drop tile — "New on the floor" */
+.drop-card { display: flex; flex-direction: column; align-items: center; gap: var(--s-1); width: 132px; padding: var(--s-3) var(--s-2); background: var(--surface); border: var(--bw-1) solid var(--line); border-radius: var(--r-3); text-align: center; cursor: pointer; transition: transform var(--d-fast) var(--e-out-expo), border-color var(--d-fast); }
+.drop-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+.drop-card:focus-visible { outline: var(--focus-w) solid var(--focus); outline-offset: var(--focus-offset); }
+.drop-card .dc-art { width: 72px; height: 72px; border-radius: var(--r-2); display: grid; place-items: center; }
+.drop-card .dc-name { font-size: var(--fs-caption); font-weight: 700; line-height: 1.15; color: var(--fg); }
+.drop-card.is-locked .dc-art { filter: grayscale(.5) saturate(.6); opacity: .75; }
+
+/* Brand wall — all nine, one grid, no scroll */
+.brand-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--s-2); }
+.brand-tile { position: relative; aspect-ratio: 4/5; border-radius: var(--r-3); border: var(--bw-1) solid var(--line); overflow: hidden; cursor: pointer; display: flex; flex-direction: column; padding: 0; background: linear-gradient(160deg, var(--surface-2), var(--surface-dim)); transition: transform var(--d-fast) var(--e-out-expo); }
+.brand-tile:nth-child(3n+2) { background: linear-gradient(200deg, var(--surface-dim), var(--surface-2)); }
+.brand-tile:hover { transform: translateY(-2px); }
+.brand-tile:focus-visible { outline: var(--focus-w) solid var(--focus); outline-offset: var(--focus-offset); }
+.brand-tile .bt-art { flex: 1; display: grid; place-items: center; color: var(--accent); padding-top: var(--s-2); }
+.brand-tile .bt-name { padding: var(--s-1) var(--s-2) var(--s-3); font-size: var(--fs-caption); font-weight: 700; line-height: 1.15; color: var(--fg); text-align: center; }
+.brand-tile .bt-lock { position: absolute; top: var(--s-2); right: var(--s-2); width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--surface) 85%, transparent); color: var(--accent-text); }
+.brand-tile.is-locked .bt-art { filter: grayscale(.5) saturate(.6); opacity: .75; }
 
 /* "Running low" card (Shop home reorder rail) */
 .low-card { display: flex; align-items: center; gap: var(--s-2); background: var(--surface); border: var(--bw-1) solid var(--line); border-radius: var(--r-3); padding: var(--s-2) var(--s-3); width: 252px; }

@@ -16,8 +16,12 @@ export const shop = {
     const posOn = state.get('pos') === 'connected';
     const role = state.get('role');
     const hero = D.styleGuides[0];
-    const drops = visibleBrands().filter((b) => b.launching || b.tier !== 'standard').slice(0, 4);
-    const openDrafts = D.carts.filter((c) => c.section === 'mine').slice(0, 2);
+    // New on the floor: launching first, then gated tiers, then the freshest
+    // general-release brands — six drop tiles, not two.
+    const vb = visibleBrands();
+    const drops = [...vb.filter((b) => b.launching), ...vb.filter((b) => !b.launching && b.tier !== 'standard'), ...vb.filter((b) => !b.launching && b.tier === 'standard').slice(-4)].slice(0, 6);
+    // Resume rail: every draft in motion — mine and shared with me.
+    const openDrafts = D.carts.filter((c) => c.section === 'mine' || c.section === 'shared');
     const pendingApprovals = D.carts.filter((c) => c.awaiting);
 
     // 1 · Running low at your store (the reorder motion, POS-driven H1 math)
@@ -63,11 +67,11 @@ export const shop = {
         <div class="row-between">${C.sectionLabel('Featured guide')}<span class="scene-hint"><i></i> Shoppable</span></div>
         ${C.styleTile(hero, { wide: true })}
       </div>
-      ${openDrafts.length ? rail('Pick up where you left off', openDrafts.map((c) => `<div style="width:240px">${C.draftCard(c)}</div>`).join('')) : ''}
-      ${rail('New on the floor', drops.map((b) => `<div style="width:200px">${C.brandCard(b, { locked: !D.canSee(b, state.get('tier')) })}</div>`).join(''))}
+      ${openDrafts.length ? rail('Pick up where you left off', openDrafts.map((c) => C.resumeCard(c)).join('')) : ''}
+      ${rail('New on the floor', drops.map((b) => C.dropCard(b)).join(''))}
       ${rail('For your shop', D.products.slice(0, 6).map((p) => C.productCard(p)).join(''))}
       ${C.sectionLabel('Brands')}
-      <div class="chip-row">${visibleBrands().map((b) => C.brandChip(b.id)).join('')}</div>
+      <div class="brand-grid">${D.brands.map((b) => C.brandTile(b)).join('')}</div>
       <div class="grid-2"><button class="btn ghost sm" data-go="S705">All style guides</button><button class="btn ghost sm" data-go="S007">Browse categories</button></div>`;
     return base('Shop', { tab: 'shop', headerRight: C.tabHeaderActions({ search: false }), body });
   },

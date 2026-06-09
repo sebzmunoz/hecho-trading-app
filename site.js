@@ -28,7 +28,7 @@
   // ---- Features ----
   var features = [
     { ic: 'scan', t: 'Live shelf scan', d: 'Point your phone at a barcode on a real shelf. Hecho resolves it to that product’s own live POS stock, last order, and a recommended reorder quantity — instantly.', tag: 'Signature', span: true },
-    { ic: 'lock', t: 'Privacy on the floor', d: 'Negotiated price, on-hand stock, past spend, and credit balance mask by default. Press and hold to reveal; release to re-mask. Nobody reads your numbers over your shoulder.', tag: 'Signature' },
+    { ic: 'lock', t: 'Privacy on the floor', d: 'Negotiated price, on-hand stock, past spend, and credit balance mask by default. When something sensitive is on-screen, an eye appears in the header — one tap reveals, one tap re-masks. Nobody reads your numbers over your shoulder.', tag: 'Signature' },
     { ic: 'swap', t: 'Rep co-shop', d: 'A Hecho rep switches into your account and adds lines to your draft live — then hands it back. They can only submit with your explicit grant.', tag: 'Signature' },
     { ic: 'reorder', t: 'Smart reorder', d: 'Past orders become starting points, not history. Hecho proposes a draft ranked by what actually sells, with the “why” on every line. Accept piece by piece.' },
     { ic: 'layers', t: 'Live stock board', d: 'On-hand across all nine brands you manage. Out-of-stock lines show a restock window — each brand keeps its own counts current.' },

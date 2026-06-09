@@ -128,23 +128,16 @@ export const you = {
     return base('Notifications', { back: true, body: notifSettingsBody() });
   },
 
-  // S412 Privacy on the floor settings
+  // S412 Privacy on the floor — toggle-only, nothing to configure
   S412() {
-    const s = state.get();
-    const opt = (g, label) => `<button class="chip ${s.gesture === g ? 'is-selected' : ''}" data-action="set-gesture" data-g="${g}">${label}</button>`;
-    const FIELDS = [['wholesale', 'Negotiated wholesale'], ['stock', 'On-hand stock'], ['spend', 'Past spend & margin'], ['credit', 'Credit balance'], ['recommended', 'Reorder quantity']];
-    const checkRow = (key, label) => {
-      const on = s.maskFields.includes(key);
-      return `<label class="check-row"><span class="body"><span class="pri">${label}</span></span><span class="choice"><input type="checkbox" ${on ? 'checked' : ''} data-action="toggle-mask" data-field="${key}" /><span class="box"></span></span></label>`;
-    };
+    const on = state.get('privacyOn');
     return base('Privacy on the floor', { back: true, body: `
-      ${C.switchRow('Privacy on the floor', s.privacyOn, { sub: 'On by default on the showroom floor', action: 'toggle-privacy' })}
-      ${C.sectionLabel('Reveal mode')}
-      <div class="chip-row">${opt('hold', 'Hold to preview')}${opt('tap', 'Tap-to-toggle')}${opt('off', 'Always off')}</div>
-      <p class="muted">I auto-switch to Tap-to-toggle under VoiceOver, TalkBack, or Switch Control.</p>
-      ${C.sectionLabel('Masked fields')}
-      <div class="check-list">${FIELDS.map(([k, l]) => checkRow(k, l)).join('')}</div>
-      ${C.switchRow('Watermark screenshots', true, { sub: '"For buyer eyes" overlay where the OS supports it' })}` });
+      ${C.switchRow('Privacy on the floor', on, { sub: 'On by default on the showroom floor', action: 'toggle-privacy' })}
+      <p class="muted">While it's on, your numbers render as dots so a neighbor can't read them over your shoulder. Whenever something sensitive is on-screen, the eye appears in the header — tap it to reveal, tap again to re-mask.</p>
+      ${C.sectionLabel('What gets masked')}
+      <div class="chip-row"><span class="chip">Negotiated wholesale</span><span class="chip">On-hand stock</span><span class="chip">Past spend & margin</span><span class="chip">Credit balance</span><span class="chip">Reorder quantity</span></div>
+      <div class="card" style="max-width:none"><span class="muted" style="font-size:var(--fs-nano)">PREVIEW</span>
+        <div class="row-between"><span class="muted">Your price</span>${C.maskField('<b>$18 wholesale</b>', 'wholesale')}</div></div>` });
   },
 
   // S413 Connected POS

@@ -205,14 +205,9 @@ export function shareBody() {
     <button class="btn full" data-action="send-share">Send to selected</button>`;
 }
 export function privacyBody() {
-  const s = state.get();
-  const opt = (g, label) => `<button class="chip ${s.gesture === g ? 'is-selected' : ''}" data-action="set-gesture" data-g="${g}">${label}</button>`;
   return `
-    ${C.switchRow('Privacy on the floor', s.privacyOn, { sub: 'Mask price, stock, spend, credit', action: 'toggle-privacy' })}
-    ${C.sectionLabel('Reveal gesture')}
-    <div class="chip-row" data-chipgroup>${opt('hold', 'Hold')}${opt('tap', 'Tap-to-toggle')}${opt('off', 'Off')}</div>
-    <p class="muted">Under VoiceOver, TalkBack, or Switch Control I switch to Tap-to-toggle automatically.</p>
-    <button class="btn ghost full" data-go="S412">More privacy settings</button>`;
+    ${C.switchRow('Privacy on the floor', state.get('privacyOn'), { sub: 'Mask wholesale, stock, spend, and credit', action: 'toggle-privacy' })}
+    <p class="muted">One switch, nothing to configure. Whenever something sensitive is on-screen, the eye appears in the header — tap it to reveal everything, tap again to re-mask.</p>`;
 }
 export function addToCartBody(pid) {
   const p = D.productById[pid] || D.products[0];

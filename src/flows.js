@@ -84,10 +84,10 @@ export const flows = [
     { screen: 'S606', text: 'Send a memo via chat. Switch back any time.' },
   ] },
   { id: 'F12', name: 'Turning on Privacy on the floor', persona: 'P1·P2', phase: 'P1', steps: [
-    { screen: 'S412', text: 'Privacy is ON by default; gesture is hold-to-preview.' },
-    { screen: 'S004', text: 'Sensitive fields render as masked chips — press and hold to reveal.' },
+    { screen: 'S412', text: 'Privacy is ON by default. One switch, nothing to configure.' },
+    { screen: 'S004', text: 'Sensitive values render as dots. The eye appears in the header whenever something sensitive is on-screen.' },
     { screen: 'S210', text: 'Flip privacy fast from the header quick toggle.' },
-    { screen: 'S707', text: 'The holding state shows the value while held.' },
+    { screen: 'S707', text: 'Tap the eye: everything reveals. Tap again: everything re-masks.' },
   ] },
   { id: 'F13', name: 'Discovering a style guide', persona: 'P1·P2', phase: 'P2', steps: [
     { screen: 'S001', text: 'Shop home features a hero style guide.' },

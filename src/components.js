@@ -125,27 +125,22 @@ export function lockChip(label = 'Higher tier') {
   return `<span class="lock-chip">${icon('lock', 12)}${esc(label)}</span>`;
 }
 
-// ---- Privacy on the floor (§07-D / §SR) ----
-// Inline masked value used inside cards/rows.
-const MASK_ARIA = 'Your price, hidden. Double-tap to reveal.';
-// A field is masked when Privacy is on, the gesture isn't "off", AND the field
-// is in the masked-fields checklist (§07-D / S412).
-export function fieldMasked(field) {
-  const s = state.get();
-  return s.privacyOn && s.gesture !== 'off' && state.isFieldMasked(field);
+// ---- Privacy on the floor (§07-D) — toggle-only ----
+// One global switch. Sensitive values render masked while it's ON; the eye
+// in the header (shown only when sensitive info is on-screen) flips it.
+const MASK_ARIA = 'Hidden. Tap the eye in the header to reveal.';
+export function fieldMasked() {
+  return state.get('privacyOn');
 }
-export function maskField(valueHTML, field, { sr = MASK_ARIA } = {}) {
-  if (!fieldMasked(field)) return `<span class="mask-inline is-open" data-field="${field}"><span class="mv">${valueHTML}</span></span>`;
-  return `<span class="mask-inline" data-field="${field}" role="button" tabindex="0" aria-label="${esc(sr)}"><span class="mv">${valueHTML}</span><span class="mdots" aria-hidden="true">●●●</span></span>`;
+export function maskField(valueHTML, field) {
+  if (!fieldMasked()) return `<span class="mask-inline is-open" data-field="${field}"><span class="mv">${valueHTML}</span></span>`;
+  return `<span class="mask-inline" data-field="${field}" role="img" aria-label="${esc(MASK_ARIA)}"><span class="mv">${valueHTML}</span><span class="mdots" aria-hidden="true">●●●</span></span>`;
 }
-// Full privacy row (label left, masked value + reveal button right).
+// Full privacy row (label left, masked value right) — same toggle.
 export function privacyRow(label, valueHTML, field) {
-  const open = !fieldMasked(field);
-  return `<div class="privacy-row ${open ? 'is-revealing' : 'is-masked'}" data-field="${field}">
+  return `<div class="privacy-row ${fieldMasked() ? 'is-masked' : 'is-revealing'}" data-field="${field}">
     <span class="label">${esc(label)}</span>
-    <span class="value"><span class="value-content">${valueHTML}</span>
-      <button class="hold-btn" aria-label="${esc(MASK_ARIA)}">${icon(open ? 'eye' : 'eye-off', 14)}</button>
-    </span></div>`;
+    <span class="value"><span class="value-content">${valueHTML}</span></span></div>`;
 }
 // Animated success mark for confirmation screens.
 export function successMark() {
@@ -238,6 +233,44 @@ export function styleTile(g, { wide = false } = {}) {
   </button>`;
 }
 
+// Resume tile — "Pick up where you left off" rail. Name, status, then the
+// numbers stacked on their own lines so nothing crams at 220px.
+export function resumeCard(c) {
+  const total = D.cartTotal(c);
+  const tag = c.sync === 'pending'
+    ? `<span class="sync-tag"><span class="spin-dot"></span>Syncing</span>`
+    : (c.awaiting ? `<span class="tag coral">Awaiting you</span>` : `<span class="tag">${esc(c.author === 'You' ? 'Yours' : 'Shared')}</span>`);
+  return `<button class="resume-card" data-go="S202?cart=${c.id}">
+    <span class="rc-head"><b>${esc(c.name)}</b>${tag}</span>
+    <span class="rc-line">${maskField(`<b>${money(total)}</b>`, 'spend')}<span class="muted">· ${D.cartBrandCount(c)} brands</span></span>
+    <span class="rc-time">${icon('clock', 12)} ${esc(c.lastEdited)}</span>
+  </button>`;
+}
+
+// Drop tile — "New on the floor" rail. Visual-first: product art on top,
+// brand + status underneath.
+export function dropCard(b) {
+  const locked = !D.canSee(b, state.get('tier'));
+  const p = D.productsByBrand(b.id)[0];
+  const tag = locked ? lockChip() : (b.launching ? `<span class="tag coral">Launching</span>` : `<span class="tag">New</span>`);
+  return `<button class="drop-card ${locked ? 'is-locked' : ''}" data-go="${locked ? `S804?brand=${b.id}` : `S003?brand=${b.id}`}">
+    <span class="dc-art thumb-illo">${illo(p ? p.illo : 'jar', 44)}</span>
+    <span class="dc-name">${esc(b.name)}</span>
+    <span class="dc-tag">${tag}</span>
+  </button>`;
+}
+
+// Brand tile — the Brands wall: nine big image cards in one grid, no scroll.
+export function brandTile(b, i = 0) {
+  const locked = !D.canSee(b, state.get('tier'));
+  const p = D.productsByBrand(b.id)[0];
+  return `<button class="brand-tile ${locked ? 'is-locked' : ''}" data-go="${locked ? `S804?brand=${b.id}` : `S003?brand=${b.id}`}" aria-label="${esc(b.name)}${locked ? ', higher tier' : ''}">
+    <span class="bt-art">${illo(p ? p.illo : 'jar', 54)}</span>
+    <span class="bt-name">${esc(b.name)}</span>
+    ${locked ? `<span class="bt-lock">${icon('lock', 12)}</span>` : ''}
+  </button>`;
+}
+
 export function brandCard(b, { locked = false } = {}) {
   const nameEl = `<span class="name" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.name)}</span>`;
   if (locked) {
@@ -310,11 +343,12 @@ export function hActions(list) {
   }).join('');
 }
 // Standard header for the five primary tabs: search + notifications + privacy quick-toggle.
-export function tabHeaderActions({ search = 'S005', bell = true, privacy = true } = {}) {
+// The privacy eye is NOT part of these static actions — the route renderer
+// appends it only when the rendered screen actually contains sensitive info.
+export function tabHeaderActions({ search = 'S005', bell = true } = {}) {
   const list = [];
   if (search) list.push({ icon: 'search', go: search, label: 'Search' });
   if (bell) list.push({ icon: 'bell', go: 'S701', label: 'Notifications', badge: '3' });
-  if (privacy) list.push({ icon: state.get('privacyOn') ? 'eye-off' : 'eye', action: 'privacy-sheet', label: 'Privacy on the floor' });
   return hActions(list);
 }
 export function sectionLabel(t) { return `<div class="section-label">${esc(t)}</div>`; }
@@ -472,54 +506,9 @@ export function toast(msg, { action, positive = false, ms = 4000 } = {}) {
 }
 
 // ---- Privacy wiring (called on every screen mount + on overlay mount) ----
-export function wirePrivacy(root) {
-  root.querySelectorAll('.mask-inline[data-field]').forEach((el) => {
-    if (el._wired) return; el._wired = true;
-    const field = el.dataset.field;
-    const reveal = () => { el.classList.add('is-open'); el.setAttribute('aria-label', 'Revealed. Activate to mask.'); state.telemetry('privacy.reveal', state.get('gesture'), field); };
-    const mask = () => { el.classList.remove('is-open'); el.setAttribute('aria-label', MASK_ARIA); };
-    if (!fieldMasked(field)) { el.classList.add('is-open'); return; }
-    // A masked chip often lives INSIDE a tappable card. Privacy interactions
-    // must never leak to the parent — no navigation on reveal/release.
-    const swallow = (e) => { e.stopPropagation(); };
-    const g = state.get('gesture');
-    if (g === 'tap') {
-      el.addEventListener('click', (e) => { swallow(e); e.preventDefault(); el.classList.contains('is-open') ? mask() : reveal(); });
-      el.addEventListener('pointerdown', swallow);
-      el.addEventListener('pointerup', swallow);
-    } else { // hold (default)
-      el.addEventListener('pointerdown', (e) => {
-        swallow(e); e.preventDefault();
-        try { el.setPointerCapture(e.pointerId); } catch {}
-        reveal();
-      });
-      el.addEventListener('pointerup', (e) => { swallow(e); mask(); });
-      el.addEventListener('pointercancel', (e) => { swallow(e); mask(); });
-      el.addEventListener('pointerleave', mask);
-      // the browser still fires click after pointerup — eat it before the card sees it
-      el.addEventListener('click', (e) => { swallow(e); e.preventDefault(); });
-    }
-    el.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); swallow(e); el.classList.contains('is-open') ? mask() : reveal(); } });
-  });
-  root.querySelectorAll('.privacy-row[data-field]').forEach((row) => {
-    if (row._wired) return; row._wired = true;
-    const btn = row.querySelector('.hold-btn'); if (!btn) return;
-    const field = row.dataset.field;
-    const reveal = () => { row.classList.add('is-revealing'); row.classList.remove('is-masked'); btn.classList.add('is-holding'); state.telemetry('privacy.reveal', state.get('gesture'), field); };
-    const mask = () => { row.classList.remove('is-revealing'); row.classList.add('is-masked'); btn.classList.remove('is-holding'); };
-    if (!fieldMasked(field)) return;
-    const g = state.get('gesture');
-    if (g === 'tap') {
-      btn.addEventListener('click', (e) => { e.stopPropagation(); row.classList.contains('is-revealing') ? mask() : reveal(); });
-    } else {
-      btn.addEventListener('pointerdown', (e) => { e.stopPropagation(); e.preventDefault(); try { btn.setPointerCapture(e.pointerId); } catch {} reveal(); });
-      btn.addEventListener('pointerup', (e) => { e.stopPropagation(); mask(); });
-      btn.addEventListener('pointerleave', mask);
-      btn.addEventListener('pointercancel', mask);
-      btn.addEventListener('click', (e) => { e.stopPropagation(); e.preventDefault(); });
-    }
-  });
-}
+// Per-chip gestures are gone — masking is the single global toggle, flipped
+// by the header eye. Nothing to wire on individual chips anymore.
+export function wirePrivacy() {}
 
 // ---- Steppers wiring ----
 export function wireSteppers(root, onChange) {

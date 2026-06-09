@@ -73,8 +73,13 @@ export const system = {
 
   // S707 Privacy holding state (transient)
   S707() {
-    return base('', { noTabbar: true, hideHeader: true, body: `
-      <div class="center-col" style="height:100%;justify-content:center;gap:var(--s-4)">${icon('eye', 56)}<h3>$18 wholesale</h3><p class="muted">Release to mask</p></div>` });
+    const on = state.get('privacyOn');
+    return base('Privacy demo', { back: true, body: `
+      <div class="center-col pad-block">${icon(on ? 'eye-off' : 'eye', 56)}
+        <h3>${on ? 'Masked' : 'Revealed'}</h3>
+        <p class="muted">${on ? 'Sensitive values render as dots. Tap the eye in the header to reveal them.' : 'Everything is visible. Tap the eye to re-mask before you turn the phone around.'}</p></div>
+      <div class="card" style="max-width:none"><div class="row-between"><span class="muted">Your price</span>${C.maskField('<b>$18 wholesale</b>', 'wholesale')}</div>
+        <div class="row-between"><span class="muted">On hand</span>${C.maskField('<b>14 units</b>', 'stock')}</div></div>` });
   },
 
   // S708 Live stock — the 9 brands you manage (replaces the floor map)

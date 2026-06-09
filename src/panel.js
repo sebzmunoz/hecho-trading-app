@@ -132,7 +132,7 @@ function renderVars() {
     </div>
     <div class="var-group"><span class="gl">Privacy on the floor</span>
       ${row('Privacy', 'masked by default', seg('privacyOn', [{ v: true, l: 'On' }, { v: false, l: 'Off' }], s.privacyOn))}
-      ${row('Reveal gesture', '', seg('gesture', [{ v: 'hold', l: 'Hold' }, { v: 'tap', l: 'Tap' }, { v: 'double', l: '2-tap' }, { v: 'off', l: 'Off' }], s.gesture))}
+
     </div>
     <div class="var-group"><span class="gl">Live data</span>
       ${row('POS', 'stock & reorder (§07-H)', seg('pos', [{ v: 'connected', l: 'Live' }, { v: 'connecting', l: 'Conn…' }, { v: 'disconnected', l: 'Off' }], s.pos))}
