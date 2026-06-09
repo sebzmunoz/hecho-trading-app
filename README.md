@@ -1,14 +1,15 @@
-# Hecho · Mobile App — Functional Prototype
+# Hecho · Wholesale showroom app
 
-A clickable, mocked-data prototype of the **Hecho Trading Co.** wholesale showroom companion app, built to the **Design Brief v1.1** and **Design System v3.0** in [`/reference`](./reference).
+Two surfaces for the **Hecho Trading Co.** wholesale showroom companion app, built to the **Design Brief v1.1** and **Design System v3.0** in [`/reference`](./reference):
 
-It implements **all 91 screens**, **all 14 user flows** (clickable end-to-end with branches), and **every documented state** — wrapped in a phone frame with a live **control panel** for driving the app and testing how each screen reacts to different variables.
+- **`/` — Explainer site.** A public overview of the features, the four roles (with a capability comparison chart), how the app works, tiers, and the nine brands.
+- **`/app/` — Functional prototype.** A clickable, mocked-data build of **all 91 screens**, **all 14 user flows** (end-to-end with branches), and **every documented state** — wrapped in a phone frame with a live **control panel** for driving the app and testing how each screen reacts to different variables.
 
 > No build step. Pure HTML/CSS/JS. The styling is the canonical Design System CSS, used verbatim.
 
 ## Run it
 
-Open `index.html` through any static server (ES modules need `http://`, not `file://`):
+Open through any static server (ES modules need `http://`, not `file://`):
 
 ```bash
 # pick one
@@ -16,9 +17,10 @@ python -m http.server 8080
 npx serve .
 ```
 
-Then visit **http://localhost:8080**.
+Then visit **http://localhost:8080** (explainer) and **http://localhost:8080/app/** (prototype).
 
 Live build: deployed to **GitHub Pages** on every push to `main` (see `.github/workflows/deploy.yml`).
+Explainer: `https://sebzmunoz.github.io/hecho-trading-app/` · Prototype: `…/app/`
 
 ## The control panel (side console)
 
@@ -54,7 +56,10 @@ The console collapses (device chrome button, top-left) so you can also view the 
 ## Project structure
 
 ```
-index.html              device frame, role-aware header + tab bar, console, overlay roots
+index.html              explainer / marketing site (front door)
+site.js                 explainer content (features, roles, comparison chart, brands) + reveal
+styles/marketing.css    explainer layout (built on Design System tokens)
+app/index.html          prototype shell — device frame, role-aware header + tab bar, console
 styles/system.css       Design System v3.0 — canonical CSS (verbatim)
 styles/app.css          prototype chrome only (frame, console, transitions, masks)
 src/
