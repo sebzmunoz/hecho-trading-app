@@ -18,7 +18,7 @@ export const orders = {
       <div class="row-between"><span class="muted">Outstanding</span>${C.maskField(`<b>${C.money(D.account.outstanding)}</b>`, 'credit')}</div>
       <div class="row-between"><span class="muted">Headroom</span>${C.maskField(`<b>${C.money(D.account.creditLimit - D.account.outstanding)}</b>`, 'credit')}</div>
       <div class="row-between"><span class="muted">Oldest due</span><span>INV-4602 · past due 8 days</span></div>
-      <button class="btn sm full" data-go="S304?order=4602">Pay oldest</button></div>`;
+      <button class="btn full" data-go="S304?order=4602">Pay oldest</button></div>`;
     const segs = [['all', 'All'], ['open', 'Open'], ['fulfillment', 'Fulfillment'], ['shipped', 'Shipped'], ['delivered', 'Delivered'], ['settled', 'Settled']];
     const body = `
       ${wallet}

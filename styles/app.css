@@ -15,14 +15,15 @@ body.proto {
     var(--canvas);
   overflow: hidden;
 }
+/* NOTE: never transition grid-template-columns here — Chromium wedges the
+   interpolation mid-flight (track sticks at 372px) and the stuck animation
+   also blocks compositor idle. The collapse is instant and robust. */
 .app-shell {
   display: grid;
   grid-template-columns: 372px 1fr;
   height: 100vh;
   width: 100%;
-  transition: grid-template-columns var(--d-base) var(--e-out-expo);
 }
-@media (prefers-reduced-motion: reduce) { .app-shell { transition: none; } }
 .app-shell.console-collapsed { grid-template-columns: 0 1fr; }
 
 .stage {
@@ -322,6 +323,14 @@ body.proto {
 .segmented.on-camera button { color: var(--on-viewfinder); }
 .segmented.on-camera button[aria-selected="true"] { background: var(--cream-bright); color: var(--warm-900); box-shadow: none; }
 
+/* Guard: a .switch placed inside a .list-row must never inherit the
+   row-thumbnail gradient/size (`.list-row .thumb` collision). */
+.list-row .switch .thumb, .switch .thumb {
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--surface); background-image: none;
+  display: block; place-items: unset; color: inherit;
+}
+
 /* Sheet close button (was rendering as an empty modal box) */
 .sheet-x { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: var(--fg-soft); background: var(--surface-dim); border: 0; cursor: pointer; flex: 0 0 auto; }
 .sheet-x:hover { color: var(--fg); }
@@ -376,7 +385,11 @@ body.proto {
 .splash-bar { width: 132px; height: 4px; border-radius: var(--r-pill); background: var(--surface-dim); overflow: hidden; }
 .splash-bar i { display: block; height: 100%; width: 40%; border-radius: var(--r-pill); background: var(--accent); animation: splash-slide 1.2s var(--e-in-out) infinite; }
 @keyframes splash-slide { 0% { transform: translateX(-120%); } 100% { transform: translateX(330%); } }
-.proto-spinner { width: 44px; height: 44px; border-radius: 50%; border: 3px solid var(--surface-dim); border-top-color: var(--accent); margin: 0 auto; animation: spin var(--d-spin) var(--e-linear) infinite; }
+.proto-spinner { width: 44px; height: 44px; border-radius: 50%; border: 3px solid var(--surface-dim); border-top-color: var(--accent); margin: 0 auto; animation: spin-rotate var(--d-spin) var(--e-linear) infinite; }
+/* The system `spin` keyframes bake in translate(-50%,-50%) for the absolutely-
+   positioned button spinner; inline spinners need rotation only or they drift. */
+@keyframes spin-rotate { to { transform: rotate(360deg); } }
+.sync-tag .spin-dot { animation-name: spin-rotate; }
 @media (prefers-reduced-motion: reduce) { .splash-bar i { animation: none; width: 100%; } .proto-spinner { animation: none; } }
 
 /* Welcome carousel */

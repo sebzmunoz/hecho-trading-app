@@ -339,15 +339,22 @@ function trapFocus(container, onEsc) {
 }
 
 function enableSwipeDown(sheetEl, close) {
-  const grab = sheetEl.querySelector('.grab');
-  if (!grab) return;
-  grab.style.touchAction = 'none';
+  // Draggable from the grab handle AND the title row, like a native sheet.
+  const handles = [sheetEl.querySelector('.grab'), sheetEl.querySelector('.row-between')].filter(Boolean);
+  if (!handles.length) return;
   let startY = null;
-  grab.addEventListener('pointerdown', (e) => { startY = e.clientY; try { grab.setPointerCapture(e.pointerId); } catch {} sheetEl.style.transition = 'none'; });
-  grab.addEventListener('pointermove', (e) => { if (startY == null) return; const dy = Math.max(0, e.clientY - startY); sheetEl.style.transform = `translateY(${dy}px)`; });
+  const move = (e) => { if (startY == null) return; const dy = Math.max(0, e.clientY - startY); sheetEl.style.transform = `translateY(${dy}px)`; };
   const end = (e) => { if (startY == null) return; const dy = Math.max(0, e.clientY - startY); sheetEl.style.transition = ''; if (dy > 90) close(); else sheetEl.style.transform = ''; startY = null; };
-  grab.addEventListener('pointerup', end);
-  grab.addEventListener('pointercancel', end);
+  handles.forEach((h) => {
+    h.style.touchAction = 'none';
+    h.addEventListener('pointerdown', (e) => {
+      if (e.target.closest('.sheet-x,button:not(.grab),input,select,textarea')) return; // don't hijack controls
+      startY = e.clientY; try { h.setPointerCapture(e.pointerId); } catch {} sheetEl.style.transition = 'none';
+    });
+    h.addEventListener('pointermove', move);
+    h.addEventListener('pointerup', end);
+    h.addEventListener('pointercancel', end);
+  });
 }
 
 function mountOverlay(_shellClass, innerHTML, { onMount, dismissible = true } = {}) {
@@ -366,10 +373,13 @@ function mountOverlay(_shellClass, innerHTML, { onMount, dismissible = true } = 
   };
   // explicit close buttons
   wrap.querySelectorAll('[data-dismiss]').forEach((b) => b.addEventListener('click', close));
-  if (dismissible && shell) {
-    // tap on the backdrop (the shell area outside the panel) closes
-    shell.addEventListener('click', (e) => { if (e.target === shell) close(); });
-    if (shell.classList.contains('sheet-shell') && panel) enableSwipeDown(panel, close);
+  if (dismissible) {
+    // tap on the backdrop closes — both the scrim layer and the shell area outside the panel
+    wrap.querySelector('.scrim')?.addEventListener('click', close);
+    if (shell) {
+      shell.addEventListener('click', (e) => { if (e.target === shell) close(); });
+      if (shell.classList.contains('sheet-shell') && panel) enableSwipeDown(panel, close);
+    }
   }
   wrap._untrap = trapFocus(wrap, () => { if (dismissible) close(); });
   overlayStack.push(close);
