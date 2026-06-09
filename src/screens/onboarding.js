@@ -106,7 +106,7 @@ export const onboarding = {
   S510() {
     return base('', { noTabbar: true, hideHeader: true, body: `
       <div style="height:100%;display:flex;flex-direction:column;justify-content:flex-end">
-        <div class="thumb-illo" style="flex:1;border-radius:0">${C.vignette()}</div>
+        <div class="thumb-illo" style="flex:1;border-radius:0;align-items:stretch;padding:0">${C.sceneArt(D.styleGuides[0], { scale: 1.05 })}</div>
         <div class="sheet" style="border-radius:var(--r-4) var(--r-4) 0 0;position:static;box-shadow:none"><span class="grab"></span>
           <h4>You're all set</h4><p class="muted">Want to see live stock across the 9 brands you manage?</p>
           <button class="btn full" data-go="S708">See live stock</button>

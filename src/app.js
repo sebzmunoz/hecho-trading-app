@@ -70,6 +70,7 @@ function renderRoute(route, { direction } = {}) {
 
   // wiring
   C.wirePrivacy(screenBody);
+  C.wireScene(screenBody);
   C.wireSteppers(screenBody, () => C.recomputeTotals(screenBody));
   if (spec.onMount) try { spec.onMount(screenBody); } catch (e) { console.error(e); }
 

@@ -6,41 +6,87 @@ import { icon } from '../icons.js';
 const visibleBrands = () => D.brands.filter((b) => D.canSee(b, state.get('tier')));
 
 export const shop = {
-  // S001 Shop home
+  // S001 Shop home — ordered by buyer decision priority: reorder what's
+  // running out → clear what's waiting on you → discover what's new.
   S001() {
     if (state.get('_state') === 'empty') {
       return base('Shop', { tab: 'shop', headerRight: C.tabHeaderActions(), body:
         C.emptyState({ ic: 'home', title: 'Nothing curated yet', body: "I'll show Hecho-picked guides here until I learn your shop.", primary: { label: 'Browse brands', go: 'S706' } }) });
     }
+    const posOn = state.get('pos') === 'connected';
+    const role = state.get('role');
     const hero = D.styleGuides[0];
-    const recs = D.products.slice(0, 6);
     const drops = visibleBrands().filter((b) => b.launching || b.tier !== 'standard').slice(0, 4);
+    const openDrafts = D.carts.filter((c) => c.section === 'mine').slice(0, 2);
+    const pendingApprovals = D.carts.filter((c) => c.awaiting);
+
+    // 1 · Running low at your store (the reorder motion, POS-driven H1 math)
+    let lowRail = '';
+    if (posOn) {
+      const low = D.lowStockLines(4);
+      if (low.length) lowRail = `
+        <div class="stack tight">
+          <div class="row-between">${C.sectionLabel('Running low at your store')}<button class="chip" data-go="S708" style="min-height:28px;padding:2px 10px;font-size:var(--fs-nano)">Live stock</button></div>
+          <div class="rail">${low.map(({ p, daysLeft }) => {
+            const rec = D.recommendedQty(p, true);
+            const st = D.stockState(p, 'connected');
+            return `<div class="low-card">
+              <span class="thumb-illo" style="width:44px;height:44px;border-radius:var(--r-2);flex:0 0 auto">${C.illo(p.illo, 26)}</span>
+              <span class="lc-body">
+                <b>${C.esc(p.name)}</b>
+                <span class="stock ${st.kind}" style="font-size:var(--fs-nano)"><span class="dot"></span>${C.maskField(`${st.value} left · ~${daysLeft}d`, 'stock')}</span>
+              </span>
+              <button class="btn sm" data-action="add-to-cart" data-p="${p.id}">Add${rec ? ' ×' + rec : ''}</button>
+            </div>`;
+          }).join('')}</div>
+        </div>`;
+    } else {
+      lowRail = C.softPitch();
+    }
+
+    // 2 · Waiting on you (role-aware)
+    const waiting = [];
+    if (role === 'owner' && pendingApprovals.length) {
+      waiting.push(C.listRow({ thumbIcon: 'check', pri: `${pendingApprovals.length} draft${pendingApprovals.length > 1 ? 's' : ''} awaiting your approval`, sec: pendingApprovals.map((c) => c.name).join(' · '), trail: `<span class="badge">${pendingApprovals.length}</span>`, go: 'S208' }));
+    }
+    const pastDue = D.orders.find((o) => o.pastDue);
+    if (role === 'owner' && pastDue) {
+      waiting.push(C.listRow({ thumbIcon: 'card', pri: 'An invoice is past due', sec: `#${pastDue.id} · ${pastDue.due}`, trail: C.statusPill('pastdue'), go: `S304?order=${pastDue.id}` }));
+    }
+    const waitingBlock = waiting.length ? `<div class="stack tight">${C.sectionLabel('Waiting on you')}${waiting.join('')}</div>` : '';
+
     const body = `
       <div class="search" data-go="S005"><span>${icon('search', 20)}</span><span class="muted" style="flex:1">Search name, SKU, or barcode</span></div>
-      <div class="chip-row">${visibleBrands().slice(0, 6).map((b) => C.brandChip(b.id)).join('')}</div>
-      ${C.sectionLabel('Featured guide')}
-      ${C.styleTile(hero, { wide: true })}
-      ${rail('For your shop', recs.map((p) => C.productCard(p)).join(''))}
+      ${lowRail}
+      ${waitingBlock}
+      <div class="stack tight">
+        <div class="row-between">${C.sectionLabel('Featured guide')}<span class="scene-hint"><i></i> Shoppable</span></div>
+        ${C.styleTile(hero, { wide: true })}
+      </div>
+      ${openDrafts.length ? rail('Pick up where you left off', openDrafts.map((c) => `<div style="width:240px">${C.draftCard(c)}</div>`).join('')) : ''}
       ${rail('New on the floor', drops.map((b) => `<div style="width:200px">${C.brandCard(b, { locked: !D.canSee(b, state.get('tier')) })}</div>`).join(''))}
-      ${rail('Continue shopping', D.carts.slice(0, 2).map((c) => `<div style="width:240px">${C.draftCard(c)}</div>`).join(''))}
-      ${C.softPitch()}
-      <button class="btn ghost full" data-go="S705">See all style guides</button>`;
+      ${rail('For your shop', D.products.slice(0, 6).map((p) => C.productCard(p)).join(''))}
+      ${C.sectionLabel('Brands')}
+      <div class="chip-row">${visibleBrands().map((b) => C.brandChip(b.id)).join('')}</div>
+      <div class="grid-2"><button class="btn ghost sm" data-go="S705">All style guides</button><button class="btn ghost sm" data-go="S007">Browse categories</button></div>`;
     return base('Shop', { tab: 'shop', headerRight: C.tabHeaderActions({ search: false }), body });
   },
 
-  // S002 Style guide detail
+  // S002 Style guide detail — the illustration IS the shop surface: every
+  // piece in the scene carries a tappable marker (no product list below).
   S002(params) {
     const g = D.styleGuideById[params.guide] || D.styleGuides[0];
     const lines = g.lines.map((id) => D.productById[id]).filter(Boolean);
+    const setTotal = lines.reduce((s, p) => s + p.wholesale, 0);
     const body = `
-      <div class="card" style="padding:0;overflow:hidden;max-width:none">
-        <div class="thumb-illo" style="padding:var(--s-5)">${C.vignette()}</div>
+      <div class="card" style="padding:0;overflow:visible;max-width:none;border-radius:var(--r-4)">
+        ${C.sceneArt(g, { interactive: true, scale: 1.05 })}
       </div>
+      <div class="row-between"><span class="scene-hint"><i></i> Tap a marker to shop the piece</span>
+        <span class="muted" style="font-size:var(--fs-nano)">${lines.length} pieces · ${C.maskField('$' + setTotal + ' the set', 'wholesale')}</span></div>
       <div><small class="section-label">${g.season} · ${g.theme}</small><h3 style="margin-top:var(--s-1)">${g.title}</h3></div>
       <p class="muted">${g.blurb}</p>
       <div class="chip-row">${g.brands.map((b) => C.brandChip(b)).join('')}</div>
-      ${C.sectionLabel('The look')}
-      <div class="stack tight">${lines.map((p) => C.listRow({ thumb: `<span class="thumb-illo" style="width:44px;height:44px;border-radius:var(--r-2)">${C.illo(p.illo, 26)}</span>`, pri: p.name, sec: `${D.brandById[p.brand].name} · ${p.variant}`, trail: C.pricePair(p, { compact: true }), go: `S004?p=${p.id}` })).join('')}</div>
       <div class="sticky-actions"><button class="btn ghost" data-action="save-template">Save look</button><button class="btn" data-action="shop-the-look" data-guide="${g.id}">Shop the look</button></div>`;
     return base(g.title, { back: true, headerRight: C.hActions([{ icon: 'share', action: 'share', label: 'Share' }]), body });
   },

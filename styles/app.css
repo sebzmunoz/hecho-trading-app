@@ -289,6 +289,34 @@ body.proto {
 .app-shell.console-open ~ .console-scrim { opacity: 1; pointer-events: auto; }
 @media (min-width: 1041px) { .console-scrim { display: none; } }
 
+/* ---- Style-guide scene (the shoppable vignette) ---- */
+.scene { position: relative; width: 100%; aspect-ratio: 16/10; background: linear-gradient(160deg, var(--surface-2), var(--surface-dim)); border-radius: inherit; overflow: hidden; color: var(--accent); }
+.scene-ground { position: absolute; left: 7%; right: 7%; top: 78%; height: 1.5px; background: currentColor; opacity: .75; border-radius: 1px; }
+.scene-item { position: absolute; transform: translate(-50%, -100%); pointer-events: none; }
+.scene-item svg { width: 100%; height: 100%; }
+/* shoppable marker: 14px pip inside a 44px target, lifted to the item's middle */
+.scene-dot { position: absolute; width: var(--hit-min); height: var(--hit-min); transform: translate(-50%, -50%) translateY(calc(-1 * var(--lift, 24px))); display: grid; place-items: center; background: none; border: 0; cursor: pointer; padding: 0; }
+.scene-dot i { width: 14px; height: 14px; border-radius: 50%; background: var(--surface); border: var(--bw-2) solid var(--accent); box-shadow: 0 0 0 0 var(--a-coral-25); transition: transform var(--d-fast) var(--e-out-back); animation: dot-pulse 2.4s var(--e-in-out) infinite; }
+.scene-dot:hover i, .scene-dot[aria-expanded="true"] i { background: var(--accent); transform: scale(1.15); animation: none; }
+.scene-dot:focus-visible { outline: var(--focus-w) solid var(--focus); outline-offset: -8px; border-radius: 50%; }
+@keyframes dot-pulse { 0%,100% { box-shadow: 0 0 0 0 var(--a-coral-25); } 50% { box-shadow: 0 0 0 8px transparent; } }
+@media (prefers-reduced-motion: reduce) { .scene-dot i { animation: none; } }
+.scene-pop { position: absolute; transform: translateX(-50%); z-index: 5; display: flex; align-items: center; gap: var(--s-2); background: var(--surface); border: var(--bw-1) solid var(--line); border-radius: var(--r-3); box-shadow: var(--shadow-md); padding: var(--s-2) var(--s-3); width: max-content; max-width: 86%; animation: scene-pop-in var(--d-fast) var(--e-out-back); }
+/* keyframes must carry the translateX or the animation overrides it mid-flight */
+@keyframes scene-pop-in { from { transform: translateX(-50%) scale(.92); opacity: 0; } to { transform: translateX(-50%) scale(1); opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .scene-pop { animation: none; } }
+.scene-pop .sp-body { display: flex; flex-direction: column; min-width: 0; color: var(--fg); }
+.scene-pop .sp-body b { font-size: var(--fs-caption); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.scene-pop .sp-acts { display: flex; gap: var(--s-1); flex: 0 0 auto; }
+.scene-hint { display: inline-flex; align-items: center; gap: var(--s-1); font-size: var(--fs-nano); letter-spacing: .08em; text-transform: uppercase; font-weight: 700; color: var(--accent-text); }
+.scene-hint i { width: 8px; height: 8px; border-radius: 50%; border: var(--bw-2) solid var(--accent); }
+
+/* "Running low" card (Shop home reorder rail) */
+.low-card { display: flex; align-items: center; gap: var(--s-2); background: var(--surface); border: var(--bw-1) solid var(--line); border-radius: var(--r-3); padding: var(--s-2) var(--s-3); width: 252px; }
+.low-card .lc-body { display: flex; flex-direction: column; gap: 2px; flex: 1; min-width: 0; }
+.low-card .lc-body b { font-size: var(--fs-caption); line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.low-card .btn { flex: 0 0 auto; }
+
 /* floor map (S708) */
 .floorplan { position: relative; background: var(--surface); border: var(--bw-1) solid var(--line); border-radius: var(--r-3); padding: var(--s-5); color: var(--accent); min-height: 240px; }
 .floorplan .pins { position: absolute; inset: 0; }

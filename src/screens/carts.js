@@ -210,7 +210,7 @@ export function privacyBody() {
   return `
     ${C.switchRow('Privacy on the floor', s.privacyOn, { sub: 'Mask price, stock, spend, credit', action: 'toggle-privacy' })}
     ${C.sectionLabel('Reveal gesture')}
-    <div class="chip-row">${opt('hold', 'Hold')}${opt('tap', 'Tap-to-toggle')}${opt('off', 'Off')}</div>
+    <div class="chip-row" data-chipgroup>${opt('hold', 'Hold')}${opt('tap', 'Tap-to-toggle')}${opt('off', 'Off')}</div>
     <p class="muted">Under VoiceOver, TalkBack, or Switch Control I switch to Tap-to-toggle automatically.</p>
     <button class="btn ghost full" data-go="S412">More privacy settings</button>`;
 }

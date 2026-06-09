@@ -36,6 +36,8 @@ const CAPS = {
 function load() {
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
+    // migration: the double-tap reveal mode was removed from settings
+    if (saved.gesture === 'double') saved.gesture = 'hold';
     return { ...DEFAULTS, ...saved, stateOverride: null };
   } catch { return { ...DEFAULTS }; }
 }
