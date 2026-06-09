@@ -30,6 +30,8 @@ const ILLO = {
   coat: '<path d="M28 14l-10 8 6 10 4-3v37h24V29l4 3 6-10-10-8z"/><path d="M40 19v45"/>',
   bottle: '<path d="M34 12h12v10l4 8v40H30V30l4-8z"/><path d="M30 44h20"/>',
   tin: '<rect x="24" y="28" width="32" height="38" rx="4"/><path d="M24 38h32"/>',
+  throw: '<path d="M16 26h48v12H16zM18 38h44v12H18zM20 50h40v12H20z"/><path d="M24 62v8M32 62v8M40 62v8M48 62v8M56 62v8"/>',
+  bag: '<path d="M22 34h36v32a4 4 0 0 1-4 4H26a4 4 0 0 1-4-4z"/><path d="M22 34l18 12 18-12"/><path d="M28 34c0-16 24-16 24 0"/>',
 };
 export function illo(kind, size = 80) {
   const body = ILLO[kind] || ILLO.jar;
@@ -384,8 +386,9 @@ function mountOverlay(_shellClass, innerHTML, { onMount, dismissible = true } = 
   wrap._untrap = trapFocus(wrap, () => { if (dismissible) close(); });
   overlayStack.push(close);
   if (onMount) onMount(wrap, close);
-  const first = wrap.querySelector('button:not([data-dismiss]),input,select,textarea,a[href]');
-  if (first) setTimeout(() => first.focus(), 30);
+  // Focus the dialog itself (screen reader announces its label first; avoids a
+  // clipped focus ring on whatever control happens to come first).
+  if (panel) { panel.setAttribute('tabindex', '-1'); setTimeout(() => panel.focus({ preventScroll: true }), 30); }
   return close;
 }
 

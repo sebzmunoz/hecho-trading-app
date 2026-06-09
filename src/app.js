@@ -101,7 +101,7 @@ screenFrame.addEventListener('click', (e) => {
   if (segEl && segEl.closest('[data-seg]')) { const seg = segEl.closest('[data-seg]'); seg.querySelectorAll('[role=tab]').forEach((b) => b.setAttribute('aria-selected', String(b === segEl))); }
   // chip-group single-select (destination chips, snooze, generic)
   const groupChip = e.target.closest('[data-chipgroup] .chip, .chip[data-snooze]');
-  if (groupChip) {
+  if (groupChip && groupChip.getAttribute('aria-disabled') !== 'true') {
     const group = groupChip.closest('[data-chipgroup]') || groupChip.parentElement;
     group.querySelectorAll('.chip').forEach((c) => c.classList.toggle('is-selected', c === groupChip));
     if (groupChip.dataset.snooze) C.toast(groupChip.dataset.snooze === 'off' ? 'Snooze off' : 'Snoozed');

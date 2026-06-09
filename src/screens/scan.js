@@ -38,7 +38,7 @@ export const scan = {
     const rec = D.recommendedQty(p, state.get('pos') === 'connected');
     const st = D.stockState(p, state.get('pos'));
     const stockVal = st.kind === 'out' ? 'Out' : (st.kind === 'unknown' ? String(st.value) : String(st.value));
-    const card = `<div class="scan-result" style="position:absolute;left:var(--s-3);right:var(--s-3);bottom:var(--s-3);z-index:6">
+    const card = `<div class="scan-result" style="position:absolute;left:var(--s-3);right:var(--s-3);bottom:var(--s-3);z-index:6;width:auto;max-width:none">
       <div class="top"><div class="info"><span class="brand">${b.name}</span><span class="nm">${p.name}</span><span class="muted" style="font-size:var(--fs-nano)">${p.variant}</span></div>${p.map ? `<span class="pill">${icon('info', 12)} MAP</span>` : ''}</div>
       <div class="grid-info">
         <div class="col"><span class="l">Your price</span><span class="v">${C.pricePair(p, { compact: true })}</span></div>
@@ -57,9 +57,9 @@ export const scan = {
       <div style="position:absolute;bottom:var(--s-5);left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:var(--s-3);z-index:5">
         <div class="segmented on-camera" data-seg="mode"><button role="tab" aria-selected="false" data-val="barcode" data-go="S101">Barcode</button><button role="tab" aria-selected="true" data-val="photo">Photo</button></div>
         <div class="row" style="display:flex;gap:var(--s-4);align-items:center">
-          <button class="hicon" data-action="library" aria-label="Pick from library" style="color:var(--on-viewfinder)">${icon('image', 22)}</button>
+          <button class="cam-btn" data-action="library" aria-label="Pick from library">${icon('image', 22)}</button>
           <button data-action="capture-photo" aria-label="Capture" style="width:68px;height:68px;border-radius:50%;border:4px solid var(--on-viewfinder);background:var(--on-viewfinder)"></button>
-          <button class="hicon" aria-label="Flash" style="color:var(--on-viewfinder)">${icon('flash', 22)}</button>
+          <button class="cam-btn" aria-label="Flash">${icon('flash', 22)}</button>
         </div>
         <span class="hint" style="position:static">Photograph a product on any shelf or page</span></div>`;
     return base('Photo identify', { tab: 'scan', camera: true, flush: true, body: `<div style="position:relative;display:flex;flex-direction:column;height:100%"><div class="viewfinder" style="flex:1;border-radius:0"><div class="corners"><i class="tr"></i><i class="bl"></i></div></div>${controls}</div>` });

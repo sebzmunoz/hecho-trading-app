@@ -70,12 +70,22 @@ export const shop = {
     if (!D.canSee(b, state.get('tier'))) return shop.S804({ brand: b.id });
     const variantOut = state.get('_state') === 'oos';
     const rec = D.recommendedQty(p, state.get('pos') === 'connected');
+    // Variant alternates coherent with the product's category — never apparel
+    // sizes on a candle. Last alternate renders OOS in the 'oos' state.
+    const ALTS = { Textiles: ['Clay', 'Dune'], Body: ['4 oz', '8 oz'], Stationery: ['Assorted 20'], Gifts: ['Box of 40'], Home: ['Terracotta', 'Sage'], Jewelry: ['Silver', 'Rose gold'], Bags: ['Olive', 'Black'], Novelty: ['Blue', 'Mint'], Candles: ['14 oz'] };
+    const alts = (ALTS[p.cat] || []).filter((a) => a !== p.variant);
+    const variantChips = [
+      `<button class="chip is-selected">${p.variant}</button>`,
+      ...alts.map((a, i) => (variantOut && i === alts.length - 1)
+        ? `<button class="chip" aria-disabled="true" style="opacity:.5">${a} · OOS</button>`
+        : `<button class="chip">${a}</button>`),
+    ].join('');
     const body = `
       <div class="photo-frame r-1-1"><div class="ph">${C.illo(p.illo, 120)}</div></div>
       <div><button class="chip" data-go="S003?brand=${p.brand}">${b.name}</button></div>
       <h3>${p.name}</h3>
       ${C.sectionLabel('Variant')}
-      <div class="chip-row"><button class="chip is-selected">${p.variant}</button><button class="chip ${variantOut ? '' : ''}">Clay · M</button><button class="chip" aria-disabled="true" style="opacity:.5">Ash · L · OOS</button></div>
+      <div class="chip-row" data-chipgroup>${variantChips}</div>
       <div class="card" style="max-width:none">
         <div class="row-between"><span class="muted">Your price</span>${p.map ? `<span class="pill">${icon('info', 12)} MAP $${p.msrp}</span>` : ''}</div>
         <div class="row-between"><span></span>${C.pricePair(p)}</div>

@@ -158,6 +158,7 @@ body.proto {
 .overlay-host { position: absolute; inset: 0; }
 .overlay-host .sheet-shell, .overlay-host .modal-shell, .overlay-host .drawer-shell { position: absolute; inset: 0; }
 .overlay-host .sheet { max-height: 86%; overflow-y: auto; }
+.sheet:focus, .modal:focus, .drawer:focus { outline: none; } /* programmatic dialog focus; keyboard still gets :focus-visible */
 .overlay-host .drawer { width: min(280px, 80%); }
 
 /* inline masked value (Privacy on the floor) — coral underline, dots overlay */
@@ -323,6 +324,10 @@ body.proto {
 .segmented.on-camera button { color: var(--on-viewfinder); }
 .segmented.on-camera button[aria-selected="true"] { background: var(--cream-bright); color: var(--warm-900); box-shadow: none; }
 
+/* Switch: keep the 44×26 visual but extend the invisible input hit area
+   to the 44px floor (brief §07-E: transparent padding on small controls). */
+.switch input { inset: -9px -6px; width: auto; height: auto; }
+
 /* Guard: a .switch placed inside a .list-row must never inherit the
    row-thumbnail gradient/size (`.list-row .thumb` collision). */
 .list-row .switch .thumb, .switch .thumb {
@@ -362,6 +367,7 @@ body.proto {
 
 /* Cart line rows with live totals */
 .line-row { display: flex; align-items: center; gap: var(--s-3); padding: var(--s-2) 0; }
+.line-row .body { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .line-row .pri { font-size: var(--fs-body); font-weight: 600; line-height: 1.25; }
 .line-row .sec { font-size: var(--fs-caption); color: var(--fg-soft); }
 .line-trail { display: flex; flex-direction: column; align-items: flex-end; gap: var(--s-1); flex: 0 0 auto; }
@@ -399,7 +405,10 @@ body.proto {
 .carousel .slide { flex: 0 0 100%; display: flex; flex-direction: column; align-items: center; gap: var(--s-4); padding: 0 var(--s-5); text-align: center; }
 .carousel .slide-ic { color: var(--accent); }
 .carousel .slide p { max-width: 30ch; }
-.dots { display: flex; gap: 8px; }
-.dots .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--surface-dim); border: 0; cursor: pointer; padding: 0; transition: background var(--d-fast), width var(--d-fast); }
-.dots .dot.is-on { background: var(--accent); width: 22px; border-radius: var(--r-pill); }
+/* Pager dots: 8px pip visual, 44px tappable button (brief §07-E hit-target floor) */
+.dots { display: flex; gap: 0; }
+.dots .dot { width: var(--hit-min); height: var(--hit-min); border: 0; background: none; cursor: pointer; padding: 0; display: grid; place-items: center; }
+.dots .dot::before { content: ""; width: 8px; height: 8px; border-radius: var(--r-pill); background: var(--surface-dim); transition: background var(--d-fast), width var(--d-fast); }
+.dots .dot.is-on::before { background: var(--accent); width: 22px; }
+.dots .dot:focus-visible { outline: var(--focus-w) solid var(--focus); outline-offset: -8px; border-radius: 50%; }
 @media (prefers-reduced-motion: reduce) { .carousel-track { transition: none; } }
