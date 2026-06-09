@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#FFB4AB" />
+<title>Hecho · Mobile App · Functional Prototype</title>
+<meta name="description" content="Functional prototype of the Hecho Trading Co. wholesale showroom mobile app. 91 screens, 14 flows, every state — built from the Design System v3.0, with a live control panel." />
+<link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles/system.css" />
+<link rel="stylesheet" href="../styles/app.css" />
+</head>
+<body class="proto">
+<a class="skip-link" href="#screen-scroll">Skip to screen</a>
+
+<!-- HECHO mark symbol (reusable via <use>), copied from the design system -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="hecho-mark" viewBox="0 0 463 168">
+      <path fill="currentColor" d="M385.834 52.9383C385.947 52.932 386.06 52.9263 386.176 52.9218C406.216 52.122 421.205 63.1391 421.173 84.0336C421.162 91.0115 421.451 98.1953 421.254 105.173C421.024 113.322 422.036 122.847 419.994 130.737C418.76 135.613 416.307 140.096 412.864 143.765C407.264 149.785 396.99 152.387 388.977 152.674C367.209 152.957 352.834 142.428 353.18 119.331C353.372 106.435 352.721 92.9446 353.525 80.0455C354.144 74.1472 356.342 67.1174 360.499 62.8304C367.654 55.4524 376.069 53.431 385.834 52.9383Z"/>
+      <path fill="var(--logo-cutout)" d="M386.323 76.1866C393.389 75.4063 397.29 79.7133 397.649 86.4498C397.945 92.0021 397.966 97.4876 397.918 103.052C397.869 108.811 398.11 114.682 397.482 120.412C396.823 126.204 394.308 128.674 388.579 129.192C381.506 129.241 377.167 127.531 376.832 119.626C376.358 108.46 376.236 96.4955 376.925 85.3465C377.293 79.3811 380.634 76.76 386.323 76.1866Z"/>
+      <path fill="currentColor" d="M44.5316 55.4346C49.4981 55.2334 54.6648 55.4077 59.6325 55.4495C65.2707 55.4969 63.9518 63.611 63.9385 67.641L63.8755 84.5731C63.8669 87.5007 63.7639 90.5032 63.9737 93.408C64.2798 96.4214 65.7241 97.1207 68.5391 97.2067C70.9997 97.5028 74.0505 97.0092 76.451 97.216C86.8343 98.1109 85.0757 94.0177 85.0549 85.2022L84.9948 68.8448C84.9844 66.0576 84.8272 63.1732 85.0115 60.3949C85.1028 59.0172 85.4037 57.2144 86.5224 56.2875C88.5117 54.6391 102.665 55.3063 105.847 55.5865C107.576 56.7452 108.337 57.2474 108.411 59.4858C108.512 62.5662 108.444 65.6469 108.435 68.7294L108.414 86.1666L108.427 142.371C108.494 145.611 109.138 147.739 106.236 149.825C105.491 149.945 104.728 150.003 103.975 150.042C100.802 150.207 88.0097 150.753 86.1853 149.016C85.5123 148.376 85.2636 147.387 85.1267 146.498C84.8102 144.445 84.9973 142.169 85.0049 140.091C85.023 135.335 85.1744 130.544 85.0363 125.791C84.9939 124.324 84.8371 122.455 83.6836 121.399C81.9478 119.81 71.8409 120.434 69.2276 120.521C67.7805 120.568 66.2324 120.462 65.1421 121.588C61.6485 125.196 66.1488 145.553 62.7168 149.054C62.1263 149.656 61.2798 149.876 60.4695 149.996C57.9061 150.373 55.1053 150.07 52.5108 150.035C50.3995 150.007 48.2924 150.12 46.182 150.143C43.878 150.167 42.35 149.703 40.6887 148.075C40.2278 144.737 40.4713 139.958 40.4702 136.507L40.4637 116.04L40.4603 79.5658C40.461 73.2211 40.4332 66.8389 40.4987 60.4954C40.5084 59.568 40.5061 57.6511 41.0996 57.0376C42.1946 55.9054 43.0629 55.564 44.5316 55.4346Z"/>
+      <path fill="currentColor" d="M278.52 55.4131C282.984 55.295 287.507 55.3982 291.968 55.4274C297.871 55.4657 296.52 62.9634 296.507 67.1591L296.459 84.2981C296.45 87.2168 296.337 90.2664 296.572 93.1705C296.816 96.1786 298.427 97.0184 301.199 97.1905C303.921 97.3594 306.722 97.209 309.456 97.2128C312.422 97.158 317.166 97.9901 317.498 93.8099C317.735 90.7977 317.638 87.7951 317.629 84.7901L317.572 68.7161C317.566 66.3665 317.082 57.5192 318.752 56.5977C322.219 54.6824 334.558 55.2302 338.455 55.5581C339.903 56.5311 340.753 57.0728 340.834 58.9332C340.974 62.0778 340.902 65.2294 340.893 68.3778L340.868 86.0302L340.881 143.444C340.945 146.621 341.401 148.022 338.561 149.898C335.326 150.27 324.076 150.437 321.099 149.840C320.118 149.644 318.72 149.247 318.160 148.366C316.088 145.101 319.276 125.633 316.664 121.901C316.095 121.086 315.345 120.777 314.392 120.612C312.325 120.255 302.421 120.278 300.492 120.574C299.593 120.712 298.754 120.980 298.007 121.517C297.243 122.067 296.904 122.808 296.692 123.707C296.294 125.396 296.452 127.373 296.459 129.107L296.520 140.215C296.534 142.223 296.672 144.597 296.403 146.563C296.145 148.452 295.583 148.863 294.148 149.872C290.556 150.293 286.443 150.027 282.785 150.112C280.156 150.173 275.981 150.346 273.826 148.769C272.732 146.949 273.098 132.580 273.098 129.561L273.100 98.8646L273.119 71.3973C273.121 67.9998 273.152 64.4883 273.055 61.0980C272.922 56.5650 274.155 55.5676 278.520 55.4131Z"/>
+      <path fill="currentColor" d="M126.092 55.4271C136.391 55.0521 148.989 55.4158 159.467 55.4088L174.124 55.3903C177.422 55.386 181.032 55.2817 184.281 55.5974C184.973 56.075 186.458 57.1035 186.579 58.0203C187.247 61.917 186.549 66.5023 186.839 70.3509C187.619 80.7037 183.225 78.8331 174.868 78.7952L156.722 78.7225C154.449 78.7164 151.671 78.4154 149.472 78.9408C148.340 79.2113 147.180 79.7194 146.561 80.7601C145.730 82.1581 145.944 86.9694 146.389 88.5238C146.631 89.3697 147.029 90.0699 147.836 90.4755C151.945 92.5409 169.636 89.5677 173.545 91.7682C174.289 92.1875 174.616 92.7617 174.839 93.5663C175.423 95.6724 175.493 111.058 174.591 112.596C174.130 113.383 173.323 113.915 172.451 114.144C170.734 114.595 168.725 114.405 166.959 114.390C163.176 114.359 151.665 113.801 148.694 114.584C147.832 114.811 147.260 115.171 146.815 115.954C145.604 118.081 145.905 122.626 146.540 124.935C146.884 125.602 147.305 126.242 148.066 126.440C150.532 127.080 154.129 126.892 156.696 126.887L173.708 126.848C176.851 126.841 186.716 125.681 186.750 130.048C186.792 135.367 186.898 140.933 186.797 146.281C186.752 148.704 185.351 149.770 183.075 149.944C180.266 150.191 177.355 150.092 174.502 150.085L158.976 150.052L138.156 150.082C134.431 150.094 130.636 150.170 126.939 150.047C124.746 149.812 122.252 149.611 122.106 146.879C121.894 142.899 121.981 138.970 121.982 135.021L121.989 111.787L121.978 77.2098C121.977 71.7328 121.981 66.2557 121.991 60.7790C121.996 57.7060 122.539 55.7247 126.092 55.4271Z"/>
+      <path fill="currentColor" d="M228.730 52.9374C232.148 52.6946 235.973 53.0681 239.348 53.6347C246.315 54.8044 254.240 59.1441 258.342 64.9474C261.566 69.5095 263.039 74.7352 263.676 80.2094C263.804 81.3267 264.062 82.6919 263.845 83.7898C263.646 84.8061 262.935 85.4542 262.085 85.9826C260.224 87.1407 245.565 90.3133 243.640 89.8409C240.181 88.9919 240.213 82.5058 238.521 79.8700C237.297 77.9662 235.446 76.9099 233.264 76.4423C230.293 75.8053 226.412 75.9617 223.798 77.6725C221.643 79.0828 220.544 81.4676 220.030 83.9149C218.788 89.8308 219.430 96.6212 219.426 102.637C219.423 108.365 219.042 114.368 219.754 120.052C219.996 121.992 220.379 124.048 221.480 125.705C222.669 127.496 224.523 128.490 226.595 128.910C228.312 129.257 230.138 129.326 231.884 129.213C242.135 128.550 237.925 118.815 242.576 115.883C243.046 115.586 243.545 115.427 244.101 115.422C247.320 115.390 254.626 117.435 258.134 118.175C260.294 118.661 263.969 119.201 263.904 122.176C263.807 129.253 261.247 137.942 256.212 143.173C244.386 155.466 218.623 155.725 205.704 145.031C193.310 133.965 196.506 116.903 196.036 102.760C195.159 76.3885 195.646 54.5501 228.730 52.9374Z"/>
+      <path fill="currentColor" d="M430.489 40.7188C431.427 40.8617 432.92 41.5116 433.381 42.287C435.773 46.2969 429.692 52.0599 427.415 54.5381C425.020 57.1433 422.772 59.5154 420.245 61.3760C419.610 60.7713 418.966 59.9753 418.390 59.3022C416.655 57.2787 414.827 55.4949 412.943 53.6195C418.787 49.5455 423.647 41.3996 430.489 40.7188Z"/>
+      <path fill="currentColor" d="M408.511 33.2319C417.443 32.5595 410.815 47.7653 409.891 52.0118C408.601 51.4701 407.115 50.9833 405.784 50.5156C403.679 49.8179 401.765 49.4972 399.581 48.6694C400.525 44.0361 404.061 35.2841 408.511 33.2319Z"/>
+      <path fill="currentColor" d="M433.433 61.9466C437.962 61.3329 439.008 62.4276 441.590 65.7235C438.453 70.5162 434.088 71.7365 428.940 73.3550C427.239 73.9175 426.455 74.2413 424.855 75.0459C424.164 71.0267 423.218 69.0893 421.616 65.3436C424.677 63.3843 429.809 62.4490 433.433 61.9466Z"/>
+      <path fill="currentColor" d="M425.998 78.3973C428.888 78.2650 432.852 78.1530 435.624 78.8645C438.577 79.6232 439.571 80.8873 441.017 83.3576C440.294 84.6955 439.499 85.4404 438.353 86.3913C434.940 88.3725 430.248 88.4159 426.258 88.7871C426.344 86.3055 425.404 79.7605 425.998 78.3973Z"/>
+      <path fill="currentColor" d="M391.098 34.1180C397.640 33.7355 396.134 44.1973 396.696 48.3840L392.149 48.1200C390.174 48.1422 388.198 48.1139 386.223 48.0356C385.941 43.3919 386.514 36.4763 391.098 34.1180Z"/>
+      <path fill="currentColor" d="M374.869 35.2355C380.598 34.3707 381.714 44.1345 382.889 48.1548L378.766 48.6010C377.347 48.9431 374.234 49.8233 373.012 49.7558C371.729 48.9874 371.641 45.8283 371.627 44.4039C371.589 40.8714 371.250 37.0192 374.869 35.2355Z"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="app-shell" id="appShell">
+  <!-- CONTROL PANEL -->
+  <aside class="console" id="console" aria-label="Prototype control panel">
+    <div class="console-head">
+      <div class="brand-row">
+        <svg class="hecho-logo" viewBox="0 0 463 168" aria-hidden="true"><use href="#hecho-mark"/></svg>
+        <span class="ver">Prototype</span>
+      </div>
+      <p class="sub">91 screens · 14 flows · every state. Drive the app live from here.</p>
+    </div>
+    <div class="console-tabs" role="tablist" id="consoleTabs">
+      <button role="tab" data-ctab="flows" aria-selected="true">Flows</button>
+      <button role="tab" data-ctab="screens" aria-selected="false">Screens</button>
+      <button role="tab" data-ctab="vars" aria-selected="false">Variables</button>
+      <button role="tab" data-ctab="tel" aria-selected="false">Telemetry</button>
+    </div>
+    <div class="console-body" id="consoleBody"></div>
+    <div class="console-foot">
+      <span id="footScreen">—</span>
+      <span>Design System v3.0</span>
+    </div>
+  </aside>
+
+  <!-- STAGE + DEVICE -->
+  <div class="stage">
+    <div class="device-wrap">
+      <div class="device-tools" id="deviceTools">
+        <button id="toolConsole" aria-label="Toggle control panel" title="Toggle control panel">
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="6" width="22" height="20" rx="2"/><path d="M13 6v20"/></svg>
+        </button>
+        <button id="toolTheme" aria-label="Toggle dark theme" aria-pressed="false" title="Toggle theme">
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M24 18a9 9 0 0 1-11-11 9 9 0 1 0 11 11z"/></svg>
+        </button>
+        <button id="toolBack" aria-label="Back" title="Back">
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L10 16l10 10"/></svg>
+        </button>
+        <a href="../" aria-label="Overview site" title="Overview">
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 14l12-9 12 9v14a1 1 0 0 1-1 1h-7v-9h-8v9H5a1 1 0 0 1-1-1z"/></svg>
+        </a>
+      </div>
+      <div class="device" id="device">
+        <div class="notch" aria-hidden="true"></div>
+        <div class="screen-frame" id="screenFrame">
+          <div class="statusbar" id="statusbar">
+            <span class="clock">9:41</span>
+            <span class="ind">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><rect x="1" y="14" width="3" height="6" rx="1"/><rect x="6" y="10" width="3" height="10" rx="1"/><rect x="11" y="6" width="3" height="14" rx="1"/><rect x="16" y="2" width="3" height="18" rx="1" opacity=".4"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2 9a14 14 0 0 1 20 0"/><path d="M5 13a9 9 0 0 1 14 0"/><path d="M8.5 16.5a4.5 4.5 0 0 1 7 0"/><circle cx="12" cy="20" r="1" fill="currentColor"/></svg>
+              <span class="batt" aria-label="Battery"></span>
+            </span>
+          </div>
+          <header class="app-header" id="appHeader"></header>
+          <div class="net-slot" id="netSlot"></div>
+          <main class="screen-scroll" id="screen-scroll" tabindex="-1">
+            <div class="screen-body" id="screenBody"></div>
+          </main>
+          <div class="tabbar-wrap" id="tabbarWrap"></div>
+          <div class="home-indicator"><i></i></div>
+          <div class="device-overlay" id="overlayRoot" aria-live="polite"></div>
+          <div class="toast-host" id="toastHost" aria-live="polite"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="console-scrim" id="consoleScrim" aria-hidden="true"></div>
+<button class="proto-fab left" id="fabConsole" hidden>
+  <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8h22M5 16h22M5 24h22"/></svg>
+  Console
+</button>
+
+<script type="module" src="../src/app.js"></script>
+</body>
+</html>
