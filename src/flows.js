@@ -61,7 +61,7 @@ export const flows = [
   { id: 'F15', name: 'Love now, decide later', persona: 'P1·P2', phase: 'P0', steps: [
     { screen: 'S001', text: 'Every product surface carries a heart — one tap, nothing else asked.' },
     { screen: 'S004', text: 'On the floor: scan lands here — love it and keep walking, no quantity needed.' },
-    { screen: 'S010', text: 'The list keeps the context: where you saw it, when, and a note to yourself.', branch: { label: 'Branch · empty list', screen: 'S010?_=empty' } },
+    { screen: 'S010', text: 'Your loves as a visual wall — tap a card to open the product.', branch: { label: 'Branch · empty list', screen: 'S010?_=empty' } },
     { screen: 'S011', text: 'When you\'re ready — and only then — pick lines and start a cart. Quantities and MOQs live there, not before.' },
   ] },
 ];

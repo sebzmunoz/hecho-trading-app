@@ -81,13 +81,9 @@ export const state = {
   toggleLove(pid, src = 'browse') {
     const i = data.loved.findIndex((x) => x.p === pid);
     if (i >= 0) data.loved.splice(i, 1);
-    else data.loved.push({ p: pid, src, when: 'just now', note: '' });
+    else data.loved.push({ p: pid, src });
     persist();
     return i < 0;
-  },
-  setLoveNote(pid, note) {
-    const it = data.loved.find((x) => x.p === pid);
-    if (it) { it.note = note; persist(); }
   },
 
   // ---- saved brands ----

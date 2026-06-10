@@ -175,13 +175,13 @@ export const notifications = [
 
 // ---- Love list seeds ----
 // Pre-loved items so the prototype demos with a lived-in list. src is where
-// the heart was tapped: 'scan' (showroom floor) or 'browse'.
+// the heart was tapped: 'scan' (showroom floor) or 'browse' — telemetry only.
 export const lovedSeeds = [
-  { p: 'p-candle', src: 'scan', when: 'this morning', note: '' },
-  { p: 'p-linen', src: 'browse', when: 'this morning', note: 'For the back wall table' },
-  { p: 'p-necklace', src: 'browse', when: 'yesterday', note: '' },
-  { p: 'p-boba', src: 'scan', when: 'yesterday', note: 'Counter impulse buy?' },
-  { p: 'p-cross', src: 'browse', when: 'two days ago', note: '' },
+  { p: 'p-candle', src: 'scan' },
+  { p: 'p-linen', src: 'browse' },
+  { p: 'p-necklace', src: 'browse' },
+  { p: 'p-boba', src: 'scan' },
+  { p: 'p-cross', src: 'browse' },
 ];
 
 // ---- Search ----

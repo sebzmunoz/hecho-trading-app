@@ -8,7 +8,7 @@ import { initPanel, onRouteChange } from './panel.js';
 import { icon } from './icons.js';
 import * as C from './components.js';
 import { newCartBody } from './screens/carts.js';
-import { loveToCartBody, loveNoteBody, loveMenuBody } from './screens/love.js';
+import { loveToCartBody } from './screens/love.js';
 import { filtersBody } from './screens/shop.js';
 import { paymentBody, addMethodBody, addCardBody } from './screens/orders.js';
 import { registrationBody } from './screens/onboarding.js';
@@ -162,23 +162,6 @@ function handleAction(action, el) {
       } else nav.refresh();
       if (nowLoved) C.toast('On your love list', { positive: true, action: { label: 'Open', fn: () => nav.go('S010') } });
       else C.toast('Removed from your love list', { action: { label: 'Undo', fn: () => { state.toggleLove(pid, src); nav.refresh(); } } });
-      break;
-    }
-    case 'love-menu': C.openSheet({ title: 'Loved item', html: loveMenuBody(el.dataset.p) }); break;
-    case 'love-note': { const p = el.dataset.p; C.closeAllOverlays(); C.openSheet({ title: 'A note to yourself', html: loveNoteBody(p) }); break; }
-    case 'love-note-save': {
-      const ta = (el.closest('.sheet') || screenBody).querySelector('[data-love-note]');
-      state.setLoveNote(el.dataset.p, ta ? ta.value.trim() : '');
-      T('love.note', 'list', el.dataset.p);
-      C.closeAllOverlays(); nav.refresh(); C.toast('Noted', { positive: true });
-      break;
-    }
-    case 'love-remove': {
-      const pid = el.dataset.p;
-      state.toggleLove(pid);
-      T('love.removed', 'list', pid);
-      C.closeAllOverlays(); nav.refresh();
-      C.toast('Removed from your love list', { action: { label: 'Undo', fn: () => { state.toggleLove(pid); nav.refresh(); } } });
       break;
     }
     case 'love-to-cart': C.openSheet({ title: 'Start a cart', html: loveToCartBody() }); break;
