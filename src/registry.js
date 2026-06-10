@@ -49,10 +49,6 @@ const META = {
   S304a: { name: 'ACH onboarding', group: 'Orders', tab: 'orders', states: S('default') },
   S305: { name: 'Payment success', group: 'Orders', tab: 'orders', states: S('default') },
   S306: { name: 'Tracking detail', group: 'Orders', tab: 'orders', states: S('default', 'offline') },
-  S307: { name: 'Damage / RMA start', group: 'Orders', tab: 'orders', states: S('default') },
-  S308: { name: 'RMA submit / review', group: 'Orders', tab: 'orders', states: S('default', 'error') },
-  S309: { name: 'RMA submitted', group: 'Orders', tab: 'orders', states: S('default') },
-  S310: { name: 'RMA history', group: 'Orders', tab: 'orders', states: S('default', 'empty') },
   // ---- Account ----
   S401: { name: 'Account & settings', group: 'Account', tab: 'you', states: S('default', 'offline') },
   S402: { name: 'My details', group: 'Account', tab: 'you', states: S('default') },

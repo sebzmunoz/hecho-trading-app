@@ -150,13 +150,6 @@ export const orderById = Object.fromEntries(orders.map((o) => [o.id, o]));
 export const lifecycleSteps = ['Open', 'In fulfillment', 'Shipped', 'Delivered', 'Settled'];
 export const lifecycleIndex = { open: 0, fulfillment: 1, shipped: 2, delivered: 3, settled: 4 };
 
-// ---- RMA / claims ----
-export const claims = [
-  { id: 'RMA-318', order: '4763', product: 'p-boba', qty: 4, reason: 'Damaged', status: 'In review', brand: 'Popkle', when: 'two days ago' },
-  { id: 'RMA-302', order: '4655', product: 'p-candle', qty: 2, reason: 'Wrong item', status: 'Replaced', brand: 'The New Savant', when: 'three weeks ago' },
-  { id: 'RMA-288', order: '4602', product: 'p-tumbler', qty: 1, reason: 'Damaged', status: 'Refunded', brand: 'Frida Vida', when: 'one month ago' },
-];
-
 // ---- Notification categories (§07-B) + copy deck (§13) ----
 export const pushCategories = [
   { id: 'lifecycle', label: 'Order lifecycle', icon: 'truck', deep: 'S302', title: 'Order shipped', body: 'Your order to {brand} just shipped. Track it.' },
@@ -186,7 +179,7 @@ export const lovedSeeds = [
 
 // ---- Search ----
 export const recentSearches = ['Wool Throw', 'candle', 'Talavera', 'SKU 4821-OAT'];
-export const trendingChips = ['Jewelry', 'Under MOQ', 'New drops', 'In stock', 'Reorder'];
+export const trendingChips = ['Jewelry', 'Under MOQ', 'New drops', 'In stock'];
 
 // ---- Ship-to (shown at review & submit) ----
 export const addresses = [

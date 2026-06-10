@@ -18,14 +18,14 @@ export const carts = {
   S201() {
     if (state.get('_state') === 'empty' || !D.carts.length) {
       return base('Carts', { back: true, headerRight: newCartActions(), body:
-        C.emptyState({ ic: 'draft', title: 'No drafts yet', body: 'Scan a shelf or start one by hand.', primary: { label: 'New cart', action: 'new-cart' }, secondary: { label: 'Smart reorder', action: 'smart-reorder' } }) });
+        C.emptyState({ ic: 'draft', title: 'No drafts yet', body: 'Scan a shelf or start one by hand.', primary: { label: 'New cart', action: 'new-cart' }, secondary: { label: 'Scan the floor', go: 'S101' } }) });
     }
     const lovedN = state.lovedCount();
     const body = `
       ${lovedN ? C.listRow({ thumbIcon: 'heart', pri: 'Your love list', sec: `${lovedN} saved with zero commitment — start a cart when ready`, trail: `<span class="badge">${lovedN}</span>`, go: 'S010' }) : ''}
       ${C.sectionLabel('Drafts')}
       <div class="stack tight">${D.carts.map(C.draftCard).join('')}</div>
-      <div class="grid-2"><button class="btn ghost" data-action="smart-reorder">${icon('reorder', 16)} Smart reorder</button><button class="btn" data-action="new-cart">${icon('plus', 16)} New cart</button></div>`;
+      <button class="btn full" data-action="new-cart">${icon('plus', 16)} New cart</button>`;
     return base('Carts', { back: true, headerRight: newCartActions(), body });
   },
 
@@ -101,7 +101,7 @@ export const carts = {
 
 // ---- shared bodies (used by screens AND by sheets) ----
 export function newCartActions() {
-  return C.hActions([{ icon: 'reorder', action: 'smart-reorder', label: 'Smart reorder' }, { icon: 'plus', action: 'new-cart', label: 'New cart' }]);
+  return C.hActions([{ icon: 'plus', action: 'new-cart', label: 'New cart' }]);
 }
 export function newCartBody() {
   return `
@@ -110,6 +110,5 @@ export function newCartBody() {
     <div class="stack tight">
       <button class="list-row" data-action="create-cart" data-tpl="blank"><span class="thumb">${icon('draft', 22)}</span><span class="body"><span class="pri">Blank</span><span class="sec">An empty draft</span></span><span class="trail">${icon('chevron-right', 16)}</span></button>
       <button class="list-row" data-action="create-cart" data-tpl="repeat"><span class="thumb">${icon('refresh', 22)}</span><span class="body"><span class="pri">Repeat last order</span><span class="sec">Order #4790 lines</span></span><span class="trail">${icon('chevron-right', 16)}</span></button>
-      <button class="list-row" data-action="smart-reorder"><span class="thumb">${icon('sparkle', 22)}</span><span class="body"><span class="pri">Smart reorder</span><span class="sec">Behavior-ranked picks</span></span><span class="trail">${icon('chevron-right', 16)}</span></button>
     </div>`;
 }

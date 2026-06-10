@@ -109,7 +109,6 @@ function handleAction(action, el) {
     // ---- navigation-ish ----
     case 'new-cart': C.openSheet({ title: 'New cart', html: newCartBody() }); break;
     case 'create-cart': C.closeAllOverlays(); T('cart.created', 'manual', 'c-new'); nav.go('S202?cart=c-back'); C.toast('Draft created', { positive: true }); break;
-    case 'smart-reorder': C.closeAllOverlays(); T('cart.smart_reorder.accepted', 'order', 'c-back'); nav.go('S202?cart=c-back'); C.toast('Smart reorder ready — accept lines', { positive: true }); break;
     case 'filters': C.openSheet({ title: 'Filters', html: filtersBody() }); break;
     case 'apply-filters': C.closeAllOverlays(); C.toast('Filters applied'); break;
     case 'reset-filters': C.toast('Filters reset'); break;
@@ -235,7 +234,6 @@ function handleAction(action, el) {
     case 'email-support': C.toast('Opening mail to support…'); break;
     case 'mark-read': C.toast('All marked read'); break;
     case 'sign-out': nav.go('S417'); break;
-    case 'capture-rma': nav.go('S308'); break;
     case 'cart-menu': case 'order-menu': C.openSheet({ title: 'Options', html: `<div class="opts"><button class="opt">${icon('copy', 20)} Duplicate</button><button class="opt">${icon('trash', 20)} Archive</button></div>` }); break;
 
     default: C.toast('Done'); break;

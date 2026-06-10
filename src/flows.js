@@ -1,5 +1,5 @@
 // ============================================================
-// The 9 user flows (§05) as step sequences for the Flow Player.
+// The 7 user flows (§05) as step sequences for the Flow Player.
 // Each step: { screen, text, branch? } — branch jumps to an edge.
 // ============================================================
 
@@ -27,12 +27,6 @@ export const flows = [
     { screen: 'S004', text: 'Every add happens on the product page, quantity inline.' },
     { screen: 'S202', text: 'Edit lines, change quantity, save.', branch: { label: 'Branch · MOQ not met', screen: 'S207' } },
   ] },
-  { id: 'F6', name: 'Smart reorder from past orders', persona: 'P1·P2', phase: 'P1', steps: [
-    { screen: 'S201', text: 'Tap Smart reorder.' },
-    { screen: 'S203', text: 'Smart reorder template selected.' },
-    { screen: 'S202', text: 'Builder lists proposed lines with the why; accept piece by piece.' },
-    { screen: 'S204', text: 'Continue to submit.' },
-  ] },
   { id: 'F7', name: 'Submitting an order & its lifecycle', persona: 'P1', phase: 'P0', steps: [
     { screen: 'S202', text: 'Tap Submit.' },
     { screen: 'S204', text: 'Review ship-to, terms, and MOQ. Confirm.' },
@@ -45,12 +39,6 @@ export const flows = [
     { screen: 'S304', text: 'Choose ACH or saved card.' },
     { screen: 'S304a', text: 'First-time ACH triggers bank-link (Plaid).' },
     { screen: 'S305', text: 'Payment success. Lifecycle moves to Settled.', branch: { label: 'Branch · network error', screen: 'S803' } },
-  ] },
-  { id: 'F9', name: 'Filing a damage / RMA claim', persona: 'P1·P2', phase: 'P1', steps: [
-    { screen: 'S302', text: 'From order detail, report damage on a line.' },
-    { screen: 'S307', text: 'Take or pick a photo.' },
-    { screen: 'S308', text: 'Pre-filled claim — reason and note.', branch: { label: 'Branch · offline', screen: 'S310' } },
-    { screen: 'S309', text: 'Submitted. Claim ID and brand queue routing.' },
   ] },
   { id: 'F14', name: 'Receiving a brand-launch notification', persona: 'P1', phase: 'P2', steps: [
     { screen: 'S701', text: 'A brand-drop push arrives (tier-gated).' },
@@ -68,9 +56,9 @@ export const flows = [
 
 export const flowById = Object.fromEntries(flows.map((f) => [f.id, f]));
 
-// Stakeholder walkthrough (acceptance criteria): F1 → F2 → F15 → F6 → F7
+// Stakeholder walkthrough (acceptance criteria): F1 → F2 → F15 → F7
 export const walkthrough = {
   name: '2-minute walkthrough',
-  line: 'Set up, scan a real shelf, love it for later, reorder smart, then submit and track.',
-  flows: ['F1', 'F2', 'F15', 'F6', 'F7'],
+  line: 'Set up, scan a real shelf, love it for later, then submit and track.',
+  flows: ['F1', 'F2', 'F15', 'F7'],
 };

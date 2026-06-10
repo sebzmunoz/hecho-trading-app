@@ -34,7 +34,7 @@ export const orders = {
     const caps = { 0: 'Brands notified.', 1: 'Picking your lines.', 2: 'On the way.', 3: 'Left at your door.', 4: 'Closed and settled.' };
     const ctx = o.status === 'open' ? `<button class="btn" data-go="S304?order=${o.id}">Pay invoice</button>`
       : o.status === 'shipped' ? `<button class="btn" data-go="S306?order=${o.id}">Track</button>`
-      : o.status === 'delivered' ? `<button class="btn" data-action="smart-reorder">Reorder</button>`
+      : o.status === 'delivered' ? `<button class="btn" data-action="create-cart" data-tpl="repeat">Reorder</button>`
       : `<button class="btn ghost" data-go="S303?order=${o.id}">View invoice</button>`;
     const body = `
       <div class="row-between"><h3>#${o.id}</h3>${C.maskField(`<span class="price"><span class="v">${D.usd(o.total)}</span><span class="currency">USD</span></span>`, 'spend')}</div>
@@ -43,7 +43,7 @@ export const orders = {
       ${o.status === 'shipped' || o.status === 'delivered' ? C.listRow({ thumbIcon: 'truck', pri: o.carrier || 'Carrier', sec: `${o.tracking} · ${o.eta}`, go: `S306?order=${o.id}` }) : ''}
       ${C.sectionLabel('Lines')}
       <div class="stack tight">${o.lines.map(([pid, q]) => { const p = D.productById[pid]; return `<div class="list-row dense"><span class="thumb thumb-illo" style="width:40px;height:40px">${C.illo(p.illo, 22)}</span><span class="body"><span class="pri">${p.name} ×${q}</span><span class="sec">${D.brandById[p.brand].name}</span></span><span class="trail">${C.maskField(C.money(p.wholesale * q), 'spend')}</span></div>`; }).join('')}</div>
-      <div class="grid-2"><button class="btn ghost sm" data-go="S303?order=${o.id}">${icon('receipt', 16)} Invoice</button><button class="btn ghost sm" data-go="S307?order=${o.id}">${icon('flag', 16)} Report damage</button></div>
+      <button class="btn ghost sm full" data-go="S303?order=${o.id}">${icon('receipt', 16)} Invoice</button>
       <div class="sticky-actions">${ctx}<button class="btn ghost" data-go="S704">Contact us</button></div>`;
     return base(`Order #${o.id}`, { back: true, headerRight: C.hActions([{ icon: 'dots', action: 'order-menu' }]), body });
   },
@@ -101,48 +101,6 @@ export const orders = {
       <button class="btn full" data-action="open-carrier">Open carrier site</button>` });
   },
 
-  // S307 Damage / RMA start
-  S307(params) {
-    const o = D.orderById[params.order] || D.orders.find((x) => x.status === 'delivered') || D.orders[2];
-    return base('Report damage', { back: true, body: `
-      <p class="muted">Photograph the damaged item. I'll pre-fill the claim from order #${o.id}.</p>
-      <button class="photo-frame r-4-5" data-action="capture-rma" style="border:2px dashed var(--line-strong);background:var(--surface)"><div class="ph" style="flex-direction:column;gap:var(--s-2)">${icon('camera', 48)}<span class="muted">Tap to take a photo</span></div></button>
-      <div class="grid-2"><button class="btn ghost" data-action="library">${icon('image', 16)} From library</button><button class="btn" data-go="S308?order=${o.id}">Continue</button></div>` });
-  },
-
-  // S308 RMA submit / review
-  S308(params) {
-    const o = D.orderById[params.order] || D.orders[2];
-    const line = D.productById[o.lines[0][0]];
-    const err = state.get('_state') === 'error';
-    return base('File a claim', { back: true, body: `
-      <div class="photo-frame r-3-2" style="background:var(--surface)"><div class="ph">${C.illo(line.illo, 64)}</div><span class="tag" style="position:absolute;top:var(--s-2);left:var(--s-2)">Photo 1</span></div>
-      <div class="input-group"><label>Order</label><input class="input" value="#${o.id} · ${line.name}" readonly /></div>
-      <div class="input-group"><label>Quantity affected</label><input class="input" value="4" inputmode="numeric" /></div>
-      ${C.sectionLabel('Reason')}
-      <div class="chip-row"><button class="chip is-selected">Damaged</button><button class="chip">Missing</button><button class="chip">Wrong item</button><button class="chip">Other</button></div>
-      <div class="input-group"><label>Note</label><textarea class="textarea" placeholder="What happened?"></textarea></div>
-      ${err ? C.banner('Add a photo before you submit.', { kind: 'caution', ic: 'warning' }) : ''}
-      <button class="btn full" data-go="S309?order=${o.id}">Submit claim</button>` });
-  },
-
-  // S309 RMA submitted
-  S309(params) {
-    const o = D.orderById[params.order] || D.orders[2];
-    const brand = D.brandById[D.productById[o.lines[0][0]].brand];
-    return base('Claim filed', { back: true, body: `
-      <div class="center-col pad-block">${C.successMark()}<h3>Claim RMA-319 is in</h3><p class="muted">Routed to the ${brand.name} returns queue. I'll update you here.</p></div>
-      <button class="btn ghost full" data-go="S302?order=${o.id}">Back to order</button>
-      <button class="btn full" data-go="S310">View claim history</button>` });
-  },
-
-  // S310 RMA history
-  S310() {
-    if (state.get('_state') === 'empty') return base('Claims', { back: true, body: C.emptyState({ ic: 'flag', title: 'No claims yet', body: 'Damage or RMA claims you file appear here.' }) });
-    const pill = (s) => s === 'Refunded' || s === 'Replaced' ? 'positive' : (s === 'Denied' ? 'critical' : '');
-    return base('Claims', { back: true, body: `
-      <div class="stack tight">${D.claims.map((c) => C.listRow({ thumbIcon: 'flag', pri: `${c.id} · ${D.productById[c.product].name}`, sec: `${c.reason} · ${c.brand} · ${c.when}`, trail: `<span class="pill ${pill(c.status)}">${c.status}</span>` })).join('')}</div>` });
-  },
 };
 
 // shared payment body (screen + sheet)
