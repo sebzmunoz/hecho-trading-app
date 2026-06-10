@@ -38,65 +38,6 @@ export function illo(kind, size = 80) {
   return `<svg viewBox="0 0 80 80" width="${size}" height="${size}" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
 }
 
-// ---- Style-guide scene ----
-// The guide's own products composed on a shelf line. This replaces the old
-// generic vignette (and its orphaned decorative arc). With `interactive`,
-// every product is a tappable marker that opens a shop-the-piece popover.
-export function sceneArt(g, { interactive = false, scale = 1 } = {}) {
-  const items = (g.scene || []).map((it) => {
-    const p = D.productById[it.p]; if (!p) return '';
-    const s = Math.round(it.s * scale);
-    const img = `<span class="scene-item" style="left:${it.x}%;top:${it.y}%;width:${s}px;height:${s}px">${illo(p.illo, s)}</span>`;
-    if (!interactive) return img;
-    const dot = `<button class="scene-dot" data-scene-p="${p.id}" data-guide="${g.id}"
-      style="left:${it.x}%;top:${it.y}%;--lift:${Math.round(s * 0.55)}px"
-      aria-label="${esc(p.name)} by ${esc(D.brandById[p.brand].name)}. Activate to shop this piece." aria-expanded="false"><i></i></button>`;
-    return img + dot;
-  }).join('');
-  return `<div class="scene ${interactive ? 'is-shoppable' : ''}">
-    <span class="scene-ground" aria-hidden="true"></span>${items}
-    ${interactive ? `<div class="scene-pop" hidden></div>` : ''}
-  </div>`;
-}
-
-// Wire the shoppable scene: tap a marker → popover with the piece + actions.
-export function wireScene(root) {
-  root.querySelectorAll('.scene.is-shoppable').forEach((scene) => {
-    if (scene._wired) return; scene._wired = true;
-    const pop = scene.querySelector('.scene-pop');
-    let openFor = null;
-    const close = () => { pop.hidden = true; openFor = null; scene.querySelectorAll('.scene-dot').forEach((d) => d.setAttribute('aria-expanded', 'false')); };
-    scene.addEventListener('click', (e) => {
-      const dot = e.target.closest('.scene-dot');
-      if (!dot) { if (!e.target.closest('.scene-pop')) close(); return; }
-      e.stopPropagation();
-      const pid = dot.dataset.sceneP;
-      if (openFor === pid) { close(); return; }
-      const p = D.productById[pid]; const b = D.brandById[p.brand];
-      pop.innerHTML = `
-        <span class="thumb-illo" style="width:40px;height:40px;border-radius:var(--r-2);flex:0 0 auto">${illo(p.illo, 24)}</span>
-        <span class="sp-body"><b>${esc(p.name)}</b><span class="muted" style="font-size:var(--fs-nano)">${esc(b.name)} · ${pricePair(p, { compact: true })}</span></span>
-        <span class="sp-acts">
-          ${loveBtn(p.id, { src: 'guide' })}
-          <button class="btn sm ghost" data-go="S004?p=${p.id}">View</button>
-          <button class="btn sm" data-action="add-to-cart" data-p="${p.id}">Add</button>
-        </span>`;
-      // position: above the marker, clamped so the pop's own width stays inside
-      const sr = scene.getBoundingClientRect(); const dr = dot.getBoundingClientRect();
-      pop.hidden = false;
-      const half = (pop.offsetWidth / 2 / sr.width) * 100 + 2;
-      const raw = ((dr.left + dr.width / 2 - sr.left) / sr.width) * 100;
-      const px = Math.min(Math.max(raw, half), 100 - half);
-      const above = (dr.top - sr.top) > sr.height * 0.45;
-      pop.style.left = px + '%';
-      pop.style.top = above ? Math.max(((dr.top - sr.top) / sr.height) * 100 - 30, 3) + '%' : Math.min(((dr.bottom - sr.top) / sr.height) * 100 + 6, 70) + '%';
-      openFor = pid;
-      scene.querySelectorAll('.scene-dot').forEach((d) => d.setAttribute('aria-expanded', String(d === dot)));
-      wirePrivacy(pop);
-    });
-  });
-}
-
 // ---- Status (icon + label + color, never color alone — §07-E) ----
 const STATUS = {
   current:  { pill: 'positive', icon: 'check',   label: 'Current' },
@@ -224,40 +165,6 @@ export function orderCard(o) {
     <div class="row"><span class="id">Order #${o.id}</span><span class="pill ${pillKind}">${o.pastDue ? icon('warning', 13) : ''}${esc(pillLabel)}</span></div>
     <div class="row"><span class="muted">${esc(o.brands.join(' · '))}</span></div>
     <div class="row"><span class="muted">${esc(o.eta)}</span>${maskField(`<span class="total">${money(o.total)}</span>`, 'spend')}</div>
-  </button>`;
-}
-
-export function styleTile(g, { wide = false } = {}) {
-  return `<button class="card style-tile" data-go="S002?guide=${g.id}" style="${wide ? 'aspect-ratio:16/10;' : ''}text-align:start">
-    <div class="illo" style="padding:0;align-items:stretch">${sceneArt(g, { scale: wide ? 0.95 : 0.55 })}</div>
-    <div class="lbl"><small>${esc(g.season)} · ${esc(g.theme)}</small><b>${esc(g.title)}</b></div>
-  </button>`;
-}
-
-// Resume tile — "Pick up where you left off" rail. Name, status, then the
-// numbers stacked on their own lines so nothing crams at 220px.
-export function resumeCard(c) {
-  const total = D.cartTotal(c);
-  const tag = c.sync === 'pending'
-    ? `<span class="sync-tag"><span class="spin-dot"></span>Syncing</span>`
-    : (c.awaiting ? `<span class="tag coral">Awaiting you</span>` : `<span class="tag">${esc(c.author === 'You' ? 'Yours' : 'Shared')}</span>`);
-  return `<button class="resume-card" data-go="S202?cart=${c.id}">
-    <span class="rc-head"><b>${esc(c.name)}</b>${tag}</span>
-    <span class="rc-line">${maskField(`<b>${money(total)}</b>`, 'spend')}<span class="muted">· ${D.cartBrandCount(c)} brands</span></span>
-    <span class="rc-time">${icon('clock', 12)} ${esc(c.lastEdited)}</span>
-  </button>`;
-}
-
-// Drop tile — "New on the floor" rail. Visual-first: product art on top,
-// brand + status underneath.
-export function dropCard(b) {
-  const locked = !D.canSee(b, state.get('tier'));
-  const p = D.productsByBrand(b.id)[0];
-  const tag = locked ? lockChip() : (b.launching ? `<span class="tag coral">Launching</span>` : `<span class="tag">New</span>`);
-  return `<button class="drop-card ${locked ? 'is-locked' : ''}" data-go="${locked ? `S804?brand=${b.id}` : `S003?brand=${b.id}`}">
-    <span class="dc-art thumb-illo">${illo(p ? p.illo : 'jar', 44)}</span>
-    <span class="dc-name">${esc(b.name)}</span>
-    <span class="dc-tag">${tag}</span>
   </button>`;
 }
 

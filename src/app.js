@@ -7,7 +7,7 @@ import { registry } from './registry.js';
 import { initPanel, onRouteChange } from './panel.js';
 import { icon } from './icons.js';
 import * as C from './components.js';
-import { newCartBody, shareBody, addToCartBody, shopLookBody } from './screens/carts.js';
+import { newCartBody, shareBody, addToCartBody } from './screens/carts.js';
 import { loveToCartBody, loveNoteBody, loveMenuBody } from './screens/love.js';
 import { filtersBody } from './screens/shop.js';
 import { paymentBody, addMethodBody, addCardBody } from './screens/orders.js';
@@ -65,7 +65,6 @@ function renderRoute(route, { direction } = {}) {
   screenScroll.scrollTop = 0;
 
   // wiring
-  C.wireScene(screenBody);
   C.wireSteppers(screenBody, () => C.recomputeTotals(screenBody));
   if (spec.onMount) try { spec.onMount(screenBody); } catch (e) { console.error(e); }
 
@@ -106,8 +105,6 @@ screenFrame.addEventListener('keydown', (e) => {
 function curSource() {
   const id = nav.current().id;
   if (id === 'S102') return 'barcode';
-  if (id === 'S104') return 'photo';
-  if (id === 'S106') return 'manual';
   return 'manual';
 }
 
@@ -122,11 +119,9 @@ function handleAction(action, el) {
     case 'apply-filters': C.closeAllOverlays(); C.toast('Filters applied'); break;
     case 'reset-filters': C.toast('Filters reset'); break;
 
-    // ---- add to cart / look ----
+    // ---- add to cart ----
     case 'add-to-cart': C.openSheet({ title: 'Add to cart', html: addToCartBody(el.dataset.p), onMount: (r) => { C.wirePrivacy(r); C.wireSteppers(r); } }); break;
     case 'confirm-add': C.closeAllOverlays(); T('scan.result.added_to_cart', curSource(), el.dataset.p); C.toast('Added to Back wall refresh', { positive: true, action: { label: 'View', fn: () => nav.go('S202?cart=c-back') } }); break;
-    case 'shop-the-look': C.openSheet({ title: 'Shop the look', html: shopLookBody(el.dataset.guide) }); break;
-    case 'confirm-look': C.closeAllOverlays(); T('scan.result.added_to_cart', 'manual', el.dataset.guide); C.toast('Added the look', { positive: true, action: { label: 'View cart', fn: () => nav.go('S202?cart=c-back') } }); break;
     case 'add-line': C.toast('Added to the retailer\'s draft', { positive: true }); break;
 
     // ---- share / approve / submit ----
@@ -134,6 +129,8 @@ function handleAction(action, el) {
     case 'send-share': C.closeAllOverlays(); T('cart.shared', 'cart', el.dataset.cart || 'c-back'); nav.go('S206'); break;
     case 'revoke': C.toast('Share revoked'); break;
     case 'submit-cart':
+      // guests shop freely; account details are only asked for here
+      if (state.get('guest')) { C.openSheet({ title: 'Set up your account to order', html: registrationBody() }); break; }
       if (state.get('taxId') === 'expired') { nav.go('S410'); }
       else nav.go('S204?cart=' + (el.dataset.cart || 'c-back'));
       break;
@@ -154,9 +151,7 @@ function handleAction(action, el) {
 
     // ---- scanning ----
     case 'simulate-scan': T('scan.result.shown', 'barcode', 'p-throw'); nav.go('S102?p=p-throw'); break;
-    case 'capture-photo': nav.go('S104'); break;
     case 'flash': C.toast('Flash toggled'); break;
-    case 'library': C.toast('Opening photo library…'); break;
 
     // ---- love list ----
     case 'love-toggle': {
@@ -204,7 +199,6 @@ function handleAction(action, el) {
     // ---- tier / brand ----
     case 'request-access': T('brand.requested_access', 'brand', 'savant'); state.setEphemeral('_state', 'requested'); nav.refresh(); C.toast('Request sent — your rep will follow up', { positive: true }); break;
     case 'save-brand': { const saved = state.toggleSavedBrand(el.dataset.brand); T('brand.saved', 'brand', el.dataset.brand); nav.refresh(); C.toast(saved ? 'Brand saved' : 'Removed from saved'); break; }
-    case 'save-template': C.toast('Saved as a personal template', { positive: true }); break;
     case 'remind': C.toast('I\'ll remind you'); break;
 
     // ---- sharing (full flow) ----
@@ -229,8 +223,20 @@ function handleAction(action, el) {
     case 'submit-registration': C.closeAllOverlays(); C.openModal({ title: 'Application sent', html: '<p>Hecho reviews every new retailer. I\'ll email you the moment your store is approved, then you can place your first order.</p>', actions: [{ label: 'Got it', action: 'close-overlay' }] }); break;
     case 'approve-retailer': { const r = D.repRetailers.find((x) => x.id === (el.dataset.r || state.get('repAccount'))); if (r) { r.status = 'approved'; r.taxId = 'Current'; r.credit = 'Headroom $12k'; } C.closeAllOverlays(); nav.refresh(); C.toast('Retailer approved', { positive: true }); break; }
 
-    // ---- live stock ----
-    case 'refresh-stock': C.toast('Stock refreshed', { positive: true }); break;
+    // ---- entry & sign-in ----
+    case 'guest-enter':
+      state.set({ guest: true });
+      T('guest.entered', 'entry', null);
+      nav.go('S001', { resetStack: true });
+      C.toast('Browsing as a guest — set up your account when you order');
+      break;
+    case 'verify-code':
+      state.set({ guest: false });
+      T('signin.code_verified', 'entry', null);
+      nav.go('S001', { resetStack: true });
+      C.toast("You're in", { positive: true });
+      break;
+    case 'resend': C.toast('Code re-sent', { positive: true }); break;
 
     case 'close-overlay': C.closeTopOverlay(); break;
     case 'noop': break;

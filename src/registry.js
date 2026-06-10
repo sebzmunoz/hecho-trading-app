@@ -18,13 +18,11 @@ const modules = { ...shop, ...love, ...scan, ...carts, ...orders, ...you, ...onb
 
 // Common state sets
 const S = (...x) => x;
-const BASE = S('default', 'loading', 'error', 'offline');
 
 // id → { name, group, tab, states }
 const META = {
   // ---- Shop ----
-  S001: { name: 'Shop home', group: 'Shop', tab: 'shop', states: S('default', 'loading', 'empty', 'offline', 'error') },
-  S002: { name: 'Style guide detail', group: 'Shop', tab: 'shop', states: BASE },
+  S001: { name: 'Main screen', group: 'Shop', tab: 'shop', states: S('default', 'loading', 'empty', 'offline', 'error') },
   S003: { name: 'Brand page', group: 'Shop', tab: 'shop', states: S('default', 'locked', 'launching', 'loading', 'offline') },
   S004: { name: 'Product detail', group: 'Shop', tab: 'shop', states: S('default', 'oos', 'locked', 'loading', 'offline') },
   S005: { name: 'Search', group: 'Shop', tab: 'shop', states: S('default') },
@@ -37,8 +35,6 @@ const META = {
   // ---- Scan ----
   S101: { name: 'Scanner viewfinder', group: 'Scan', tab: 'scan', states: S('default', 'identifying', 'lowlight', 'perm', 'offline') },
   S102: { name: 'Scan result', group: 'Scan', tab: 'scan', states: S('default') },
-  S103: { name: 'Photo recognition', group: 'Scan', tab: 'scan', states: S('default') },
-  S104: { name: 'Photo result', group: 'Scan', tab: 'scan', states: S('default', 'nomatch') },
   S105: { name: 'Permission denied (camera)', group: 'Scan', tab: 'scan', states: S('default') },
   S106: { name: 'Manual SKU entry', group: 'Scan', tab: 'scan', states: S('default', 'error', 'offline') },
   // ---- Carts ----
@@ -52,7 +48,6 @@ const META = {
   S208: { name: 'Approval inbox', group: 'Carts', tab: 'carts', states: S('default', 'empty') },
   S209: { name: 'Approval review', group: 'Carts', tab: 'carts', states: S('default') },
   S211: { name: 'Add to cart sheet', group: 'Carts', tab: 'carts', states: S('default') },
-  S212: { name: 'Shop the look sheet', group: 'Carts', tab: 'carts', states: S('default') },
   // ---- Orders ----
   S301: { name: 'Orders index', group: 'Orders', tab: 'orders', states: S('default', 'empty', 'loading', 'offline') },
   S302: { name: 'Order detail', group: 'Orders', tab: 'orders', states: S('default', 'offline', 'error') },
@@ -85,9 +80,8 @@ const META = {
   // ---- Onboarding ----
   S501: { name: 'Splash', group: 'Onboarding', tab: null, states: S('default') },
   S502: { name: 'Entry — current or new customer', group: 'Onboarding', tab: null, states: S('default') },
-  S503: { name: 'Sign in', group: 'Onboarding', tab: null, states: S('default') },
-  S504: { name: 'Magic link sent', group: 'Onboarding', tab: null, states: S('default') },
-  S505: { name: 'Email verification', group: 'Onboarding', tab: null, states: S('default') },
+  S503: { name: 'Sign in — email', group: 'Onboarding', tab: null, states: S('default') },
+  S504: { name: 'Verification code', group: 'Onboarding', tab: null, states: S('default') },
   S506: { name: 'Account picker', group: 'Onboarding', tab: null, states: S('default') },
   S507: { name: 'Camera permission prompt', group: 'Onboarding', tab: null, states: S('default') },
   S508: { name: 'Notification permission prompt', group: 'Onboarding', tab: null, states: S('default') },
@@ -105,9 +99,7 @@ const META = {
   S702: { name: 'Notification settings', group: 'System', tab: null, states: S('default') },
   S703: { name: 'Global search', group: 'System', tab: null, states: S('default') },
   S704: { name: 'Help & support', group: 'System', tab: null, states: S('default') },
-  S705: { name: 'Style-guide gallery', group: 'System', tab: null, states: S('default') },
   S706: { name: 'Brand directory', group: 'System', tab: null, states: S('default') },
-  S708: { name: 'Live stock board', group: 'System', tab: null, states: S('default', 'low', 'out') },
   S709: { name: 'Brand from QR', group: 'System', tab: null, states: S('default') },
   S710: { name: 'Brand-launch arrival', group: 'System', tab: null, states: S('default') },
   // ---- Edge & state ----

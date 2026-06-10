@@ -11,7 +11,6 @@ import { base } from './shop.js';
 const SRC = {
   scan: { ic: 'scan', label: 'Scanned' },
   browse: { ic: 'tag', label: 'Browsing' },
-  guide: { ic: 'image', label: 'From a guide' },
 };
 
 function srcLine(it) {
@@ -40,7 +39,7 @@ export const love = {
 
     const f = params.f || 'all';
     const items = f === 'all' ? all : all.filter((it) => it.src === f);
-    const chips = [['all', 'All'], ['scan', 'Scanned'], ['browse', 'Browsing'], ['guide', 'From guides']]
+    const chips = [['all', 'All'], ['scan', 'Scanned'], ['browse', 'Browsing']]
       .map(([v, l]) => `<button class="chip ${f === v ? 'is-selected' : ''}" data-go="S010?f=${v}">${l}</button>`).join('');
     const groups = lovedByBrand(items);
     const body = `

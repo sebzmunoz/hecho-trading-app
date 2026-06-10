@@ -9,6 +9,7 @@ const KEY = 'hecho-proto-state-v1';
 
 const DEFAULTS = {
   role: 'owner',        // owner | manager | member | rep   (§02b)
+  guest: false,         // "New to Hecho" path — shop now, register at first order
   pos: 'connected',     // connected | connecting | disconnected (§07-H H3)
   tier: 'top',          // standard | mid | top  (§TM) — top = you manage all 9 brands
   taxId: 'renews',      // current | renews | expired (F10)

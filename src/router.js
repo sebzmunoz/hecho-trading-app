@@ -27,7 +27,6 @@ function translateDeepLink(s) {
       orders: (i) => `S302?order=${i}`,
       carts: (i) => `S202?cart=${i}`,
       brands: (i) => `S003?brand=${i}`,
-      'style-guides': (i) => `S002?guide=${i}`,
       compliance: () => `S408`,
     };
     if (seg === 'compliance') return 'S408';

@@ -32,28 +32,8 @@ export const shop = {
         <span class="sc-body"><b>Scan a product</b><span>Point at any barcode on the floor</span></span>
       </button>
       ${C.sectionLabel('The nine brands')}
-      <div class="brand-grid">${D.brands.map((b) => C.brandTile(b)).join('')}</div>
-      <div class="grid-2"><button class="btn ghost sm" data-go="S705">Style guides</button><button class="btn ghost sm" data-go="S708">Live stock</button></div>`;
+      <div class="brand-grid">${D.brands.map((b) => C.brandTile(b)).join('')}</div>`;
     return base('', { hideHeader: true, body });
-  },
-
-  // S002 Style guide detail — the illustration IS the shop surface: every
-  // piece in the scene carries a tappable marker (no product list below).
-  S002(params) {
-    const g = D.styleGuideById[params.guide] || D.styleGuides[0];
-    const lines = g.lines.map((id) => D.productById[id]).filter(Boolean);
-    const setTotal = lines.reduce((s, p) => s + p.wholesale, 0);
-    const body = `
-      <div class="card" style="padding:0;overflow:visible;max-width:none;border-radius:var(--r-4)">
-        ${C.sceneArt(g, { interactive: true, scale: 1.05 })}
-      </div>
-      <div class="row-between"><span class="scene-hint"><i></i> Tap a marker to shop the piece</span>
-        <span class="muted" style="font-size:var(--fs-nano)">${lines.length} pieces · ${C.maskField('$' + setTotal + ' the set', 'wholesale')}</span></div>
-      <div><small class="section-label">${g.season} · ${g.theme}</small><h3 style="margin-top:var(--s-1)">${g.title}</h3></div>
-      <p class="muted">${g.blurb}</p>
-      <div class="chip-row">${g.brands.map((b) => C.brandChip(b)).join('')}</div>
-      <div class="sticky-actions"><button class="btn ghost" data-action="save-template">Save look</button><button class="btn" data-action="shop-the-look" data-guide="${g.id}">Shop the look</button></div>`;
-    return base(g.title, { back: true, headerRight: C.hActions([{ icon: 'share', action: 'share', label: 'Share' }]), body });
   },
 
   // S003 Brand page — category cards first; products live one level down

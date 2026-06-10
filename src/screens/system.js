@@ -5,20 +5,6 @@ import { icon } from '../icons.js';
 import { base } from './shop.js';
 import { notifSettingsBody } from './you.js';
 
-const visibleBrands = () => D.brands.filter((b) => D.canSee(b, state.get('tier')));
-
-function stockCard(b) {
-  const s = D.brandStock(b.id);
-  return `<div class="card" style="max-width:none;gap:var(--s-2)">
-    <button class="row-between" data-go="S003?brand=${b.id}" style="background:none;border:0;padding:0;text-align:start;cursor:pointer;width:100%">
-      <span><b>${b.name}</b><br/><span class="muted" style="font-size:var(--fs-nano)">Stock set by ${b.steward} · ${b.name}</span></span>
-      <span style="color:var(--fg-mute)">${icon('chevron-right', 18)}</span>
-    </button>
-    <div class="chip-row"><span class="pill positive">${icon('check', 12)} ${s.skus} SKUs</span>${s.low ? `<span class="pill caution">${icon('warning', 12)} ${s.low} low</span>` : ''}${s.out ? `<span class="pill critical">${icon('warning', 12)} ${s.out} out</span>` : ''}</div>
-    ${s.outItems.map((p) => `<div class="row-between" style="padding-top:var(--s-1)"><span class="muted">${p.name}</span><span class="sync-tag" style="color:var(--caution)">${icon('clock', 12)} ${p.restock || 'restock pending'}</span></div>`).join('')}
-  </div>`;
-}
-
 export const system = {
   // S701 Notifications center
   S701() {
@@ -53,15 +39,8 @@ export const system = {
       <div class="search"><span>${icon('search', 20)}</span><input placeholder="Search help" aria-label="Search help" /></div>
       <button class="btn full" data-go="S606">${icon('chat', 16)} Chat with your rep</button>
       ${C.sectionLabel('FAQ')}
-      <div class="stack tight">${['How does Privacy on the floor work?', 'What happens if my POS disconnects?', 'How do approvals work?', 'When is an order settled?'].map((q) => C.listRow({ thumbIcon: 'help', pri: q })).join('')}</div>
+      <div class="stack tight">${['How does signing in with a code work?', 'What happens if my POS disconnects?', 'How do approvals work?', 'When is an order settled?'].map((q) => C.listRow({ thumbIcon: 'help', pri: q })).join('')}</div>
       <button class="btn ghost full" data-action="email-support">Email Hecho support</button>` });
-  },
-
-  // S705 Style-guide gallery
-  S705() {
-    return base('Style guides', { back: true, headerRight: C.hActions([{ icon: 'filter', action: 'filters' }]), body: `
-      <div class="chip-row"><button class="chip is-selected">All</button><button class="chip">Spring</button><button class="chip">Summer</button><button class="chip">Fall</button><button class="chip">Winter</button></div>
-      <div class="grid-2">${D.styleGuides.map((g) => C.styleTile(g)).join('')}</div>` });
   },
 
   // S706 Brand directory
@@ -69,19 +48,6 @@ export const system = {
     return base('Brands', { back: true, headerRight: C.hActions([{ icon: 'search', go: 'S005' }]), body: `
       <div class="chip-row"><button class="chip is-selected">All</button><button class="chip">My tier</button><button class="chip">Invitation-only</button><button class="chip">Launching</button></div>
       <div class="stack tight">${D.brands.map((b) => { const seen = D.canSee(b, state.get('tier')); return C.brandCard(b, { locked: !seen }); }).join('')}</div>` });
-  },
-
-  // S708 Live stock — the 9 brands you manage (replaces the floor map)
-  S708() {
-    const f = state.get('_state'); // 'low' | 'out' | null
-    let list = D.brands;
-    if (f === 'low') list = D.brands.filter((b) => D.brandStock(b.id).low > 0);
-    if (f === 'out') list = D.brands.filter((b) => D.brandStock(b.id).out > 0);
-    const chip = (v, l) => `<button class="chip ${(f || 'all') === v ? 'is-selected' : ''}" data-go="S708${v === 'all' ? '' : '?_=' + v}" data-stockfilter="${v}">${l}</button>`;
-    return base('Live stock', { back: true, headerRight: C.hActions([{ icon: 'refresh', action: 'refresh-stock', label: 'Refresh' }]), body: `
-      <p class="muted">Live on-hand across the 9 brands you manage. Each brand keeps its own counts current — out-of-stock lines show a restock window.</p>
-      <div class="chip-row">${chip('all', 'All 9 brands')}${chip('low', 'Low')}${chip('out', 'Out of stock')}</div>
-      <div class="stack tight">${list.map((b) => stockCard(b)).join('')}</div>` });
   },
 
   // S709 Brand from QR (a brand tag scanned on the floor)

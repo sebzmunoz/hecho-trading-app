@@ -9,6 +9,13 @@ const roleLabel = { owner: 'Owner', manager: 'Manager', member: 'Member', rep: '
 export const you = {
   // S401 You overview
   S401() {
+    if (state.get('guest')) {
+      return base('Account', { back: true, body: `
+        <div class="center-col pad-block">${icon('user', 56)}<h3>Browsing as a guest</h3>
+          <p class="muted" style="text-align:center;max-width:32ch">Build carts and love lists freely. I'll only ask for your store details when you place your first order.</p></div>
+        <button class="btn full" data-action="register">Apply to become a retailer</button>
+        <button class="btn ghost full" data-go="S503">I already have an account</button>` });
+    }
     const tax = state.get('taxId');
     const role = state.get('role');
     const tiles = [

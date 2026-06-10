@@ -4,31 +4,21 @@
 // ============================================================
 
 export const flows = [
-  { id: 'F1', name: 'First-time setup & onboarding', persona: 'All', phase: 'P0', steps: [
+  { id: 'F1', name: 'First-time entry & sign-in', persona: 'All', phase: 'P0', steps: [
     { screen: 'S501', text: 'Cold launch. The brand mark holds during boot.' },
-    { screen: 'S502', text: 'Entry: current customer goes straight to the floor; new customers apply.', branch: { label: 'Branch · new customer applies', screen: 'S503' } },
-    { screen: 'S503', text: 'Sign in by email magic link or SSO.' },
-    { screen: 'S504', text: 'Magic link sent. Open it on this device.' },
-    { screen: 'S505', text: 'The link returns — verifying.' },
-    { screen: 'S506', text: 'Multi-account holder picks an account.', branch: { label: 'Branch · invite path', screen: 'S503' } },
+    { screen: 'S502', text: 'Entry: current customers sign in; new buyers start shopping immediately.', branch: { label: 'Branch · shop as a guest', screen: 'S001' } },
+    { screen: 'S503', text: 'Email only — I send a 6-digit code.' },
+    { screen: 'S504', text: 'Type the code. That is the whole sign-in.' },
     { screen: 'S507', text: 'Camera rationale before the OS prompt.' },
     { screen: 'S508', text: 'Notification categories preview.' },
-    { screen: 'S509', text: 'Optional POS connect, skippable.' },
-    { screen: 'S510', text: 'Showroom arrival cue offers wayfinding.' },
-    { screen: 'S001', text: 'Land on Shop home.' },
+    { screen: 'S510', text: 'All set — scan the floor or browse the brands.' },
+    { screen: 'S001', text: 'Land on the main screen.' },
   ] },
   { id: 'F2', name: 'Walking the showroom & scanning a real shelf', persona: 'P1·P2', phase: 'P0', steps: [
-    { screen: 'S101', text: 'Open Scan — barcode mode by default.' },
+    { screen: 'S101', text: 'Open Scan — barcode only, no modes.' },
     { screen: 'S102', text: 'Point at a barcode. The result half-sheet appears over the camera.' },
     { screen: 'S211', text: 'Add to cart — pick a draft, set quantity.' },
     { screen: 'S101', text: 'Sheet collapses, viewfinder live again with a confirmation chip.', branch: { label: 'Branch · camera denied', screen: 'S105' } },
-  ] },
-  { id: 'F3', name: 'Photo-identifying a product', persona: 'P1·P2', phase: 'P1', steps: [
-    { screen: 'S101', text: 'Open the scanner.' },
-    { screen: 'S103', text: 'Switch to photo mode.' },
-    { screen: 'S104', text: 'Up to five candidates ranked by confidence.', branch: { label: 'Branch · no match', screen: 'S104?_=nomatch' } },
-    { screen: 'S004', text: 'Tap a candidate → product detail.' },
-    { screen: 'S211', text: 'Add to cart.' },
   ] },
   { id: 'F4', name: 'Building a named draft cart', persona: 'P1·P2', phase: 'P0', steps: [
     { screen: 'S201', text: 'Open Carts.' },
@@ -82,12 +72,6 @@ export const flows = [
     { screen: 'S603', text: 'Retailer profile: context, credit, tax-ID.' },
     { screen: 'S604', text: 'Co-shop live in the retailer\'s draft.' },
     { screen: 'S606', text: 'Send a memo via chat. Switch back any time.' },
-  ] },
-  { id: 'F13', name: 'Discovering a style guide', persona: 'P1·P2', phase: 'P2', steps: [
-    { screen: 'S001', text: 'Shop home features a hero style guide.' },
-    { screen: 'S002', text: 'Editorial spread, multi-brand, the look list.' },
-    { screen: 'S212', text: 'Shop the look — pick or skip, batch-add.' },
-    { screen: 'S202', text: 'Picked lines flow into the chosen draft.' },
   ] },
   { id: 'F14', name: 'Receiving a brand-launch notification', persona: 'P1', phase: 'P2', steps: [
     { screen: 'S701', text: 'A brand-drop push arrives (tier-gated).' },

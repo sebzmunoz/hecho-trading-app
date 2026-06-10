@@ -15,59 +15,46 @@ export const onboarding = {
       </div>`, flush: false });
   },
 
-  // S502 Entry — the first interactive screen: logo + current/new choice.
-  // Account & settings sits in the corner; deeper auth stays one tap away.
+  // S502 Entry — the logo and two choices, nothing else.
+  // Current → email + code. New → shop immediately as a guest; account
+  // details are only asked for at the first order.
   S502() {
     const body = `
       <div class="entry">
-        <button class="corner-btn" data-go="S401" aria-label="Account & settings">${icon('user', 20)}</button>
-        <div class="entry-brand">${mark('min(210px, 56%)')}
-          <p class="entry-tag">Wholesale, straight from the floor.</p></div>
+        <div class="entry-brand">${mark('min(210px, 56%)')}</div>
         <div class="entry-choices">
-          <button class="entry-card" data-go="S001">
+          <button class="entry-card" data-go="S503">
             <span class="ec-ic">${icon('bag', 26)}</span>
-            <span class="ec-body"><b>Current customer</b><span>Shop the floor with your account</span></span>
+            <span class="ec-body"><b>Current customer</b><span>Sign in with your email</span></span>
             <span class="ec-arr">${icon('chevron-right', 18)}</span>
           </button>
-          <button class="entry-card" data-action="register">
+          <button class="entry-card" data-action="guest-enter">
             <span class="ec-ic">${icon('sparkle', 26)}</span>
-            <span class="ec-body"><b>New to Hecho</b><span>Apply to become a retailer — quick review</span></span>
+            <span class="ec-body"><b>New to Hecho</b><span>Start shopping now — set up at your first order</span></span>
             <span class="ec-arr">${icon('chevron-right', 18)}</span>
           </button>
         </div>
-        <button class="entry-alt" data-go="S503">Sign in another way</button>
       </div>`;
     return base('', { noTabbar: true, hideHeader: true, body });
   },
 
-  // S503 Sign in
+  // S503 Sign in — email only; a 6-digit code does the rest
   S503() {
     return base('Sign in', { noTabbar: true, body: `
       <div style="margin:var(--s-4) auto;display:flex;justify-content:center">${mark('120px')}</div>
+      <p class="muted" style="text-align:center">Enter the email on your account — I'll send a 6-digit code.</p>
       <div class="input-group"><label>Email</label><input class="input" placeholder="you@store.com" inputmode="email" value="${D.account.email}" /></div>
-      <button class="btn full" data-go="S504">Send magic link</button>
-      <div class="row-between"><span class="hairline" style="flex:1"></span><span class="muted" style="padding:0 var(--s-3)">or</span><span class="hairline" style="flex:1"></span></div>
-      <button class="btn ghost full" data-go="S505">Continue with Apple</button>
-      <button class="btn ghost full" data-go="S505">Continue with Google</button>
-      <button class="btn ghost full" data-go="S505">Hecho SSO</button>
-      <div class="hairline"></div>
-      <div class="center-col" style="gap:var(--s-2)"><span class="muted">New to Hecho?</span><button class="btn ghost full" data-action="register">Apply to become a retailer</button><button class="btn ghost sm full" data-go="S506">I have an invite</button></div>` });
+      <button class="btn full" data-go="S504">Send code</button>` });
   },
 
-  // S504 Magic link sent
+  // S504 Verification code
   S504() {
-    return base('Check your mail', { back: true, noTabbar: true, body: `
-      <div class="center-col pad-block">${icon('mail', 56)}<h3>Magic link sent</h3><p class="muted">I sent a link to ${D.account.email}. Open it on this device to sign in.</p></div>
-      <button class="btn full" data-go="S505">Open mail app</button>
-      <button class="btn ghost full" data-action="resend">Send it again</button>
+    return base('Enter the code', { back: true, noTabbar: true, body: `
+      <div class="center-col pad-block">${icon('mail', 56)}<h3>Check your mail</h3><p class="muted">I sent a 6-digit code to ${D.account.email}.</p></div>
+      <div class="input-group"><label>Verification code</label><input class="input" inputmode="numeric" maxlength="6" placeholder="••••••" aria-label="6-digit verification code" style="text-align:center;letter-spacing:.4em;font-size:var(--fs-h3);font-weight:700" /></div>
+      <button class="btn full" data-action="verify-code">Continue</button>
+      <button class="btn ghost sm full" data-action="resend">Send it again</button>
       <button class="btn ghost sm full" data-go="S503">Use a different email</button>` });
-  },
-
-  // S505 Email verification
-  S505() {
-    return base('', { noTabbar: true, hideHeader: true, body: `
-      <div class="center-col" style="height:100%;justify-content:center;gap:var(--s-5)"><div class="proto-spinner"></div><h3>Signing you in</h3><p class="muted">One moment.</p>
-      <button class="btn" data-go="S506">Continue</button></div>` });
   },
 
   // S506 Account picker
@@ -90,7 +77,7 @@ export const onboarding = {
 
   // S508 Notification permission prompt
   S508() {
-    const preview = ['Order shipped', 'Low stock', 'Tax-ID', 'Style guide', 'Brand drop'];
+    const preview = ['Order shipped', 'Low stock', 'Tax-ID', 'Brand drop'];
     return base('', { noTabbar: true, hideHeader: true, body: `
       <div class="center-col" style="height:100%;justify-content:center;gap:var(--s-4);padding:0 var(--s-4)">${icon('bell', 64)}<h3>Stay in the loop</h3><p class="muted" style="text-align:center;max-width:32ch">Get a ping when an order ships, stock runs low, or a brand opens first-look.</p>
       <div class="chip-row" style="justify-content:center;flex-wrap:wrap">${preview.map((p) => `<span class="chip">${p}</span>`).join('')}</div>
@@ -110,15 +97,12 @@ export const onboarding = {
   // S510 First showroom-visit cue
   S510() {
     return base('', { noTabbar: true, hideHeader: true, body: `
-      <div style="height:100%;display:flex;flex-direction:column;justify-content:flex-end">
-        <div class="thumb-illo" style="flex:1;border-radius:0;align-items:stretch;padding:0">${C.sceneArt(D.styleGuides[0], { scale: 1.05 })}</div>
-        <div class="sheet" style="border-radius:var(--r-4) var(--r-4) 0 0;position:static;box-shadow:none"><span class="grab"></span>
-          <h4>You're all set</h4><p class="muted">Want to see live stock across the 9 brands you manage?</p>
-          <button class="btn full" data-go="S708">See live stock</button>
-          <button class="btn ghost full" data-action="new-cart">Start a draft</button>
-          <button class="btn ghost sm full" data-go="S001">Dismiss</button>
-        </div>
-      </div>`, flush: true });
+      <div class="center-col" style="height:100%;justify-content:center;gap:var(--s-4);padding:0 var(--s-4)">
+        ${C.successMark()}
+        <h3>You're all set</h3>
+        <p class="muted" style="text-align:center;max-width:30ch">Scan anything on the floor, or browse the nine brands.</p>
+        <div class="stack" style="width:100%"><button class="btn full" data-go="S101">Scan the floor</button><button class="btn ghost full" data-go="S001">Start browsing</button></div>
+      </div>` });
   },
 };
 

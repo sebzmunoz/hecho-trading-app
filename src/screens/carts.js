@@ -162,9 +162,6 @@ export const carts = {
 
   // S211 Add to cart (sheet, also screen)
   S211(params) { return base('Add to cart', { back: true, body: addToCartBody(params.p || 'p-throw') }); },
-
-  // S212 Shop the look (sheet, also screen)
-  S212(params) { return base('Shop the look', { back: true, body: shopLookBody(params.guide || 'sg-table') }); },
 };
 
 // ---- shared bodies (used by screens AND by sheets) ----
@@ -221,15 +218,4 @@ export function addToCartBody(pid) {
     ${C.sectionLabel('Add to')}
     <div class="chip-row" data-chipgroup><button class="chip is-selected">Back wall refresh</button><button class="chip">Holiday 2026</button><button class="chip" data-action="new-cart">+ New draft</button></div>
     <button class="btn full" data-action="confirm-add" data-p="${pid}">Confirm</button>`;
-}
-export function shopLookBody(gid) {
-  const g = D.styleGuideById[gid] || D.styleGuides[0];
-  const lines = g.lines.map((id) => D.productById[id]).filter(Boolean);
-  return `
-    <p class="muted">${g.title} — pick or skip each line, then add the set.</p>
-    <div class="stack tight">${lines.map((p, i) => {
-      const locked = !D.canSee(D.brandById[p.brand], state.get('tier'));
-      return `<label class="list-row dense" style="cursor:pointer;${locked ? 'opacity:.55' : ''}"><span class="thumb thumb-illo" style="width:40px;height:40px">${C.illo(p.illo, 22)}</span><span class="body"><span class="pri">${p.name}${locked ? ' · locked' : ''}</span><span class="sec">${D.brandById[p.brand].name} · $${p.wholesale}</span></span><span class="trail">${locked ? C.lockChip() : `<span class="choice"><input type="checkbox" checked /><span class="box"></span></span>`}</span></label>`;
-    }).join('')}</div>
-    <button class="btn full" data-action="confirm-look" data-guide="${g.id}">Add ${lines.length} items</button>`;
 }

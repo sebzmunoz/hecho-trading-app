@@ -112,18 +112,7 @@ export function canSee(brand, accountTier) {
   return tierRank[accountTier] >= tierRank[brand.tier];
 }
 
-// ---- "Running low at your store" (Shop home) ----
-// POS-driven: lines the buyer has ordered before, sorted by days of cover
-// left (on_hand / velocity). The motion the low-stock push (§07-B) feeds.
-export function lowStockLines(max = 4) {
-  return products
-    .filter((p) => p.lastOrderQty > 0 && p.velocity > 0 && p.onHand <= Math.ceil(p.velocity * 7))
-    .map((p) => ({ p, daysLeft: Math.round(p.onHand / p.velocity) }))
-    .sort((a, b) => a.daysLeft - b.daysLeft)
-    .slice(0, max);
-}
-
-// ---- Brand-level live stock summary (for the Live Stock board, S708) ----
+// ---- Brand-level stock summary (used by the QR brand screen, S709) ----
 export function brandStock(bid) {
   const ps = productsByBrand(bid);
   const out = ps.filter((p) => p.onHand === 0);
@@ -131,38 +120,6 @@ export function brandStock(bid) {
   const units = ps.reduce((s, p) => s + p.onHand, 0);
   return { skus: ps.length, units, out: out.length, low: low.length, outItems: out, lowItems: low };
 }
-
-// ---- Style guides (editorial, multi-brand) ----
-// Each guide carries a composed `scene`: the products drawn ON the vignette,
-// bottom-anchored at (x%, y%) of the canvas, size in px (scaled per surface).
-// The scene IS the shoppable surface on S002 — every item is tappable.
-export const styleGuides = [
-  { id: 'sg-table', title: 'The Set Table', season: 'Spring', theme: 'Home', region: 'Southwest',
-    blurb: 'A warm tablescape for the long evenings — washed linen, Talavera color, and a candle to close it.',
-    brands: ['etta', 'frida', 'savant'], lines: ['p-linen', 'p-tumbler', 'p-towel', 'p-candle', 'p-incense'],
-    scene: [
-      { p: 'p-linen', x: 14, y: 78, s: 52 }, { p: 'p-tumbler', x: 33, y: 78, s: 42 },
-      { p: 'p-towel', x: 52, y: 78, s: 48 }, { p: 'p-candle', x: 70, y: 78, s: 46 },
-      { p: 'p-incense', x: 87, y: 78, s: 44 }] },
-  { id: 'sg-counter', title: 'The Fun Counter', season: 'Summer', theme: 'Gifts', region: 'National',
-    blurb: 'Impulse buys that earn their inch of counter. A one-liner, a charm, a pen by the register.',
-    brands: ['arroyo', 'popkle', 'beljoy'], lines: ['p-cards', 'p-napkins', 'p-boba', 'p-hoops'],
-    scene: [
-      { p: 'p-cards', x: 17, y: 78, s: 50 }, { p: 'p-napkins', x: 40, y: 78, s: 52 },
-      { p: 'p-boba', x: 63, y: 78, s: 44 }, { p: 'p-hoops', x: 84, y: 78, s: 40 }] },
-  { id: 'sg-carry', title: 'Carry & Adorn', season: 'Fall', theme: 'Accessories', region: 'National',
-    blurb: 'The tote you reach for and the stack you never take off. Canvas, clay, and a little gold.',
-    brands: ['ellie', 'pompom', 'beljoy'], lines: ['p-tote', 'p-cross', 'p-necklace', 'p-bracelet'],
-    scene: [
-      { p: 'p-tote', x: 18, y: 78, s: 58 }, { p: 'p-cross', x: 44, y: 78, s: 50 },
-      { p: 'p-necklace', x: 67, y: 78, s: 40 }, { p: 'p-bracelet', x: 86, y: 78, s: 36 }] },
-  { id: 'sg-bath', title: 'Slow Bath', season: 'Winter', theme: 'Body', region: 'National',
-    blurb: 'Unscented, hand-labeled, made in cast iron. The quiet end of the shelf.',
-    brands: ['lavender'], lines: ['p-tallow', 'p-balm'],
-    scene: [
-      { p: 'p-tallow', x: 36, y: 78, s: 52 }, { p: 'p-balm', x: 62, y: 78, s: 44 }] },
-];
-export const styleGuideById = Object.fromEntries(styleGuides.map((g) => [g.id, g]));
 
 // ---- Draft carts ----
 export const carts = [
@@ -230,8 +187,7 @@ export const pushCategories = [
   { id: 'payment', label: 'Payment', icon: 'card', deep: 'S303', title: 'Invoice due soon', body: "Your {brand} invoice is due soon. Pay when you're ready." },
   { id: 'lowstock', label: 'Low stock', icon: 'warning', deep: 'S203', title: 'Running low', body: '{product} is running low at your store. Reorder?' },
   { id: 'compliance', label: 'Compliance', icon: 'doc', deep: 'S408', title: 'Tax ID renews soon', body: "Your tax ID is due for renewal. Submit when you're ready." },
-  { id: 'restock', label: 'Restock', icon: 'refresh', deep: 'S708', title: 'Back in stock', body: '{product} from {brand} is back in stock.' },
-  { id: 'styleguide', label: 'New style guide', icon: 'image', deep: 'S002', title: 'New style guide', body: 'A new look just landed: {guide}.' },
+  { id: 'restock', label: 'Restock', icon: 'refresh', deep: 'S004', title: 'Back in stock', body: '{product} from {brand} is back in stock.' },
   { id: 'branddrop', label: 'Brand drop', icon: 'sparkle', deep: 'S710', title: 'First-look open', body: '{brand} is open for first-look. See it now.' },
   { id: 'approval', label: 'Approval requests', icon: 'check', deep: 'S208', title: 'Approval needed', body: '{name} sent a draft cart for your approval.' },
   { id: 'dm', label: 'Direct messages', icon: 'chat', deep: 'S606', title: '{name}', body: '{name} sent you a message.' },
@@ -239,11 +195,10 @@ export const pushCategories = [
 export const notifications = [
   { cat: 'lifecycle', group: 'Today', title: 'Order shipped', body: 'Your order to Etta & East just shipped. Track it.', when: 'two hours ago', deep: 'S302?order=4790' },
   { cat: 'approval', group: 'Today', title: 'Approval needed', body: 'Priya N. sent a draft cart for your approval.', when: 'three hours ago', deep: 'S208' },
-  { cat: 'restock', group: 'Today', title: 'Back in stock', body: 'Wild Lip Balm from Lavender Thorne is back in stock.', when: 'four hours ago', deep: 'S708' },
+  { cat: 'restock', group: 'Today', title: 'Back in stock', body: 'Wild Lip Balm from Lavender Thorne is back in stock.', when: 'four hours ago', deep: 'S004?p=p-balm' },
   { cat: 'branddrop', group: 'Today', title: 'First-look open', body: 'Pom Pom London is open for first-look. See it now.', when: 'five hours ago', deep: 'S710?brand=pompom' },
   { cat: 'payment', group: 'Earlier this week', title: 'Invoice due soon', body: 'Your Frida Vida invoice is past due. Pay when you can.', when: 'two days ago', deep: 'S303?order=4602' },
   { cat: 'lowstock', group: 'Earlier this week', title: 'Running low', body: 'Tallow Moisturizer is running low at your store. Reorder?', when: 'three days ago', deep: 'S203' },
-  { cat: 'styleguide', group: 'Older', title: 'New style guide', body: 'A new look just landed: The Set Table.', when: 'one week ago', deep: 'S002?guide=sg-table' },
 ];
 
 // ---- Rep mode (P3) — retailers, with registration/approval status ----
@@ -259,21 +214,12 @@ export const repAppointments = [
   { retailer: 'Taos Mercantile', when: 'this afternoon', kind: 'Reserve preview' },
 ];
 
-// ---- Photo-match candidates (§07-H H2: score 0-1, show >=0.40, best-guess <0.65, cap 5) ----
-export const photoCandidates = [
-  { product: 'p-throw', score: 0.91 },
-  { product: 'p-linen', score: 0.74 },
-  { product: 'p-towel', score: 0.58 },
-  { product: 'p-tote', score: 0.43 },
-  { product: 'p-pen', score: 0.31 }, // below floor — filtered out
-];
-
 // ---- Love list seeds ----
 // Pre-loved items so the prototype demos with a lived-in list. src is where
-// the heart was tapped: 'scan' (showroom floor), 'browse', or 'guide'.
+// the heart was tapped: 'scan' (showroom floor) or 'browse'.
 export const lovedSeeds = [
   { p: 'p-candle', src: 'scan', when: 'this morning', note: '' },
-  { p: 'p-linen', src: 'guide', when: 'this morning', note: 'The Set Table look' },
+  { p: 'p-linen', src: 'browse', when: 'this morning', note: 'For the back wall table' },
   { p: 'p-necklace', src: 'browse', when: 'yesterday', note: '' },
   { p: 'p-boba', src: 'scan', when: 'yesterday', note: 'Counter impulse buy?' },
   { p: 'p-cross', src: 'browse', when: 'two days ago', note: '' },

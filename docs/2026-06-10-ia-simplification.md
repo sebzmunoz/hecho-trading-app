@@ -41,3 +41,21 @@ one entry gate, one main screen, everything else a spoke with a back button.
 
 The love list (S010/S011, hearts on every product surface) is unchanged and
 re-verified under the new structure.
+
+## Round 2 (same day) — entry rework + more cuts
+
+- **Entry is the logo and two cards, nothing else** (tagline, corner icon, and
+  "sign in another way" removed).
+- **New to Hecho = shop now.** Guests land on the main screen immediately
+  (`state.guest`); the account ask happens exactly once, at order submit
+  (registration sheet → "Application sent"). The guest's account screen explains
+  the model and offers apply / sign-in.
+- **Current customer = email + 6-digit code.** S503 is email-only (SSO and the
+  magic-link screens removed; S505 deleted), S504 is the code entry.
+- **Cut:** live stock board (S708), style guides (S002 / S705 / S212 + scenes,
+  shoppable popovers, flow F13), photo recognition (S103 / S104, flow F3,
+  the barcode/photo mode toggle — scanner is barcode-only).
+- Ripples: restock notifications now deep-link to the product page; the love
+  list loses its "From guides" source; S510 became a simple "you're all set"
+  hand-off; F1 rewritten around the new entry.
+- Inventory: **83 screens · 12 flows**; walkthrough unchanged (F1 → F2 → F15 → F6 → F7).
