@@ -1,9 +1,6 @@
 # Hecho · Wholesale showroom app
 
-Two surfaces for the **Hecho Trading Co.** wholesale showroom companion app, built to the **Design Brief v1.1** and **Design System v3.0** in [`/reference`](./reference):
-
-- **`/` — Explainer site.** A public overview of the features, the four roles (with a capability comparison chart), how the app works, tiers, and the nine brands.
-- **`/app/` — Functional prototype.** A clickable, mocked-data build of **all 91 screens**, **all 14 user flows** (end-to-end with branches), and **every documented state** — wrapped in a phone frame with a live **control panel** for driving the app and testing how each screen reacts to different variables.
+Functional prototype of the **Hecho Trading Co.** wholesale showroom companion app, built to the **Design Brief v1.1** and **Design System v3.0** in [`/reference`](./reference): a clickable, mocked-data build of **all 91 screens**, **all 14 user flows** (end-to-end with branches), and **every documented state** — wrapped in a phone frame with a live **control panel** for driving the app and testing how each screen reacts to different variables.
 
 > No build step. Pure HTML/CSS/JS. The styling is the canonical Design System CSS, used verbatim.
 
@@ -17,10 +14,10 @@ python -m http.server 8080
 npx serve .
 ```
 
-Then visit **http://localhost:8080** (explainer) and **http://localhost:8080/app/** (prototype).
+Then visit **http://localhost:8080**.
 
-Live build: deployed to **GitHub Pages** on every push to `main` (see `.github/workflows/deploy.yml`).
-Explainer: `https://sebzmunoz.github.io/hecho-trading-app/` · Prototype: `…/app/`
+Live build: deployed to **GitHub Pages** on every push to `main` (see `.github/workflows/deploy.yml`):
+**https://sebzmunoz.github.io/hecho-trading-app/** (old `…/app/` links redirect here).
 
 ## The control panel (side console)
 
@@ -32,7 +29,7 @@ Drive the prototype and watch screens react in real time:
   | Variable | Effect |
   |---|---|
   | Role | Owner / Manager / Member / Rep — submit & approve gating, Rep tab swap (§02b) |
-  | Privacy on the floor | on/off + reveal gesture; masks price, stock, spend, credit (§07-D) |
+  | Privacy on the floor | on/off; masks price, stock, spend, credit — the header eye toggles it (§07-D) |
   | POS | Connected / Connecting / Off — live stock ↔ "last counted", reorder math (§07-H) |
   | Exclusivity tier | Standard / Mid / Top — silent discovery filtering + S804 locks (§TM) |
   | Tax-ID | Current / Renews / Expired — submit warning vs. hard hold (F10) |
@@ -56,10 +53,8 @@ The console collapses (device chrome button, top-left) so you can also view the 
 ## Project structure
 
 ```
-index.html              explainer / marketing site (front door)
-site.js                 explainer content (features, roles, comparison chart, brands) + reveal
-styles/marketing.css    explainer layout (built on Design System tokens)
-app/index.html          prototype shell — device frame, role-aware header + tab bar, console
+index.html              prototype shell — device frame, role-aware header + tab bar, console
+app/index.html          redirect for old /app/ links
 styles/system.css       Design System v3.0 — canonical CSS (verbatim)
 styles/app.css          prototype chrome only (frame, console, transitions, masks)
 src/
