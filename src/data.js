@@ -262,6 +262,17 @@ export const photoCandidates = [
   { product: 'p-pen', score: 0.31 }, // below floor — filtered out
 ];
 
+// ---- Love list seeds ----
+// Pre-loved items so the prototype demos with a lived-in list. src is where
+// the heart was tapped: 'scan' (showroom floor), 'browse', or 'guide'.
+export const lovedSeeds = [
+  { p: 'p-candle', src: 'scan', when: 'this morning', note: '' },
+  { p: 'p-linen', src: 'guide', when: 'this morning', note: 'The Set Table look' },
+  { p: 'p-necklace', src: 'browse', when: 'yesterday', note: '' },
+  { p: 'p-boba', src: 'scan', when: 'yesterday', note: 'Counter impulse buy?' },
+  { p: 'p-cross', src: 'browse', when: 'two days ago', note: '' },
+];
+
 // ---- Search ----
 export const recentSearches = ['Wool Throw', 'candle', 'Talavera', 'SKU 4821-OAT'];
 export const trendingChips = ['Jewelry', 'Under MOQ', 'New drops', 'In stock', 'Reorder'];

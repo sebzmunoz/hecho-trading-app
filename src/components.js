@@ -77,6 +77,7 @@ export function wireScene(root) {
         <span class="thumb-illo" style="width:40px;height:40px;border-radius:var(--r-2);flex:0 0 auto">${illo(p.illo, 24)}</span>
         <span class="sp-body"><b>${esc(p.name)}</b><span class="muted" style="font-size:var(--fs-nano)">${esc(b.name)} · ${pricePair(p, { compact: true })}</span></span>
         <span class="sp-acts">
+          ${loveBtn(p.id, { src: 'guide' })}
           <button class="btn sm ghost" data-go="S004?p=${p.id}">View</button>
           <button class="btn sm" data-action="add-to-cart" data-p="${p.id}">Add</button>
         </span>`;
@@ -149,6 +150,18 @@ export function successMark() {
     <span class="spark s1"></span><span class="spark s2"></span><span class="spark s3"></span><span class="spark s4"></span></div>`;
 }
 
+// ---- Love button (zero-commitment capture) ----
+// One tap, no sheet, no quantity. `src` records where the heart was tapped
+// so the list can answer "where did I see this?" later.
+// Rendered as span[role=button] so it can sit inside card buttons —
+// the HTML parser flattens nested <button> elements.
+export function loveBtn(pid, { src = 'browse', overlay = false, size = 16 } = {}) {
+  const loved = state.isLoved(pid);
+  return `<span class="love-btn ${overlay ? 'overlay' : ''} ${loved ? 'is-loved' : ''}" role="button" tabindex="0"
+    data-action="love-toggle" data-p="${pid}" data-src="${src}" aria-pressed="${loved}"
+    aria-label="${loved ? 'Remove from your love list' : 'Add to your love list'}">${icon(loved ? 'heart-fill' : 'heart', size)}</span>`;
+}
+
 // ---- Price pair (A1) ----
 export function pricePair(p, { masked = true, compact = false } = {}) {
   const tier = state.get('tier');
@@ -198,7 +211,7 @@ export function productCard(p, { go = true, lockedView = false } = {}) {
     </div>`;
   }
   return `<${go ? 'button' : 'div'} class="card product" ${go ? `data-go="S004?p=${p.id}"` : ''} style="text-align:start">
-    <div class="img thumb-illo">${illo(p.illo, 64)}</div>
+    <div class="img thumb-illo">${illo(p.illo, 64)}${loveBtn(p.id, { overlay: true })}</div>
     <div class="body"><span class="brand">${esc(b.name)}</span><span class="nm">${esc(p.name)}</span>
       <div class="row">${pricePair(p, { compact: true })}<span class="muted" style="font-size:var(--fs-nano)">${esc(p.variant)}</span></div>
     </div></${go ? 'button' : 'div'}>`;
@@ -345,9 +358,10 @@ export function hActions(list) {
 // Standard header for the five primary tabs: search + notifications + privacy quick-toggle.
 // The privacy eye is NOT part of these static actions — the route renderer
 // appends it only when the rendered screen actually contains sensitive info.
-export function tabHeaderActions({ search = 'S005', bell = true } = {}) {
+export function tabHeaderActions({ search = 'S005', bell = true, love = true } = {}) {
   const list = [];
   if (search) list.push({ icon: 'search', go: search, label: 'Search' });
+  if (love) { const n = state.lovedCount(); list.push({ icon: 'heart', go: 'S010', label: 'Love list', badge: n ? String(n) : '' }); }
   if (bell) list.push({ icon: 'bell', go: 'S701', label: 'Notifications', badge: '3' });
   return hActions(list);
 }

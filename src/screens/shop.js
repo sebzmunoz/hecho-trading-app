@@ -145,7 +145,7 @@ export const shop = {
         <p class="muted" style="font-size:var(--fs-nano)">${rec ? `Behavior model: ${C.esc(D.whyString(p, state.get('pos') === 'connected'))}` : 'Connect a POS for a reorder recommendation.'}</p>
       </div>
       ${state.get('pos') !== 'connected' ? C.softPitch() : ''}
-      <div class="sticky-actions"><button class="btn ghost" data-action="save-template">Save</button><button class="btn" data-action="add-to-cart" data-p="${p.id}">Add to cart${rec ? ` · ${C.maskField(String(rec), 'recommended')}` : ''}</button></div>`;
+      <div class="sticky-actions"><button class="btn ghost" data-action="love-toggle" data-p="${p.id}" data-src="browse" aria-pressed="${state.isLoved(p.id)}">${icon(state.isLoved(p.id) ? 'heart-fill' : 'heart', 16)} ${state.isLoved(p.id) ? 'Loved' : 'Love'}</button><button class="btn" data-action="add-to-cart" data-p="${p.id}">Add to cart${rec ? ` · ${C.maskField(String(rec), 'recommended')}` : ''}</button></div>`;
     return base(p.name, { back: true, headerRight: C.hActions([{ icon: 'share', action: 'share' }]), body });
   },
 
@@ -174,7 +174,7 @@ export const shop = {
       <div class="chip-row"><button class="chip" data-action="filters">${icon('filter', 14)} Filters</button>${visibleBrands().slice(0, 4).map((b) => `<button class="chip">${b.name}</button>`).join('')}</div>
       ${matchBrands.length ? C.sectionLabel('Brands') + '<div class="stack tight">' + matchBrands.map((b) => C.listRow({ thumbIcon: 'building', pri: b.name, sec: b.cats.join(' · '), go: `S003?brand=${b.id}` })).join('') + '</div>' : ''}
       ${C.sectionLabel('Products')}
-      <div class="stack tight">${matchProds.map((p) => C.listRow({ thumb: `<span class="thumb-illo" style="width:44px;height:44px;border-radius:var(--r-2)">${C.illo(p.illo, 24)}</span>`, pri: p.name, sec: D.brandById[p.brand].name, trail: `<button class="btn sm icon-only" data-action="add-to-cart" data-p="${p.id}" aria-label="Quick add">${icon('plus', 16)}</button>`, go: `S004?p=${p.id}` })).join('')}</div>`;
+      <div class="stack tight">${matchProds.map((p) => C.listRow({ thumb: `<span class="thumb-illo" style="width:44px;height:44px;border-radius:var(--r-2)">${C.illo(p.illo, 24)}</span>`, pri: p.name, sec: D.brandById[p.brand].name, trail: `${C.loveBtn(p.id)}<span class="btn sm icon-only" role="button" tabindex="0" data-action="add-to-cart" data-p="${p.id}" aria-label="Quick add">${icon('plus', 16)}</span>`, go: `S004?p=${p.id}` })).join('')}</div>`;
     return base(`Results`, { back: true, body });
   },
 

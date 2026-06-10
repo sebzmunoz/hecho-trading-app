@@ -101,13 +101,20 @@ export const flows = [
     { screen: 'S009', text: 'First-look detail — Open the drop.', branch: { label: 'Branch · below tier', screen: 'S804?brand=marquee' } },
     { screen: 'S003', text: 'Land on the brand page with the new collection.' },
   ] },
+  { id: 'F15', name: 'Love now, decide later', persona: 'P1·P2', phase: 'P0', steps: [
+    { screen: 'S001', text: 'Every product surface carries a heart — one tap, nothing else asked.' },
+    { screen: 'S102', text: 'On the floor: scan a shelf, love it from the result card, keep walking.' },
+    { screen: 'S004', text: 'Or love it from the product page. No quantity, no draft, no sign-off.' },
+    { screen: 'S010', text: 'The list keeps the context: where you saw it, when, and a note to yourself.', branch: { label: 'Branch · empty list', screen: 'S010?_=empty' } },
+    { screen: 'S011', text: 'When you\'re ready — and only then — pick lines and start a cart. Quantities and MOQs live there, not before.' },
+  ] },
 ];
 
 export const flowById = Object.fromEntries(flows.map((f) => [f.id, f]));
 
-// Stakeholder walkthrough (acceptance criteria): F1 → F2 → F6 → F7 → F12
+// Stakeholder walkthrough (acceptance criteria): F1 → F2 → F15 → F6 → F7 → F12
 export const walkthrough = {
   name: '2-minute walkthrough',
-  line: 'Set up, scan a real shelf, reorder smart, submit and track, then protect it on the floor.',
-  flows: ['F1', 'F2', 'F6', 'F7', 'F12'],
+  line: 'Set up, scan a real shelf, love it for later, reorder smart, submit and track, then protect it on the floor.',
+  flows: ['F1', 'F2', 'F15', 'F6', 'F7', 'F12'],
 };

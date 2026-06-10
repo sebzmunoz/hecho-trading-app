@@ -1022,3 +1022,26 @@ footer .marquee span{display:inline-flex;align-items:flex-start;gap:.05em;animat
   *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;scroll-behavior:auto !important}
   .viewfinder .scan-line,.dur-row .bar-wrap i,footer .marquee span,.sync-tag .spin-dot,.btn.is-loading::after,.skeleton .s-bar,.scroll-cue::after{animation:none !important}
 }
+
+/* ============================================================
+   Love list (S010) — zero-commitment capture. The heart is the
+   anti-cart: one tap, no sheet, no quantity. Terracotta when loved.
+   ============================================================ */
+.love-btn{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:var(--r-pill);border:var(--bw-1) solid var(--line);background:var(--surface);color:var(--fg-soft);cursor:pointer;flex:0 0 auto;transition:color var(--d-fast),border-color var(--d-fast),background var(--d-fast)}
+.love-btn:hover{color:var(--accent-text);border-color:var(--accent-text)}
+.love-btn:focus-visible{outline:var(--focus-w) solid var(--focus);outline-offset:var(--focus-offset)}
+.love-btn.is-loved{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.love-btn.is-loved svg{animation:love-pop .35s var(--e-out-expo)}
+@keyframes love-pop{0%{transform:scale(.5)}55%{transform:scale(1.25)}100%{transform:scale(1)}}
+[data-reduced] .love-btn.is-loved svg{animation:none}
+/* overlay variant — floats on a product-card image */
+.card.product .img{position:relative}
+.love-btn.overlay{position:absolute;top:var(--s-2);inset-inline-end:var(--s-2);width:28px;height:28px;background:color-mix(in srgb,var(--surface) 84%,transparent);backdrop-filter:blur(4px);z-index:2}
+/* love-list rows: a tappable body + heart and menu in the trail */
+.love-row{grid-template-columns:1fr auto;cursor:default}
+.love-row .lr-open{display:grid;grid-template-columns:auto 1fr;gap:var(--s-3);align-items:center;background:none;border:0;padding:0;min-width:0;text-align:start;font-family:var(--f);color:var(--fg);cursor:pointer}
+.love-row .lr-open:focus-visible{outline:var(--focus-w) solid var(--focus);outline-offset:var(--focus-offset);border-radius:var(--r-2)}
+.love-src{display:inline-flex;align-items:center;gap:var(--s-1);font-size:var(--fs-nano);color:var(--fg-mute)}
+.love-src svg{flex:0 0 auto}
+.love-note{display:inline-flex;align-items:center;gap:var(--s-1);font-size:var(--fs-nano);color:var(--accent-text);font-style:italic}
+.love-note svg{flex:0 0 auto}

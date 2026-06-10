@@ -46,7 +46,7 @@ export const scan = {
         <div class="col"><span class="l">Last order</span><span class="v">${p.lastOrder ? `${p.lastOrderQty} · ${p.lastOrder}` : 'First time'}</span></div>
         <div class="col"><span class="l">Reorder rec</span><span class="v rec">${rec ? C.maskField(String(rec), 'recommended') : '<span class="manual-link">Reorder?</span>'}</span></div>
       </div>
-      <div class="actions"><button class="btn ghost sm" data-go="S004?p=${p.id}">View</button><button class="btn sm" data-action="add-to-cart" data-p="${p.id}" data-qty="${rec || 12}">Add${rec ? ` ×${rec}` : ''}</button></div>
+      <div class="actions">${C.loveBtn(p.id, { src: 'scan', size: 18 })}<button class="btn ghost sm" data-go="S004?p=${p.id}">View</button><button class="btn sm" data-action="add-to-cart" data-p="${p.id}" data-qty="${rec || 12}">Add${rec ? ` ×${rec}` : ''}</button></div>
     </div>`;
     return base('Scan result', { tab: 'scan', camera: true, flush: true, body: `<div style="position:relative;display:flex;flex-direction:column;height:100%">${viewfinder()}${card}</div>` });
   },

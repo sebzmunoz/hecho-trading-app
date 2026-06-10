@@ -12,6 +12,7 @@ export const you = {
     const tax = state.get('taxId');
     const role = state.get('role');
     const tiles = [
+      { ic: 'heart', label: 'Love list', go: 'S010' },
       { ic: 'user', label: 'My details', go: 'S402' },
       { ic: 'pin', label: 'Address book', go: 'S403' },
       { ic: 'user', label: 'Company users', go: 'S405' },

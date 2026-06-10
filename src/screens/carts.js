@@ -24,8 +24,10 @@ export const carts = {
     const shared = D.carts.filter((c) => c.section === 'shared');
     const pending = D.carts.filter((c) => c.section === 'pending');
     const isOwner = state.get('role') === 'owner';
+    const lovedN = state.lovedCount();
     const body = `
       ${state.get('network') !== 'online' ? '' : ''}
+      ${lovedN ? C.listRow({ thumbIcon: 'heart', pri: 'Your love list', sec: `${lovedN} saved with zero commitment — start a cart when ready`, trail: `<span class="badge">${lovedN}</span>`, go: 'S010' }) : ''}
       ${C.sectionLabel('Mine')}
       <div class="stack tight">${mine.map(C.draftCard).join('')}</div>
       ${C.sectionLabel('Shared with me')}

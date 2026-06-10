@@ -3,6 +3,8 @@
 // screens subscribe and re-render so you can watch them react.
 // ============================================================
 
+import { lovedSeeds } from './data.js';
+
 const KEY = 'hecho-proto-state-v1';
 
 const ALL_MASK_FIELDS = ['wholesale', 'stock', 'spend', 'credit', 'recommended'];
@@ -20,6 +22,7 @@ const DEFAULTS = {
   reducedMotion: false,
   repAccount: 'r-marfa',// current retailer in Rep mode
   savedBrands: [],      // brand ids the buyer saved
+  loved: lovedSeeds.map((x) => ({ ...x })), // love list — {p, src, when, note}
   cards: [],            // payment cards added in-session
   stateOverride: null,  // per-screen state forced from the panel
 };
@@ -89,6 +92,23 @@ export const state = {
   getTelemetry: () => telemetryLog.slice(),
   subscribeTelemetry(fn) { telSubs.add(fn); return () => telSubs.delete(fn); },
   clearTelemetry() { telemetryLog.length = 0; telSubs.forEach((fn) => fn(telemetryLog)); },
+
+  // ---- love list ----
+  // Capture is one tap with zero decisions; newest first on the list screen.
+  isLoved(pid) { return data.loved.some((x) => x.p === pid); },
+  lovedItems() { return data.loved.slice().reverse(); },
+  lovedCount() { return data.loved.length; },
+  toggleLove(pid, src = 'browse') {
+    const i = data.loved.findIndex((x) => x.p === pid);
+    if (i >= 0) data.loved.splice(i, 1);
+    else data.loved.push({ p: pid, src, when: 'just now', note: '' });
+    persist();
+    return i < 0;
+  },
+  setLoveNote(pid, note) {
+    const it = data.loved.find((x) => x.p === pid);
+    if (it) { it.note = note; persist(); }
+  },
 
   // ---- saved brands ----
   isBrandSaved(id) { return data.savedBrands.includes(id); },

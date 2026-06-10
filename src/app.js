@@ -8,6 +8,7 @@ import { initPanel, onRouteChange } from './panel.js';
 import { icon } from './icons.js';
 import * as C from './components.js';
 import { newCartBody, shareBody, addToCartBody, shopLookBody } from './screens/carts.js';
+import { loveToCartBody, loveNoteBody, loveMenuBody } from './screens/love.js';
 import { filtersBody } from './screens/shop.js';
 import { paymentBody, addMethodBody, addCardBody } from './screens/orders.js';
 import { registrationBody } from './screens/onboarding.js';
@@ -101,7 +102,10 @@ function tabbar(active) {
 // ---------- global delegation ----------
 screenFrame.addEventListener('click', (e) => {
   const goEl = e.target.closest('[data-go]');
-  if (goEl && goEl.getAttribute('data-go')) { e.preventDefault(); C.closeAllOverlays(); state.setEphemeral('_state', null); nav.go(goEl.dataset.go); return; }
+  // Nearest attribute wins when nested — e.g. a love heart inside a product card.
+  const nestedAct = e.target.closest('[data-action]');
+  const actWins = nestedAct && goEl && goEl !== nestedAct && goEl.contains(nestedAct);
+  if (goEl && goEl.getAttribute('data-go') && !actWins) { e.preventDefault(); C.closeAllOverlays(); state.setEphemeral('_state', null); nav.go(goEl.dataset.go); return; }
   const tabEl = e.target.closest('[data-tab]');
   if (tabEl) { e.preventDefault(); C.closeAllOverlays(); state.setEphemeral('_state', null); nav.tab(tabEl.dataset.tab); return; }
   const backEl = e.target.closest('[data-back]');
@@ -117,6 +121,14 @@ screenFrame.addEventListener('click', (e) => {
   }
   const actEl = e.target.closest('[data-action]');
   if (actEl) { e.preventDefault(); handleAction(actEl.dataset.action, actEl, e); }
+});
+
+// span[role=button] actions (e.g. love hearts inside card buttons) need
+// explicit keyboard activation — they aren't native buttons.
+screenFrame.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const el = e.target.closest('span[role="button"][data-action]');
+  if (el) { e.preventDefault(); handleAction(el.dataset.action, el, e); }
 });
 
 // ---------- actions ----------
@@ -184,6 +196,49 @@ function handleAction(action, el) {
     case 'capture-photo': nav.go('S104'); break;
     case 'flash': C.toast('Flash toggled'); break;
     case 'library': C.toast('Opening photo library…'); break;
+
+    // ---- love list ----
+    case 'love-toggle': {
+      const pid = el.dataset.p, src = el.dataset.src || 'browse';
+      const nowLoved = state.toggleLove(pid, src);
+      T(nowLoved ? 'love.added' : 'love.removed', src, pid);
+      if (el.closest('.scene-pop, .overlay-host')) {
+        // inside a popover/sheet a full re-render would dismiss it — swap in place
+        el.classList.toggle('is-loved', nowLoved);
+        el.setAttribute('aria-pressed', String(nowLoved));
+        el.setAttribute('aria-label', nowLoved ? 'Remove from your love list' : 'Add to your love list');
+        el.innerHTML = icon(nowLoved ? 'heart-fill' : 'heart', 16);
+      } else nav.refresh();
+      if (nowLoved) C.toast('On your love list', { positive: true, action: { label: 'Open', fn: () => nav.go('S010') } });
+      else C.toast('Removed from your love list', { action: { label: 'Undo', fn: () => { state.toggleLove(pid, src); nav.refresh(); } } });
+      break;
+    }
+    case 'love-menu': C.openSheet({ title: 'Loved item', html: loveMenuBody(el.dataset.p) }); break;
+    case 'love-note': { const p = el.dataset.p; C.closeAllOverlays(); C.openSheet({ title: 'A note to yourself', html: loveNoteBody(p) }); break; }
+    case 'love-note-save': {
+      const ta = (el.closest('.sheet') || screenBody).querySelector('[data-love-note]');
+      state.setLoveNote(el.dataset.p, ta ? ta.value.trim() : '');
+      T('love.note', 'list', el.dataset.p);
+      C.closeAllOverlays(); nav.refresh(); C.toast('Noted', { positive: true });
+      break;
+    }
+    case 'love-remove': {
+      const pid = el.dataset.p;
+      state.toggleLove(pid);
+      T('love.removed', 'list', pid);
+      C.closeAllOverlays(); nav.refresh();
+      C.toast('Removed from your love list', { action: { label: 'Undo', fn: () => { state.toggleLove(pid); nav.refresh(); } } });
+      break;
+    }
+    case 'love-to-cart': C.openSheet({ title: 'Start a cart', html: loveToCartBody() }); break;
+    case 'love-to-cart-confirm': {
+      const n = (el.closest('.sheet') || screenBody).querySelectorAll('[data-love-pick]:checked').length;
+      if (!n) { C.toast('Nothing picked — tick at least one'); break; }
+      T('love.to_cart', 'list', String(n));
+      C.closeAllOverlays();
+      C.toast(`Added ${n} to Back wall refresh`, { positive: true, action: { label: 'View cart', fn: () => nav.go('S202?cart=c-back') } });
+      break;
+    }
 
     // ---- tier / brand ----
     case 'request-access': T('brand.requested_access', 'brand', 'savant'); state.setEphemeral('_state', 'requested'); nav.refresh(); C.toast('Request sent — your rep will follow up', { positive: true }); break;
