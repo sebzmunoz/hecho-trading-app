@@ -15,7 +15,6 @@ export const account = {
   status: 'approved',     // registered & approved retailer
   email: 'sebz.munoz@gmail.com',
   phone: '+1 (415) 555-0148',
-  rep: 'Dana Okafor',
 };
 
 // ---- The 9 brands Marfa Studio manages through Hecho ----
@@ -82,28 +81,25 @@ export const products = [
 export const productById = Object.fromEntries(products.map((p) => [p.id, p]));
 export const productsByBrand = (bid) => products.filter((p) => p.brand === bid);
 
-// ---- §07-H H1: reorder recommendation ----
+// ---- §07-H H1: reorder recommendation (signed-in accounts only) ----
 const roundUpToPack = (n, pack) => Math.ceil(n / pack) * pack;
-export function recommendedQty(p, posConnected = true) {
-  if (!posConnected) return null;
+export function recommendedQty(p) {
   const lead = brandById[p.brand]?.lead ?? 14;
   const need = Math.max(0, Math.ceil(p.velocity * lead) - p.onHand);
   return roundUpToPack(need, p.pack);
 }
-export function whyString(p, posConnected = true) {
-  const parts = [];
-  if (posConnected) parts.push(`Sold ${Math.round(p.velocity * 30)} in 30d`);
+export function whyString(p) {
+  const parts = [`Sold ${Math.round(p.velocity * 30)} in 30d`];
   if (p.lastOrder) parts.push(`last ordered ${p.lastOrder}`);
   if (p.season) parts.push(p.season === 'in' ? 'in season' : 'off season');
   return parts.join(' · ');
 }
 
-// ---- §07-H H3: stock staleness ----
-export function stockState(p, pos) {
-  if (pos === 'disconnected') return { kind: 'unknown', label: 'Last counted ' + p.onHand, value: p.onHand, caption: 'No POS connected · manual count' };
+// ---- §07-H H3: store stock (signed-in accounts only) ----
+export function stockState(p) {
   if (p.onHand === 0) return { kind: 'out', label: 'Out of stock', value: 0, caption: p.restock ? 'Brand says: ' + p.restock : 'Restock pending' };
-  if (p.onHand <= 4) return { kind: 'low', label: `Low · ${p.onHand}`, value: p.onHand, caption: 'Live · synced just now' };
-  return { kind: 'in', label: `In stock · ${p.onHand}`, value: p.onHand, caption: 'Live · synced just now' };
+  if (p.onHand <= 4) return { kind: 'low', label: `Low · ${p.onHand}`, value: p.onHand, caption: 'Synced just now' };
+  return { kind: 'in', label: `In stock · ${p.onHand}`, value: p.onHand, caption: 'Synced just now' };
 }
 
 // ---- Tier visibility (§TM) ----
@@ -112,25 +108,12 @@ export function canSee(brand, accountTier) {
   return tierRank[accountTier] >= tierRank[brand.tier];
 }
 
-// ---- Brand-level stock summary (used by the QR brand screen, S709) ----
-export function brandStock(bid) {
-  const ps = productsByBrand(bid);
-  const out = ps.filter((p) => p.onHand === 0);
-  const low = ps.filter((p) => p.onHand > 0 && p.onHand <= 4);
-  const units = ps.reduce((s, p) => s + p.onHand, 0);
-  return { skus: ps.length, units, out: out.length, low: low.length, outItems: out, lowItems: low };
-}
-
 // ---- Draft carts ----
 export const carts = [
-  { id: 'c-back', name: 'Back wall refresh', section: 'mine', author: 'You', lastEdited: 'a few minutes ago',
+  { id: 'c-back', name: 'Back wall refresh', lastEdited: 'a few minutes ago',
     lines: [['p-throw', 8], ['p-tallow', 24], ['p-candle', 12], ['p-boba', 24]], sync: 'synced', scanSourced: true },
-  { id: 'c-holiday', name: 'Holiday 2026', section: 'mine', author: 'You', lastEdited: 'two days ago',
+  { id: 'c-holiday', name: 'Holiday 2026', lastEdited: 'two days ago',
     lines: [['p-candle', 24], ['p-incense', 12], ['p-tumbler', 16], ['p-cards', 20], ['p-napkins', 12]], sync: 'pending' },
-  { id: 'c-mday', name: "Mother's Day", section: 'shared', author: 'Priya N. (Manager)', lastEdited: 'yesterday',
-    lines: [['p-tallow', 12], ['p-necklace', 6], ['p-bracelet', 12]], sync: 'synced', sharedWith: 'You · Approve to submit' },
-  { id: 'c-spring', name: 'Spring counter', section: 'pending', author: 'Priya N. (Manager)', lastEdited: 'three hours ago',
-    lines: [['p-boba', 24], ['p-pen', 10], ['p-tumbler', 16]], sync: 'synced', awaiting: true },
 ];
 export const cartById = Object.fromEntries(carts.map((c) => [c.id, c]));
 export function cartTotal(c) { return c.lines.reduce((s, [pid, q]) => s + (productById[pid]?.wholesale || 0) * q, 0); }
@@ -174,44 +157,20 @@ export const claims = [
   { id: 'RMA-288', order: '4602', product: 'p-tumbler', qty: 1, reason: 'Damaged', status: 'Refunded', brand: 'Frida Vida', when: 'one month ago' },
 ];
 
-// ---- Company users (§02b roles) ----
-export const companyUsers = [
-  { name: 'Sebastián Muñoz', role: 'Owner', initials: 'SM', activity: 'active now', self: true },
-  { name: 'Priya Nair', role: 'Manager', initials: 'PN', activity: 'active yesterday' },
-  { name: 'Theo Vance', role: 'Member', initials: 'TV', activity: 'active three days ago' },
-];
-
 // ---- Notification categories (§07-B) + copy deck (§13) ----
 export const pushCategories = [
   { id: 'lifecycle', label: 'Order lifecycle', icon: 'truck', deep: 'S302', title: 'Order shipped', body: 'Your order to {brand} just shipped. Track it.' },
   { id: 'payment', label: 'Payment', icon: 'card', deep: 'S303', title: 'Invoice due soon', body: "Your {brand} invoice is due soon. Pay when you're ready." },
   { id: 'lowstock', label: 'Low stock', icon: 'warning', deep: 'S203', title: 'Running low', body: '{product} is running low at your store. Reorder?' },
-  { id: 'compliance', label: 'Compliance', icon: 'doc', deep: 'S408', title: 'Tax ID renews soon', body: "Your tax ID is due for renewal. Submit when you're ready." },
   { id: 'restock', label: 'Restock', icon: 'refresh', deep: 'S004', title: 'Back in stock', body: '{product} from {brand} is back in stock.' },
   { id: 'branddrop', label: 'Brand drop', icon: 'sparkle', deep: 'S710', title: 'First-look open', body: '{brand} is open for first-look. See it now.' },
-  { id: 'approval', label: 'Approval requests', icon: 'check', deep: 'S208', title: 'Approval needed', body: '{name} sent a draft cart for your approval.' },
-  { id: 'dm', label: 'Direct messages', icon: 'chat', deep: 'S606', title: '{name}', body: '{name} sent you a message.' },
 ];
 export const notifications = [
   { cat: 'lifecycle', group: 'Today', title: 'Order shipped', body: 'Your order to Etta & East just shipped. Track it.', when: 'two hours ago', deep: 'S302?order=4790' },
-  { cat: 'approval', group: 'Today', title: 'Approval needed', body: 'Priya N. sent a draft cart for your approval.', when: 'three hours ago', deep: 'S208' },
   { cat: 'restock', group: 'Today', title: 'Back in stock', body: 'Wild Lip Balm from Lavender Thorne is back in stock.', when: 'four hours ago', deep: 'S004?p=p-balm' },
   { cat: 'branddrop', group: 'Today', title: 'First-look open', body: 'Pom Pom London is open for first-look. See it now.', when: 'five hours ago', deep: 'S710?brand=pompom' },
   { cat: 'payment', group: 'Earlier this week', title: 'Invoice due soon', body: 'Your Frida Vida invoice is past due. Pay when you can.', when: 'two days ago', deep: 'S303?order=4602' },
   { cat: 'lowstock', group: 'Earlier this week', title: 'Running low', body: 'Tallow Moisturizer is running low at your store. Reorder?', when: 'three days ago', deep: 'S203' },
-];
-
-// ---- Rep mode (P3) — retailers, with registration/approval status ----
-export const repRetailers = [
-  { id: 'r-marfa', name: 'Marfa Studio', tier: 'top', city: 'Marfa, TX', status: 'approved', liveCart: 'Back wall refresh', taxId: 'Current', credit: 'Headroom $16.3k', note: 'Owner approves every cart personally.' },
-  { id: 'r-ojai', name: 'Ojai General', tier: 'standard', city: 'Ojai, CA', status: 'approved', liveCart: null, taxId: 'Renews soon', credit: 'Headroom $9.1k', note: 'Manager builds, owner is hands-off.' },
-  { id: 'r-taos', name: 'Taos Mercantile', tier: 'top', city: 'Taos, NM', status: 'approved', liveCart: 'Reserve preview', taxId: 'Current', credit: 'Headroom $40k', note: 'Top-tier. First-look on every drop.' },
-  { id: 'r-bisbee', name: 'Bisbee Co.', tier: 'standard', city: 'Bisbee, AZ', status: 'pending', liveCart: null, taxId: 'Pending', credit: 'Awaiting approval', note: 'New application — review the resale cert to approve.' },
-];
-
-export const repAppointments = [
-  { retailer: 'Marfa Studio', when: 'in 30 minutes', kind: 'Showroom walk' },
-  { retailer: 'Taos Mercantile', when: 'this afternoon', kind: 'Reserve preview' },
 ];
 
 // ---- Love list seeds ----
@@ -229,32 +188,15 @@ export const lovedSeeds = [
 export const recentSearches = ['Wool Throw', 'candle', 'Talavera', 'SKU 4821-OAT'];
 export const trendingChips = ['Jewelry', 'Under MOQ', 'New drops', 'In stock', 'Reorder'];
 
-// ---- Compliance items ----
-export const complianceItems = [
-  { id: 'taxid', label: 'Tax ID / Resale cert', status: 'renews', note: 'Renews soon' },
-  { id: 'w9', label: 'W-9', status: 'current', note: 'On file' },
-  { id: 'coi', label: 'Certificate of insurance', status: 'current', note: 'On file' },
-  { id: 'map', label: 'MAP policy', status: 'current', note: 'Signed' },
-  { id: 'terms', label: 'Signed terms', status: 'current', note: 'Net-30 accepted' },
-];
-
-// ---- Addresses ----
+// ---- Ship-to (shown at review & submit) ----
 export const addresses = [
   { id: 'a-1', name: 'Marfa Studio · Floor', line1: '207 W San Antonio St', city: 'Marfa', region: 'TX', postal: '79843', kind: 'Ship-to', def: true },
-  { id: 'a-2', name: 'Marfa Studio · Billing', line1: 'PO Box 1120', city: 'Marfa', region: 'TX', postal: '79843', kind: 'Bill-to', def: false },
 ];
 
 // ---- Saved payment methods ----
 export const paymentMethods = [
   { id: 'm-ach', kind: 'ach', label: 'ACH bank transfer', sub: 'Lowest fee · 1–2 days', icon: 'bank' },
   { id: 'm-card', kind: 'card', label: 'Saved card', sub: '•••• 4242', icon: 'card' },
-];
-
-// ---- POS vendors ----
-export const posVendors = [
-  { id: 'shopify', name: 'Shopify', status: 'connected', sync: 'synced just now' },
-  { id: 'lightspeed', name: 'Lightspeed', status: 'disconnected' },
-  { id: 'square', name: 'Square', status: 'disconnected' },
 ];
 
 // ---- Helpers ----

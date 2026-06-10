@@ -44,7 +44,7 @@ export const orders = {
       ${C.sectionLabel('Lines')}
       <div class="stack tight">${o.lines.map(([pid, q]) => { const p = D.productById[pid]; return `<div class="list-row dense"><span class="thumb thumb-illo" style="width:40px;height:40px">${C.illo(p.illo, 22)}</span><span class="body"><span class="pri">${p.name} ×${q}</span><span class="sec">${D.brandById[p.brand].name}</span></span><span class="trail">${C.maskField(C.money(p.wholesale * q), 'spend')}</span></div>`; }).join('')}</div>
       <div class="grid-2"><button class="btn ghost sm" data-go="S303?order=${o.id}">${icon('receipt', 16)} Invoice</button><button class="btn ghost sm" data-go="S307?order=${o.id}">${icon('flag', 16)} Report damage</button></div>
-      <div class="sticky-actions">${ctx}<button class="btn ghost" data-go="S606">Chat rep</button></div>`;
+      <div class="sticky-actions">${ctx}<button class="btn ghost" data-go="S704">Contact us</button></div>`;
     return base(`Order #${o.id}`, { back: true, headerRight: C.hActions([{ icon: 'dots', action: 'order-menu' }]), body });
   },
 

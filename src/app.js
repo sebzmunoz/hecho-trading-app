@@ -7,7 +7,7 @@ import { registry } from './registry.js';
 import { initPanel, onRouteChange } from './panel.js';
 import { icon } from './icons.js';
 import * as C from './components.js';
-import { newCartBody, shareBody, addToCartBody } from './screens/carts.js';
+import { newCartBody } from './screens/carts.js';
 import { loveToCartBody, loveNoteBody, loveMenuBody } from './screens/love.js';
 import { filtersBody } from './screens/shop.js';
 import { paymentBody, addMethodBody, addCardBody } from './screens/orders.js';
@@ -102,11 +102,6 @@ screenFrame.addEventListener('keydown', (e) => {
 });
 
 // ---------- actions ----------
-function curSource() {
-  const id = nav.current().id;
-  if (id === 'S102') return 'barcode';
-  return 'manual';
-}
 
 function handleAction(action, el) {
   const T = state.telemetry.bind(state);
@@ -119,27 +114,27 @@ function handleAction(action, el) {
     case 'apply-filters': C.closeAllOverlays(); C.toast('Filters applied'); break;
     case 'reset-filters': C.toast('Filters reset'); break;
 
-    // ---- add to cart ----
-    case 'add-to-cart': C.openSheet({ title: 'Add to cart', html: addToCartBody(el.dataset.p), onMount: (r) => { C.wirePrivacy(r); C.wireSteppers(r); } }); break;
-    case 'confirm-add': C.closeAllOverlays(); T('scan.result.added_to_cart', curSource(), el.dataset.p); C.toast('Added to Back wall refresh', { positive: true, action: { label: 'View', fn: () => nav.go('S202?cart=c-back') } }); break;
-    case 'add-line': C.toast('Added to the retailer\'s draft', { positive: true }); break;
+    // ---- add to cart (direct — no sheet; the product page owns quantity) ----
+    case 'add-to-cart': {
+      const p = D.productById[el.dataset.p];
+      // on the product page, read the inline stepper; elsewhere fall back to pack size
+      const inline = el.closest('.sticky-actions') ? screenBody.querySelector('[data-stepper] input') : null;
+      const qty = inline ? (parseInt(inline.value, 10) || p.pack) : (parseInt(el.dataset.qty, 10) || p.pack);
+      T('cart.line_added', nav.current().id === 'S004' ? 'detail' : 'list', el.dataset.p);
+      C.toast(`Added ×${qty} to Back wall refresh`, { positive: true, action: { label: 'View', fn: () => nav.go('S202?cart=c-back') } });
+      break;
+    }
 
-    // ---- share / approve / submit ----
-    case 'share-cart': C.openSheet({ title: 'Share draft', html: shareBody() }); break;
-    case 'send-share': C.closeAllOverlays(); T('cart.shared', 'cart', el.dataset.cart || 'c-back'); nav.go('S206'); break;
-    case 'revoke': C.toast('Share revoked'); break;
+    // ---- submit ----
     case 'submit-cart':
       // guests shop freely; account details are only asked for here
       if (state.get('guest')) { C.openSheet({ title: 'Set up your account to order', html: registrationBody() }); break; }
-      if (state.get('taxId') === 'expired') { nav.go('S410'); }
-      else nav.go('S204?cart=' + (el.dataset.cart || 'c-back'));
+      nav.go('S204?cart=' + (el.dataset.cart || 'c-back'));
       break;
     case 'confirm-submit':
       if (state.get('network') !== 'online') { C.toast('You\'re offline — reconnect to submit'); break; }
       T('cart.submitted', 'cart', el.dataset.cart || 'c-back'); nav.go('S301'); C.toast('Order submitted', { positive: true });
       break;
-    case 'approve-submit': T('cart.approved', 'cart', el.dataset.cart); nav.go('S204?cart=' + (el.dataset.cart || 'c-spring')); break;
-    case 'send-back': nav.go('S208'); C.toast('Sent back with notes'); break;
 
     // ---- payment ----
     case 'confirm-pay':
@@ -149,8 +144,8 @@ function handleAction(action, el) {
     case 'email-receipt': C.toast('Receipt emailed', { positive: true }); break;
     case 'reemail': C.toast('Invoice re-emailed', { positive: true }); break;
 
-    // ---- scanning ----
-    case 'simulate-scan': T('scan.result.shown', 'barcode', 'p-throw'); nav.go('S102?p=p-throw'); break;
+    // ---- scanning — a scan resolves straight to the product page ----
+    case 'simulate-scan': T('scan.resolved', 'barcode', 'p-throw'); nav.go('S004?p=p-throw'); break;
     case 'flash': C.toast('Flash toggled'); break;
 
     // ---- love list ----
@@ -158,8 +153,8 @@ function handleAction(action, el) {
       const pid = el.dataset.p, src = el.dataset.src || 'browse';
       const nowLoved = state.toggleLove(pid, src);
       T(nowLoved ? 'love.added' : 'love.removed', src, pid);
-      if (el.closest('.scene-pop, .overlay-host')) {
-        // inside a popover/sheet a full re-render would dismiss it — swap in place
+      if (el.closest('.overlay-host')) {
+        // inside a sheet a full re-render would dismiss it — swap in place
         el.classList.toggle('is-loved', nowLoved);
         el.setAttribute('aria-pressed', String(nowLoved));
         el.setAttribute('aria-label', nowLoved ? 'Remove from your love list' : 'Add to your love list');
@@ -201,14 +196,6 @@ function handleAction(action, el) {
     case 'save-brand': { const saved = state.toggleSavedBrand(el.dataset.brand); T('brand.saved', 'brand', el.dataset.brand); nav.refresh(); C.toast(saved ? 'Brand saved' : 'Removed from saved'); break; }
     case 'remind': C.toast('I\'ll remind you'); break;
 
-    // ---- sharing (full flow) ----
-    case 'share': { const label = (document.querySelector('.app-header .title')?.textContent || 'this').trim(); C.openSheet({ title: 'Share', html: C.shareSheetBody(label) }); break; }
-    case 'share-rep': C.closeAllOverlays(); nav.go('S606'); C.toast('Shared with your rep', { positive: true }); break;
-    case 'share-team': C.openSheet({ title: 'Send to a teammate', html: shareTeamBody() }); break;
-    case 'share-team-send': C.closeAllOverlays(); C.toast('Sent', { positive: true }); break;
-    case 'share-email': C.closeAllOverlays(); C.toast('Opening your mail composer…'); break;
-    case 'share-copy': C.closeAllOverlays(); C.toast('Link copied', { positive: true }); break;
-
     // ---- payment methods ----
     case 'add-method': C.openSheet({ title: 'Add a payment method', html: addMethodBody() }); break;
     case 'add-card': C.closeAllOverlays(); C.openSheet({ title: 'Add a card', html: addCardBody() }); break;
@@ -218,10 +205,9 @@ function handleAction(action, el) {
     case 'snooze-custom': C.openSheet({ title: 'Snooze for…', html: snoozeCustomBody() }); break;
     case 'snooze-apply': C.closeAllOverlays(); C.toast('Snoozed'); break;
 
-    // ---- registration & approval ----
+    // ---- registration ----
     case 'register': C.openSheet({ title: 'Apply to become a retailer', html: registrationBody() }); break;
     case 'submit-registration': C.closeAllOverlays(); C.openModal({ title: 'Application sent', html: '<p>Hecho reviews every new retailer. I\'ll email you the moment your store is approved, then you can place your first order.</p>', actions: [{ label: 'Got it', action: 'close-overlay' }] }); break;
-    case 'approve-retailer': { const r = D.repRetailers.find((x) => x.id === (el.dataset.r || state.get('repAccount'))); if (r) { r.status = 'approved'; r.taxId = 'Current'; r.credit = 'Headroom $12k'; } C.closeAllOverlays(); nav.refresh(); C.toast('Retailer approved', { positive: true }); break; }
 
     // ---- entry & sign-in ----
     case 'guest-enter':
@@ -241,37 +227,10 @@ function handleAction(action, el) {
     case 'close-overlay': C.closeTopOverlay(); break;
     case 'noop': break;
 
-    // ---- POS ----
-    case 'connect-pos': state.set({ pos: 'connected' }); nav.go('S413'); C.toast('Shopify connected', { positive: true }); break;
-    case 'disconnect-pos': state.set({ pos: 'disconnected' }); nav.go('S413'); C.toast('Shopify disconnected'); break;
-
-    // ---- compliance / account ----
-    case 'save-taxid': state.set({ taxId: 'current' }); nav.go('S408'); C.toast('Tax ID updated', { positive: true }); break;
+    // ---- account ----
     case 'verify': C.toast('Details verified', { positive: true }); break;
     case 'save': C.toast('Saved', { positive: true }); break;
-    case 'send-invite': C.toast('Invite sent', { positive: true }); break;
-    case 'set-default': C.toast('Default address set'); break;
-
-    // ---- rep ----
-    case 'role-switch': {
-      const toRep = state.get('role') !== 'rep';
-      state.set({ role: toRep ? 'rep' : 'owner' });
-      nav.go(toRep ? 'S602' : 'S401', { resetStack: true });
-      break;
-    }
-    case 'pick-rep': state.set({ role: 'rep' }); nav.go('S602', { resetStack: true }); break;
-    case 'pick-retailer': state.set({ repAccount: el.dataset.r }); nav.go(el.dataset.then || 'S602'); break;
-    case 'pick-retailer-name': {
-      const map = { 'Marfa Studio': 'r-marfa', 'Ojai General': 'r-ojai', 'Taos Mercantile': 'r-taos', 'Bisbee Co.': 'r-bisbee' };
-      state.set({ repAccount: map[el.dataset.n] || 'r-marfa' }); nav.go('S603'); break;
-    }
-    case 'record': C.toast('Recording memo…'); break;
     case 'voice': C.toast('Listening…'); break;
-    case 'send-msg': C.toast('Message sent', { positive: true }); break;
-
-    // ---- map ----
-    case 'pick-booth': nav.go('S709?booth=' + el.dataset.b); break;
-    case 'reset-breadcrumb': C.toast('Trail reset'); break;
 
     // ---- search / ingest ----
     case 'run-search': nav.go('S006?q=' + encodeURIComponent(el.dataset.q || '')); break;
@@ -290,24 +249,17 @@ function handleAction(action, el) {
     case 'download': C.toast('Downloaded'); break;
     case 'copy': C.toast('Copied'); break;
     case 'open-carrier': C.toast('Opening carrier site…'); break;
-    case 'export': C.toast('Report emailed', { positive: true }); break;
     case 'email-support': C.toast('Opening mail to support…'); break;
     case 'mark-read': C.toast('All marked read'); break;
     case 'sign-out': nav.go('S417'); break;
     case 'capture-rma': nav.go('S308'); break;
-    case 'capture-doc': C.toast('Document added', { positive: true }); break;
-    case 'cart-menu': case 'order-menu': C.openSheet({ title: 'Options', html: `<div class="opts"><button class="opt">${icon('share', 20)} Share</button><button class="opt">${icon('copy', 20)} Duplicate</button><button class="opt">${icon('trash', 20)} Archive</button></div>` }); break;
+    case 'cart-menu': case 'order-menu': C.openSheet({ title: 'Options', html: `<div class="opts"><button class="opt">${icon('copy', 20)} Duplicate</button><button class="opt">${icon('trash', 20)} Archive</button></div>` }); break;
 
     default: C.toast('Done'); break;
   }
 }
 
 // ---- small sheet bodies used by actions ----
-function shareTeamBody() {
-  return `<div class="stack tight">${D.companyUsers.filter((u) => !u.self).map((u) =>
-    `<label class="share-rec" style="grid-template-columns:auto auto 1fr"><label class="choice" style="margin:0"><input type="checkbox" /><span class="box"></span></label><span class="avatar sm">${u.initials}</span><span class="body"><span class="pri">${C.esc(u.name)}</span><span class="sec">${C.esc(u.role)}</span></span></label>`).join('')}</div>
-    <button class="btn full" data-action="share-team-send">Send</button>`;
-}
 function snoozeCustomBody() {
   return `<p class="muted">Pause all notifications for a custom window.</p>
     <div class="chip-row" data-chipgroup><button class="chip is-selected">2 hours</button><button class="chip">4 hours</button><button class="chip">8 hours</button><button class="chip">2 days</button><button class="chip">3 days</button></div>

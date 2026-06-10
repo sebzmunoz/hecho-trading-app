@@ -74,16 +74,19 @@ export const shop = {
           <span class="thumb-illo cc-art">${icon('grid', 28)}</span>
           <b>All products</b><span class="muted">${prods.length} total</span></button>
       </div>`;
-    return base(b.name, { back: true, headerRight: C.hActions([{ icon: 'search', go: 'S005' }, { icon: 'share', action: 'share' }]), body });
+    return base(b.name, { back: true, headerRight: C.hActions([{ icon: 'search', go: 'S005' }]), body });
   },
 
-  // S004 Product detail
+  // S004 Product detail — quantity is picked right here (no sheet). A scan
+  // lands directly on this screen. Guests see price only: no stock, no
+  // last order, no reorder rec — they have no store history.
   S004(params) {
     const p = D.productById[params.p] || D.products[0];
     const b = D.brandById[p.brand];
     if (!D.canSee(b, state.get('tier'))) return shop.S804({ brand: b.id });
+    const guest = state.get('guest');
     const variantOut = state.get('_state') === 'oos';
-    const rec = D.recommendedQty(p, state.get('pos') === 'connected');
+    const rec = guest ? null : D.recommendedQty(p);
     // Variant alternates coherent with the product's category — never apparel
     // sizes on a candle. Last alternate renders OOS in the 'oos' state.
     const ALTS = { Textiles: ['Clay', 'Dune'], Body: ['4 oz', '8 oz'], Stationery: ['Assorted 20'], Gifts: ['Box of 40'], Home: ['Terracotta', 'Sage'], Jewelry: ['Silver', 'Rose gold'], Bags: ['Olive', 'Black'], Novelty: ['Blue', 'Mint'], Candles: ['14 oz'] };
@@ -94,6 +97,13 @@ export const shop = {
         ? `<button class="chip" aria-disabled="true" style="opacity:.5">${a} · OOS</button>`
         : `<button class="chip">${a}</button>`),
     ].join('');
+    const accountRows = guest ? `
+        <div class="row-between"><span class="muted">Margin at MSRP</span><span>${Math.round((1 - p.wholesale / p.msrp) * 100)}%</span></div>` : `
+        ${C.stockRow(p)}
+        <div class="row-between"><span class="muted">Last order</span><span>${p.lastOrder ? `${p.lastOrderQty} · ${p.lastOrder}` : 'First time'}</span></div>
+        <div class="hairline"></div>
+        <div class="row-between"><span class="muted">Margin at MSRP</span><span>${Math.round((1 - p.wholesale / p.msrp) * 100)}%</span></div>
+        ${rec ? `<p class="muted" style="font-size:var(--fs-nano)">Suggested ×${rec} — ${C.esc(D.whyString(p))}</p>` : ''}`;
     const body = `
       <div class="photo-frame r-1-1"><div class="ph">${C.illo(p.illo, 120)}</div></div>
       <div><button class="chip" data-go="S003?brand=${p.brand}">${b.name}</button></div>
@@ -103,14 +113,12 @@ export const shop = {
       <div class="card" style="max-width:none">
         <div class="row-between"><span class="muted">Your price</span>${p.map ? `<span class="pill">${icon('info', 12)} MAP $${p.msrp}</span>` : ''}</div>
         <div class="row-between"><span></span>${C.pricePair(p)}</div>
-        ${C.stockRow(p)}
-        <div class="hairline"></div>
-        <div class="row-between"><span class="muted">Margin at MSRP</span>${C.maskField(`${Math.round((1 - p.wholesale / p.msrp) * 100)}%`, 'spend')}</div>
-        <p class="muted" style="font-size:var(--fs-nano)">${rec ? `Behavior model: ${C.esc(D.whyString(p, state.get('pos') === 'connected'))}` : 'Connect a POS for a reorder recommendation.'}</p>
+        ${accountRows}
       </div>
-      ${state.get('pos') !== 'connected' ? C.softPitch() : ''}
-      <div class="sticky-actions"><button class="btn ghost" data-action="love-toggle" data-p="${p.id}" data-src="browse" aria-pressed="${state.isLoved(p.id)}">${icon(state.isLoved(p.id) ? 'heart-fill' : 'heart', 16)} ${state.isLoved(p.id) ? 'Loved' : 'Love'}</button><button class="btn" data-action="add-to-cart" data-p="${p.id}">Add to cart${rec ? ` · ${C.maskField(String(rec), 'recommended')}` : ''}</button></div>`;
-    return base(p.name, { back: true, headerRight: C.hActions([{ icon: 'share', action: 'share' }]), body });
+      ${C.sectionLabel('Quantity')}
+      <div class="row-between">${C.stepper(rec || p.pack, { id: p.id })}<span class="muted" style="font-size:var(--fs-caption)">Pack of ${p.pack}${rec ? ` · suggested ${rec}` : ''}</span></div>
+      <div class="sticky-actions"><button class="btn ghost" data-action="love-toggle" data-p="${p.id}" data-src="browse" aria-pressed="${state.isLoved(p.id)}">${icon(state.isLoved(p.id) ? 'heart-fill' : 'heart', 16)} ${state.isLoved(p.id) ? 'Loved' : 'Love'}</button><button class="btn" data-action="add-to-cart" data-p="${p.id}">Add to cart</button></div>`;
+    return base(p.name, { back: true, body });
   },
 
   // S005 Search

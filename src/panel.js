@@ -90,8 +90,6 @@ function goStep() {
   navStep(step.screen);
 }
 function navStep(screen) {
-  // role auto-switch for rep screens
-  if (/^S60[0-6]/.test(screen) && state.get('role') !== 'rep') state.set({ role: 'rep' });
   const [base, q] = screen.split('?_=');
   if (q !== undefined) { nav.go(base); state.setEphemeral('_state', q); nav.refresh(); }
   else { state.setEphemeral('_state', null); nav.go(screen); }
@@ -127,13 +125,9 @@ function renderVars() {
   const stateOpts = (entry?.states || ['default']).map((st) => ({ v: st, l: st }));
   const curState = s._state || 'default';
   return `
-    <div class="var-group"><span class="gl">Persona & role</span>
-      ${row('Role', '§02b capabilities', seg('role', [{ v: 'owner', l: 'Owner' }, { v: 'manager', l: 'Manager' }, { v: 'member', l: 'Member' }, { v: 'rep', l: 'Rep' }], s.role))}
-    </div>
-    <div class="var-group"><span class="gl">Live data</span>
-      ${row('POS', 'stock & reorder (§07-H)', seg('pos', [{ v: 'connected', l: 'Live' }, { v: 'connecting', l: 'Conn…' }, { v: 'disconnected', l: 'Off' }], s.pos))}
+    <div class="var-group"><span class="gl">Account</span>
+      ${row('Guest mode', 'register at first order', seg('guest', [{ v: false, l: 'Signed in' }, { v: true, l: 'Guest' }], s.guest))}
       ${row('Exclusivity tier', 'discovery & locks', seg('tier', [{ v: 'standard', l: 'Std' }, { v: 'mid', l: 'Mid' }, { v: 'top', l: 'Top' }], s.tier))}
-      ${row('Tax-ID', 'submit gating (F10)', seg('taxId', [{ v: 'current', l: 'Current' }, { v: 'renews', l: 'Renews' }, { v: 'expired', l: 'Expired' }], s.taxId))}
     </div>
     <div class="var-group"><span class="gl">Environment</span>
       ${row('Network', '§07-A', seg('network', [{ v: 'online', l: 'Online' }, { v: 'offline', l: 'Offline' }, { v: 'slow', l: 'Slow' }], s.network))}
@@ -187,13 +181,8 @@ function setVar(key, val) {
     nav.refresh();
     return;
   }
-  const prevRole = state.get('role');
   state.set({ [key]: val });
   if (['theme', 'reducedMotion', 'network'].includes(key)) applyEnvironment();
-  if (key === 'role') {
-    if (val === 'rep') return nav.go('S602', { resetStack: true });
-    if (prevRole === 'rep') return nav.go('S401', { resetStack: true });
-  }
   nav.refresh();
 }
 

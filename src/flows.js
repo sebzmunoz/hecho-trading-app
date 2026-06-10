@@ -1,5 +1,5 @@
 // ============================================================
-// The 14 user flows (§05) as step sequences for the Flow Player.
+// The 9 user flows (§05) as step sequences for the Flow Player.
 // Each step: { screen, text, branch? } — branch jumps to an edge.
 // ============================================================
 
@@ -16,34 +16,26 @@ export const flows = [
   ] },
   { id: 'F2', name: 'Walking the showroom & scanning a real shelf', persona: 'P1·P2', phase: 'P0', steps: [
     { screen: 'S101', text: 'Open Scan — barcode only, no modes.' },
-    { screen: 'S102', text: 'Point at a barcode. The result half-sheet appears over the camera.' },
-    { screen: 'S211', text: 'Add to cart — pick a draft, set quantity.' },
-    { screen: 'S101', text: 'Sheet collapses, viewfinder live again with a confirmation chip.', branch: { label: 'Branch · camera denied', screen: 'S105' } },
+    { screen: 'S004', text: 'The scan resolves straight to the product page.', branch: { label: 'Branch · camera denied', screen: 'S105' } },
+    { screen: 'S004', text: 'Set the quantity right here — no pop-up — and add it.' },
+    { screen: 'S101', text: 'Back to the viewfinder for the next shelf.' },
   ] },
   { id: 'F4', name: 'Building a named draft cart', persona: 'P1·P2', phase: 'P0', steps: [
     { screen: 'S201', text: 'Open Carts.' },
     { screen: 'S203', text: 'New cart — name it "Back wall refresh", pick a template.' },
     { screen: 'S202', text: 'Cart detail. Add lines from any source.' },
-    { screen: 'S211', text: 'Each add runs the Add to cart sheet.' },
+    { screen: 'S004', text: 'Every add happens on the product page, quantity inline.' },
     { screen: 'S202', text: 'Edit lines, change quantity, save.', branch: { label: 'Branch · MOQ not met', screen: 'S207' } },
-  ] },
-  { id: 'F5', name: 'Sharing a draft for approval', persona: 'P1·P2', phase: 'P1', steps: [
-    { screen: 'S202', text: 'Manager finishes a draft. Tap Share.' },
-    { screen: 'S205', text: 'Pick a recipient and permission level.' },
-    { screen: 'S206', text: 'Share confirmation. Owner gets a push.' },
-    { screen: 'S208', text: 'Owner opens the approval inbox.' },
-    { screen: 'S209', text: 'Owner reviews — approve, edit, or send back.', branch: { label: 'Branch · concurrent edit', screen: 'S807' } },
-    { screen: 'S204', text: 'Approve → cart submit.' },
   ] },
   { id: 'F6', name: 'Smart reorder from past orders', persona: 'P1·P2', phase: 'P1', steps: [
     { screen: 'S201', text: 'Tap Smart reorder.' },
     { screen: 'S203', text: 'Smart reorder template selected.' },
-    { screen: 'S202', text: 'Builder lists proposed lines with the why; accept piece by piece.', branch: { label: 'Branch · no POS', screen: 'S413' } },
+    { screen: 'S202', text: 'Builder lists proposed lines with the why; accept piece by piece.' },
     { screen: 'S204', text: 'Continue to submit.' },
   ] },
   { id: 'F7', name: 'Submitting an order & its lifecycle', persona: 'P1', phase: 'P0', steps: [
     { screen: 'S202', text: 'Tap Submit.' },
-    { screen: 'S204', text: 'Review ship-to, terms, MOQ, Tax-ID. Confirm.', branch: { label: 'Branch · tax-ID expired', screen: 'S410' } },
+    { screen: 'S204', text: 'Review ship-to, terms, and MOQ. Confirm.' },
     { screen: 'S301', text: 'Order lands at the top of the index.' },
     { screen: 'S302', text: 'Lifecycle updates Open → Settled; each change fires a push.' },
   ] },
@@ -60,19 +52,6 @@ export const flows = [
     { screen: 'S308', text: 'Pre-filled claim — reason and note.', branch: { label: 'Branch · offline', screen: 'S310' } },
     { screen: 'S309', text: 'Submitted. Claim ID and brand queue routing.' },
   ] },
-  { id: 'F10', name: 'Renewing the tax ID', persona: 'P1', phase: 'P1', steps: [
-    { screen: 'S408', text: 'Compliance push deep-links to the hub.' },
-    { screen: 'S409', text: 'Re-upload the document and confirm.' },
-    { screen: 'S204', text: 'On submit with an expired tax-ID…' },
-    { screen: 'S410', text: 'Tax-ID hold blocks the submit. Resolve.' },
-  ] },
-  { id: 'F11', name: 'Rep view & co-shopping', persona: 'P3', phase: 'P2', steps: [
-    { screen: 'S602', text: 'Switch to Rep mode — the dashboard.', branch: { label: 'From the You tab', screen: 'S401' } },
-    { screen: 'S601', text: 'Pick a retailer to co-shop with.' },
-    { screen: 'S603', text: 'Retailer profile: context, credit, tax-ID.' },
-    { screen: 'S604', text: 'Co-shop live in the retailer\'s draft.' },
-    { screen: 'S606', text: 'Send a memo via chat. Switch back any time.' },
-  ] },
   { id: 'F14', name: 'Receiving a brand-launch notification', persona: 'P1', phase: 'P2', steps: [
     { screen: 'S701', text: 'A brand-drop push arrives (tier-gated).' },
     { screen: 'S710', text: 'Brand-launch arrival with first-look phrase.' },
@@ -81,8 +60,7 @@ export const flows = [
   ] },
   { id: 'F15', name: 'Love now, decide later', persona: 'P1·P2', phase: 'P0', steps: [
     { screen: 'S001', text: 'Every product surface carries a heart — one tap, nothing else asked.' },
-    { screen: 'S102', text: 'On the floor: scan a shelf, love it from the result card, keep walking.' },
-    { screen: 'S004', text: 'Or love it from the product page. No quantity, no draft, no sign-off.' },
+    { screen: 'S004', text: 'On the floor: scan lands here — love it and keep walking, no quantity needed.' },
     { screen: 'S010', text: 'The list keeps the context: where you saw it, when, and a note to yourself.', branch: { label: 'Branch · empty list', screen: 'S010?_=empty' } },
     { screen: 'S011', text: 'When you\'re ready — and only then — pick lines and start a cart. Quantities and MOQs live there, not before.' },
   ] },

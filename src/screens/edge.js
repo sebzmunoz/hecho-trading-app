@@ -26,11 +26,6 @@ export const edge = {
   // S804 Locked · tier-gated  (delegates to the shop implementation)
   S804(params) { return shop.S804(params); },
 
-  // S805 Locked · tax-ID expired (alias of S410)
-  S805() {
-    return base('Submit on hold', { noTabbar: true, body: C.fullscreenState({ ic: 'warning', title: 'Tax ID expired', body: "I'm holding this submit until the tax ID is refreshed.", actions: [{ label: 'Resolve', go: 'S409' }, { label: 'Cancel', ghost: true, action: 'back' }] }) });
-  },
-
   // S806 Locked · MOQ not met (modal-style)
   S806() {
     return base('Minimum not met', { noTabbar: true, body: `

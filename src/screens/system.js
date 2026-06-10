@@ -33,14 +33,18 @@ export const system = {
       <div class="stack tight">${C.listRow({ thumbIcon: 'draft', pri: 'Back wall refresh', sec: '4 brands', go: 'S202?cart=c-back' })}</div>` });
   },
 
-  // S704 Help & support
+  // S704 Contact us
   S704() {
-    return base('Help', { back: true, body: `
-      <div class="search"><span>${icon('search', 20)}</span><input placeholder="Search help" aria-label="Search help" /></div>
-      <button class="btn full" data-go="S606">${icon('chat', 16)} Chat with your rep</button>
-      ${C.sectionLabel('FAQ')}
-      <div class="stack tight">${['How does signing in with a code work?', 'What happens if my POS disconnects?', 'How do approvals work?', 'When is an order settled?'].map((q) => C.listRow({ thumbIcon: 'help', pri: q })).join('')}</div>
-      <button class="btn ghost full" data-action="email-support">Email Hecho support</button>` });
+    return base('Contact us', { back: true, body: `
+      <p class="muted">Questions about an order, a brand, or your account — we answer the same day.</p>
+      <button class="btn full" data-action="email-support">${icon('mail', 16)} Email us</button>
+      <div class="card" style="max-width:none">
+        <div class="row-between"><span class="muted">Email</span><b>hello@hecho.app</b></div>
+        <div class="row-between"><span class="muted">Hours</span><span>Mon–Fri · 9–6 CT</span></div>
+        <div class="row-between"><span class="muted">Showroom</span><span>Dallas Market Center</span></div>
+      </div>
+      ${C.sectionLabel('Common questions')}
+      <div class="stack tight">${['How does signing in with a code work?', 'When is an order settled?', 'How do returns work?'].map((q) => C.listRow({ thumbIcon: 'help', pri: q })).join('')}</div>` });
   },
 
   // S706 Brand directory
@@ -48,18 +52,6 @@ export const system = {
     return base('Brands', { back: true, headerRight: C.hActions([{ icon: 'search', go: 'S005' }]), body: `
       <div class="chip-row"><button class="chip is-selected">All</button><button class="chip">My tier</button><button class="chip">Invitation-only</button><button class="chip">Launching</button></div>
       <div class="stack tight">${D.brands.map((b) => { const seen = D.canSee(b, state.get('tier')); return C.brandCard(b, { locked: !seen }); }).join('')}</div>` });
-  },
-
-  // S709 Brand from QR (a brand tag scanned on the floor)
-  S709(params) {
-    const b = D.brandById[params.brand] || D.brands.find((x) => D.canSee(x, state.get('tier'))) || D.brands[0];
-    const s = D.brandStock(b.id);
-    return base(b.name, { back: true, body: `
-      <div class="thumb-illo" style="border-radius:var(--r-4);padding:var(--s-6)">${C.illo(D.productsByBrand(b.id)[0]?.illo || 'jar', 80)}</div>
-      <h3>${b.name}</h3>
-      <p class="muted">You scanned ${b.name}'s tag. Here's the live line and stock.</p>
-      <div class="chip-row"><span class="pill positive">${s.skus} SKUs</span>${s.low ? `<span class="pill caution">${s.low} low</span>` : ''}${s.out ? `<span class="pill critical">${s.out} out</span>` : ''}</div>
-      <div class="sticky-actions"><button class="btn ghost" data-action="new-cart">Sampler cart</button><button class="btn" data-go="S003?brand=${b.id}">Open brand</button></div>` });
   },
 
   // S710 Brand-launch arrival (push deep link)

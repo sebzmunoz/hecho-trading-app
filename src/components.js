@@ -92,21 +92,14 @@ export function loveBtn(pid, { src = 'browse', overlay = false, size = 16 } = {}
 }
 
 // ---- Price pair (A1) ----
-export function pricePair(p, { masked = true, compact = false } = {}) {
-  const tier = state.get('tier');
-  const inner = `<span class="price ${compact ? 'compact' : ''}"><span class="v">${p.wholesale}</span><span class="currency">USD</span>${p.msrp ? `<span class="msrp">$${p.msrp}</span>` : ''}</span>`;
-  if (masked) return maskField(inner, 'wholesale');
-  return inner;
+export function pricePair(p, { compact = false } = {}) {
+  return `<span class="price ${compact ? 'compact' : ''}"><span class="v">${p.wholesale}</span><span class="currency">USD</span>${p.msrp ? `<span class="msrp">$${p.msrp}</span>` : ''}</span>`;
 }
 
-// ---- Stock check row (A3 + H3) ----
-export function stockRow(p, { masked = true } = {}) {
-  const pos = state.get('pos');
-  const st = D.stockState(p, pos);
-  const cls = st.kind === 'unknown' ? 'unknown' : st.kind;
-  const inner = `<span class="stock ${cls}"><span class="dot"></span>${esc(st.label)}</span>`;
-  const body = masked ? maskField(inner, 'stock') : inner;
-  return `<div class="row-between"><span class="muted">Stock</span>${body}</div>
+// ---- Stock check row (A3 + H3) — signed-in only; guests never see stock ----
+export function stockRow(p) {
+  const st = D.stockState(p);
+  return `<div class="row-between"><span class="muted">Stock</span><span class="stock ${st.kind}"><span class="dot"></span>${esc(st.label)}</span></div>
     <div class="muted" style="font-size:var(--fs-nano)">${esc(st.caption)}</div>`;
 }
 
@@ -148,9 +141,7 @@ export function productCard(p, { go = true, lockedView = false } = {}) {
 
 export function draftCard(c) {
   const total = D.cartTotal(c);
-  const tag = c.sync === 'pending'
-    ? `<span class="sync-tag"><span class="spin-dot"></span>Sync pending</span>`
-    : (c.awaiting ? `<span class="tag coral">Awaiting you</span>` : `<span class="tag">${esc(c.author === 'You' ? 'Solo' : 'Shared')}</span>`);
+  const tag = c.sync === 'pending' ? `<span class="sync-tag"><span class="spin-dot"></span>Sync pending</span>` : '';
   return `<button class="card draft" data-go="S202?cart=${c.id}" style="text-align:start">
     <div class="head"><span class="nm">${esc(c.name)}</span>${tag}</div>
     <div class="meta"><span>${D.cartBrandCount(c)} brands</span><span><b>${money(total)}</b></span><span>${esc(c.lastEdited)}</span></div>
@@ -260,18 +251,6 @@ export function tabHeaderActions({ search = 'S005', bell = true, love = true } =
 }
 export function sectionLabel(t) { return `<div class="section-label">${esc(t)}</div>`; }
 
-// Share sheet body — the full share flow for a brand / product / order.
-export function shareSheetBody(label) {
-  const opt = (ic, t, sub, action) => `<button class="opt" data-action="${action}">${icon(ic, 20)}<span style="flex:1;text-align:start"><b style="display:block;font-weight:600">${esc(t)}</b><span class="muted" style="font-size:var(--fs-nano)">${esc(sub)}</span></span>${icon('chevron-right', 16)}</button>`;
-  return `<p class="muted">Share <b>${esc(label)}</b></p>
-    <div class="opts">
-      ${opt('chat', 'Send to your rep', 'Dana Okafor · in-app chat', 'share-rep')}
-      ${opt('user', 'Send to a teammate', 'Pick a company user', 'share-team')}
-      ${opt('mail', 'Email a link', 'Opens your mail composer', 'share-email')}
-      ${opt('copy', 'Copy link', 'hecho.app/…', 'share-copy')}
-    </div>`;
-}
-
 // Recompute line + cart totals after a quantity change, in place.
 export function recomputeTotals(root) {
   let grand = 0;
@@ -297,15 +276,6 @@ export function recomputeTotals(root) {
     else { chip.className = 'moq unmet'; chip.innerHTML = `${icon('warning', 12)}$${min} · $${min - sub} to go`; }
   });
   return grand;
-}
-
-// Soft pitch card (E4) — connect a POS.
-export function softPitch() {
-  if (state.get('pos') === 'connected') return '';
-  return `<div class="banner" style="flex-direction:column;align-items:flex-start;gap:var(--s-2)">
-    <div class="row-between" style="width:100%">${icon('refresh', 20)}<b style="flex:1;margin-inline-start:var(--s-2)">Connect a POS for live stock</b></div>
-    <p class="muted">I'll show live on-hand and sharper reorder picks once a POS is linked.</p>
-    <button class="btn sm" data-go="S413">Connect a POS</button></div>`;
 }
 
 // ====================================================================

@@ -4,10 +4,8 @@ import { state } from '../state.js';
 import { icon } from '../icons.js';
 import { base } from './shop.js';
 
-const roleLabel = { owner: 'Owner', manager: 'Manager', member: 'Member', rep: 'Hecho Rep' };
-
 export const you = {
-  // S401 You overview
+  // S401 Account & settings
   S401() {
     if (state.get('guest')) {
       return base('Account', { back: true, body: `
@@ -16,28 +14,19 @@ export const you = {
         <button class="btn full" data-action="register">Apply to become a retailer</button>
         <button class="btn ghost full" data-go="S503">I already have an account</button>` });
     }
-    const tax = state.get('taxId');
-    const role = state.get('role');
     const tiles = [
       { ic: 'bag', label: 'Orders', go: 'S301' },
       { ic: 'cart', label: 'Carts', go: 'S201' },
       { ic: 'heart', label: 'Love list', go: 'S010' },
       { ic: 'user', label: 'My details', go: 'S402' },
-      { ic: 'pin', label: 'Address book', go: 'S403' },
-      { ic: 'user', label: 'Company users', go: 'S405' },
-      { ic: 'shield', label: 'Compliance', go: 'S408' },
-      { ic: 'refresh', label: 'Connected POS', go: 'S413' },
       { ic: 'bell', label: 'Notifications', go: 'S411' },
-      { ic: 'help', label: 'Help & support', go: 'S704' },
+      { ic: 'chat', label: 'Contact us', go: 'S704' },
     ];
     const body = `
-      <div class="center-col" style="padding:var(--s-4) 0"><span class="avatar lg dark">${D.account.initials}</span><h3 style="margin-top:var(--s-1)">${D.account.owner}</h3><span class="muted">${roleLabel[role]} · ${D.account.retailer}</span></div>
-      ${tax !== 'current' ? C.banner(tax === 'expired' ? '<b>Tax ID expired.</b> Resolve before your next submit.' : 'Tax ID renews soon.', { kind: tax === 'expired' ? 'caution' : '', ic: tax === 'expired' ? 'warning' : 'clock', action: { label: 'Open', go: 'S409' } }) : ''}
-      ${role !== 'rep' ? C.listRow({ thumbIcon: 'swap', pri: 'Switch to Rep mode', sec: 'Co-shop with retailers', go: '', attrs: 'data-action="role-switch"' }) : C.listRow({ thumbIcon: 'swap', pri: 'Back to buyer view', sec: 'You · ' + D.account.retailer, attrs: 'data-action="role-switch"' })}
+      <div class="center-col" style="padding:var(--s-4) 0"><span class="avatar lg dark">${D.account.initials}</span><h3 style="margin-top:var(--s-1)">${D.account.owner}</h3><span class="muted">${D.account.retailer}</span></div>
       <div class="grid-2">${tiles.map((t) => `<button class="card" style="max-width:none;flex-direction:row;align-items:center;gap:var(--s-3)" data-go="${t.go}"><span style="color:var(--accent)">${icon(t.ic, 22)}</span><b style="font-size:var(--fs-caption)">${t.label}</b></button>`).join('')}</div>
-      <button class="btn ghost full" data-go="S416">${icon('list', 16)} Reports</button>
       <button class="btn ghost full" data-action="sign-out">Sign out</button>`;
-    return base('You', { tab: 'you', headerRight: C.hActions([{ icon: 'bell', go: 'S701', label: 'Notifications', badge: '3' }]), body });
+    return base('Account', { back: true, headerRight: C.hActions([{ icon: 'bell', go: 'S701', label: 'Notifications', badge: '3' }]), body });
   },
 
   // S402 My details
@@ -50,129 +39,9 @@ export const you = {
       <button class="btn full" data-action="save">Save</button>` });
   },
 
-  // S403 Address book
-  S403() {
-    return base('Address book', { back: true, headerRight: C.hActions([{ icon: 'plus', go: 'S404', label: 'Add' }]), body: `
-      <div class="stack tight">${D.addresses.map((a) => `<div class="card" style="max-width:none"><div class="row-between"><b>${a.name}</b>${a.def ? '<span class="tag positive">Default</span>' : ''}</div><span class="muted">${a.line1}, ${a.city} ${a.region} ${a.postal}</span><div class="row-between"><span class="pill">${a.kind}</span><div style="display:flex;gap:var(--s-2)"><button class="chip" data-go="S404?a=${a.id}">Edit</button>${!a.def ? '<button class="chip" data-action="set-default">Set default</button>' : ''}</div></div></div>`).join('')}</div>
-      <button class="btn full" data-go="S404">Add new address</button>` });
-  },
-
-  // S404 Address detail / add
-  S404(params) {
-    const a = D.addresses.find((x) => x.id === params.a);
-    return base(a ? 'Edit address' : 'Add address', { back: true, body: `
-      <div class="input-group"><label>Country</label><select class="select"><option>United States</option><option>Canada</option><option>Mexico</option></select></div>
-      <div class="input-group"><label>Label</label><input class="input" value="${a ? a.name : ''}" placeholder="e.g. Floor" /></div>
-      <div class="input-group"><label>Address line 1</label><input class="input" value="${a ? a.line1 : ''}" /></div>
-      <div class="grid-2"><div class="input-group"><label>City</label><input class="input" value="${a ? a.city : ''}" /></div><div class="input-group"><label>Region</label><input class="input" value="${a ? a.region : ''}" /></div></div>
-      <div class="input-group"><label>Postal</label><input class="input" value="${a ? a.postal : ''}" inputmode="numeric" /></div>
-      <div class="chip-row"><button class="chip is-selected">Ship-to</button><button class="chip">Bill-to</button></div>
-      ${C.switchRow('Set as default', a ? a.def : false)}
-      <button class="btn full" data-go="S403">Save</button>` });
-  },
-
-  // S405 Company users
-  S405() {
-    return base('Company users', { back: true, headerRight: C.hActions([{ icon: 'plus', go: 'S406', label: 'Invite' }]), body: `
-      <div class="stack tight">${D.companyUsers.map((u) => C.listRow({ thumb: `<span class="avatar">${u.initials}</span>`, pri: u.name + (u.self ? ' (you)' : ''), sec: u.activity, trail: `<span class="pill">${u.role}</span>`, go: u.self ? '' : 'S407?user=' + encodeURIComponent(u.name) })).join('')}</div>
-      <button class="btn full" data-go="S406">Invite new user</button>
-      <p class="muted">The only Owner can't be removed, and you can't demote yourself while sole Owner.</p>` });
-  },
-
-  // S406 Invite user
-  S406() {
-    return base('Invite user', { back: true, body: `
-      <div class="input-group"><label>Email</label><input class="input" placeholder="name@store.com" inputmode="email" /></div>
-      ${C.sectionLabel('Role')}
-      <div class="chip-row"><button class="chip is-selected">Manager</button><button class="chip">Member</button></div>
-      <p class="muted">Managers build and share drafts but can't submit. The Owner role can't be granted by invite.</p>
-      <button class="btn full" data-action="send-invite">Send invite</button>
-      <button class="btn ghost full" data-action="copy">Copy invite link</button>` });
-  },
-
-  // S407 Roles & permissions
-  S407(params) {
-    const groups = [
-      ['Cart', [['Create / edit / share drafts', true], ['Submit a final order', false]]],
-      ['Approval', [['Approve a draft', false], ['Grant Approve to others', false]]],
-      ['Compliance', [['Manage Tax-ID, W-9, COI', false]]],
-      ['Payment', [['Pay invoices · manage ACH', false]]],
-      ['User management', [['Invite, change role, remove', false]]],
-    ];
-    return base('Roles & permissions', { back: true, body: `
-      <div class="card" style="max-width:none"><div class="row-between"><b>${params.user || 'Priya Nair'}</b><span class="pill">Manager</span></div></div>
-      ${groups.map(([g, rows]) => `${C.sectionLabel(g)}<div class="stack tight">${rows.map(([l, on]) => C.switchRow(l, on)).join('')}</div>`).join('')}
-      ${C.sectionLabel('Rep access')}
-      ${C.switchRow('Let ' + D.account.rep + ' submit on your behalf', false, { sub: 'Off by default · per-account grant' })}
-      <button class="btn full" data-action="save">Save changes</button>` });
-  },
-
-  // S408 Compliance hub
-  S408() {
-    const tax = state.get('taxId');
-    const items = D.complianceItems.map((it) => it.id === 'taxid' ? { ...it, status: tax === 'expired' ? 'expired' : (tax === 'current' ? 'current' : 'renews') } : it);
-    return base('Compliance', { back: true, body: `
-      <div class="stack tight">${items.map((it) => C.listRow({ thumbIcon: 'shield', pri: it.label, sec: '', trail: C.statusPill(it.status), go: it.id === 'taxid' ? 'S409' : '' })).join('')}</div>
-      <button class="btn ghost full" data-action="download">Download current docs</button>` });
-  },
-
-  // S409 Tax-ID upload
-  S409() {
-    return base('Tax ID', { back: true, body: `
-      <button class="photo-frame r-3-2" data-action="capture-doc" style="border:2px dashed var(--line-strong);background:var(--surface)"><div class="ph" style="flex-direction:column;gap:var(--s-2)">${icon('doc', 48)}<span class="muted">Tap to add photo or PDF</span></div></button>
-      <div class="input-group"><label>State</label><input class="input" value="TX" /></div>
-      <div class="input-group"><label>ID number</label><input class="input" placeholder="Resale certificate #" /></div>
-      <div class="input-group"><label>Expiry</label><input class="input" placeholder="Renewal window" /></div>
-      <button class="btn full" data-action="save-taxid">Save</button>` });
-  },
-
-  // S410 Tax-ID hold (modal-style)
-  S410() {
-    return base('Submit on hold', { back: true, noTabbar: true, body: `
-      <div class="fullscreen-state"><div class="ico" style="color:var(--critical)">${icon('warning', 48)}</div><h4>Your tax ID has expired</h4><p>I'm holding this order, not your account. Refresh the tax ID and I'll let the submit through.</p><div class="actions"><button class="btn" data-go="S409">Resolve</button><button class="btn ghost" data-back>Cancel</button></div></div>` });
-  },
-
   // S411 Notification settings (alias S702)
   S411() {
     return base('Notifications', { back: true, body: notifSettingsBody() });
-  },
-
-  // S413 Connected POS
-  S413() {
-    const pos = state.get('pos');
-    const vendors = D.posVendors.map((v) => v.id === 'shopify' ? { ...v, status: pos === 'connected' ? 'connected' : (pos === 'connecting' ? 'connecting' : 'disconnected') } : v);
-    return base('Connected POS', { back: true, body: `
-      <div class="stack tight">${vendors.map((v) => C.listRow({ thumbIcon: 'refresh', pri: v.name, sec: v.status === 'connected' ? 'Synced just now' : (v.status === 'connecting' ? 'Connecting…' : 'Not connected'), trail: v.status === 'connected' ? '<span class="pill positive">Connected</span>' : `<button class="btn sm" data-go="S414?vendor=${v.id}">Connect</button>` })).join('')}</div>
-      <button class="btn ghost full" data-go="S414">Connect another POS (open API)</button>
-      <p class="muted">A disconnected POS never blocks ordering — stock falls back to "last counted".</p>` });
-  },
-
-  // S414 POS OAuth flow
-  S414(params) {
-    return base('Connect POS', { back: true, noTabbar: true, body: `
-      <div class="center-col pad-block">${icon('globe', 48)}<h3>Sign in to ${params.vendor ? params.vendor[0].toUpperCase() + params.vendor.slice(1) : 'your POS'}</h3><p class="muted">I'll open the vendor's secure login, then bring you back. Multi-store accounts pick a store on return.</p></div>
-      <div class="card" style="max-width:none"><div class="input-group"><label>Store URL</label><input class="input" value="marfa-studio.myshopify.com" /></div></div>
-      <button class="btn full" data-action="connect-pos">Approve & connect</button>
-      <button class="btn ghost full" data-back>Cancel</button>` });
-  },
-
-  // S415 POS disconnect confirm (modal)
-  S415() {
-    return base('Disconnect POS', { back: true, noTabbar: true, body: `
-      <div class="fullscreen-state"><div class="ico">${icon('warning', 48)}</div><h4>Disconnect Shopify?</h4><p>Stock checks return to "no POS connected" and reorder picks lose live data. You can reconnect any time.</p><div class="actions"><button class="btn danger" data-action="disconnect-pos">Disconnect</button><button class="btn ghost" data-back>Cancel</button></div></div>` });
-  },
-
-  // S416 Reports
-  S416() {
-    return base('Reports', { back: true, body: `
-      <div class="chip-row"><button class="chip is-selected">This season</button><button class="chip">Last season</button><button class="chip">This year</button></div>
-      <div class="grid-2">
-        <div class="card" style="max-width:none"><span class="muted">Spend</span>${C.maskField('<b style="font-size:var(--fs-h3)">$18.4k</b>', 'spend')}</div>
-        <div class="card" style="max-width:none"><span class="muted">Reorder rate</span><b style="font-size:var(--fs-h3)">42%</b></div>
-      </div>
-      ${C.sectionLabel('Top brands')}
-      <div class="stack tight">${['Cedar House', 'Marlow', 'Lavender Thorne'].map((b, i) => C.listRow({ thumbIcon: 'building', pri: b, sec: `${[6, 5, 4][i]} orders`, trail: C.maskField(C.money([5200, 4100, 3300][i]), 'spend') })).join('')}</div>
-      <button class="btn ghost full" data-action="export">Email full report</button>` });
   },
 
   // S417 Sign out (modal)

@@ -59,3 +59,20 @@ re-verified under the new structure.
   list loses its "From guides" source; S510 became a simple "you're all set"
   hand-off; F1 rewritten around the new entry.
 - Inventory: **83 screens · 12 flows**; walkthrough unchanged (F1 → F2 → F15 → F6 → F7).
+
+## Round 3 (same day) — single-buyer model, scan-to-page, no pop-up adds
+
+- **Scan resolves straight to the product page** (the scan-result half-sheet is gone),
+  and **quantity lives inline on the product page** — the add-to-cart sheet is removed
+  everywhere; quick-adds (+) add a pack directly with an undoable toast.
+- **Guests see price only**: no store stock, no last order, no suggested quantity
+  (they have no purchase history); the quantity stepper defaults to pack size.
+  Signed-in buyers keep stock / last order / suggested ×N on the product page.
+- **Removed wholesale**: sharing (sheets, header icons, cart shares, approvals),
+  the map/QR-booth feature, rep mode (screens, role machinery, co-shopping, F11),
+  tax-ID + compliance (screens, submit gate, F10), address book, company users +
+  invites + roles, connected POS (screens, state, onboarding step), reports.
+  "Help & support" became **Contact us** (email + hours).
+- The app is now a **single-buyer model**: one account, drafts are simply yours,
+  the only approval that exists is Hecho approving a new retailer.
+- Inventory: **55 screens · 9 flows** (F3, F5, F10, F11, F12, F13 all retired).

@@ -57,17 +57,6 @@ export const onboarding = {
       <button class="btn ghost sm full" data-go="S503">Use a different email</button>` });
   },
 
-  // S506 Account picker
-  S506() {
-    return base('Choose account', { noTabbar: true, body: `
-      <p class="muted">You belong to more than one account. Pick where to work.</p>
-      <div class="stack tight">
-        ${C.listRow({ thumb: '<span class="avatar dark">SM</span>', pri: 'Marfa Studio', sec: 'Owner', go: 'S507' })}
-        ${C.listRow({ thumb: '<span class="avatar">OG</span>', pri: 'Ojai General', sec: 'Manager', go: 'S507' })}
-        ${C.listRow({ thumb: '<span class="avatar">HR</span>', pri: 'Hecho field rep', sec: 'Rep · 4 retailers', go: '', attrs: 'data-action="pick-rep"' })}
-      </div>` });
-  },
-
   // S507 Camera permission prompt
   S507() {
     return base('', { noTabbar: true, hideHeader: true, body: `
@@ -81,17 +70,7 @@ export const onboarding = {
     return base('', { noTabbar: true, hideHeader: true, body: `
       <div class="center-col" style="height:100%;justify-content:center;gap:var(--s-4);padding:0 var(--s-4)">${icon('bell', 64)}<h3>Stay in the loop</h3><p class="muted" style="text-align:center;max-width:32ch">Get a ping when an order ships, stock runs low, or a brand opens first-look.</p>
       <div class="chip-row" style="justify-content:center;flex-wrap:wrap">${preview.map((p) => `<span class="chip">${p}</span>`).join('')}</div>
-      <div class="stack" style="width:100%"><button class="btn full" data-go="S509">Allow notifications</button><button class="btn ghost full" data-go="S509">Skip</button></div></div>` });
-  },
-
-  // S509 POS connect invite
-  S509() {
-    return base('Connect a POS', { noTabbar: true, body: `
-      <p class="muted">Link a POS for live stock and sharper reorder picks. You can skip and do this later.</p>
-      <div class="stack tight">${['Shopify', 'Lightspeed', 'Square'].map((v) => C.listRow({ thumbIcon: 'refresh', pri: v, sec: 'Connect', go: 'S414?vendor=' + v.toLowerCase() })).join('')}</div>
-      <button class="btn ghost full" data-go="S414">Connect another POS (open API)</button>
-      <button class="btn full" data-go="S510">Continue</button>
-      <button class="btn ghost sm full" data-go="S001">Skip for now</button>` });
+      <div class="stack" style="width:100%"><button class="btn full" data-go="S510">Allow notifications</button><button class="btn ghost full" data-go="S510">Skip</button></div></div>` });
   },
 
   // S510 First showroom-visit cue

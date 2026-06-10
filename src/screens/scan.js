@@ -1,5 +1,4 @@
 import * as C from '../components.js';
-import * as D from '../data.js';
 import { state } from '../state.js';
 import { icon } from '../icons.js';
 import { base } from './shop.js';
@@ -27,26 +26,6 @@ export const scan = {
         <button class="cam-link" data-go="S106">Enter SKU by hand</button>
       </div>`;
     return base('Scan', { tab: 'scan', camera: true, flush: true, body: `<div style="position:relative;display:flex;flex-direction:column;height:100%">${viewfinder(controls)}</div>` });
-  },
-
-  // S102 Scan result (half-sheet over camera)
-  S102(params) {
-    const p = D.productById[params.p] || D.productById['p-throw'];
-    const b = D.brandById[p.brand];
-    const rec = D.recommendedQty(p, state.get('pos') === 'connected');
-    const st = D.stockState(p, state.get('pos'));
-    const stockVal = st.kind === 'out' ? 'Out' : (st.kind === 'unknown' ? String(st.value) : String(st.value));
-    const card = `<div class="scan-result" style="position:absolute;left:var(--s-3);right:var(--s-3);bottom:var(--s-3);z-index:6;width:auto;max-width:none">
-      <div class="top"><div class="info"><span class="brand">${b.name}</span><span class="nm">${p.name}</span><span class="muted" style="font-size:var(--fs-nano)">${p.variant}</span></div>${p.map ? `<span class="pill">${icon('info', 12)} MAP</span>` : ''}</div>
-      <div class="grid-info">
-        <div class="col"><span class="l">Your price</span><span class="v">${C.pricePair(p, { compact: true })}</span></div>
-        <div class="col"><span class="l">Your stock</span><span class="v">${C.maskField(stockVal, 'stock')}</span></div>
-        <div class="col"><span class="l">Last order</span><span class="v">${p.lastOrder ? `${p.lastOrderQty} · ${p.lastOrder}` : 'First time'}</span></div>
-        <div class="col"><span class="l">Reorder rec</span><span class="v rec">${rec ? C.maskField(String(rec), 'recommended') : '<span class="manual-link">Reorder?</span>'}</span></div>
-      </div>
-      <div class="actions">${C.loveBtn(p.id, { src: 'scan', size: 18 })}<button class="btn ghost sm" data-go="S004?p=${p.id}">View</button><button class="btn sm" data-action="add-to-cart" data-p="${p.id}" data-qty="${rec || 12}">Add${rec ? ` ×${rec}` : ''}</button></div>
-    </div>`;
-    return base('Scan result', { tab: 'scan', camera: true, flush: true, body: `<div style="position:relative;display:flex;flex-direction:column;height:100%">${viewfinder()}${card}</div>` });
   },
 
   // S105 Permission denied (camera)

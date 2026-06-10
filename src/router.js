@@ -27,15 +27,10 @@ function translateDeepLink(s) {
       orders: (i) => `S302?order=${i}`,
       carts: (i) => `S202?cart=${i}`,
       brands: (i) => `S003?brand=${i}`,
-      compliance: () => `S408`,
     };
-    if (seg === 'compliance') return 'S408';
     if (map[seg]) return map[seg](id);
     return 'S001';
   }
-  // Showroom QR: https://qr.hecho.app/booth/{showroomId}/{boothId}
-  const qr = s.match(/qr\.hecho\.app\/booth\/([^/]+)\/([^/?#]+)/);
-  if (qr) return `S709?showroom=${qr[1]}&booth=${qr[2]}`;
   return s;
 }
 

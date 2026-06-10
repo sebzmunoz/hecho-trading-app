@@ -8,27 +8,15 @@ import { lovedSeeds } from './data.js';
 const KEY = 'hecho-proto-state-v1';
 
 const DEFAULTS = {
-  role: 'owner',        // owner | manager | member | rep   (§02b)
   guest: false,         // "New to Hecho" path — shop now, register at first order
-  pos: 'connected',     // connected | connecting | disconnected (§07-H H3)
   tier: 'top',          // standard | mid | top  (§TM) — top = you manage all 9 brands
-  taxId: 'renews',      // current | renews | expired (F10)
   network: 'online',    // online | offline | slow (§07-A)
   theme: 'light',       // light | dark
   reducedMotion: false,
-  repAccount: 'r-marfa',// current retailer in Rep mode
   savedBrands: [],      // brand ids the buyer saved
   loved: lovedSeeds.map((x) => ({ ...x })), // love list — {p, src, when, note}
   cards: [],            // payment cards added in-session
   stateOverride: null,  // per-screen state forced from the panel
-};
-
-// Capabilities per role (§02b roles & capabilities matrix)
-const CAPS = {
-  owner:   { submit: true,  approve: true,  grantApprove: true, compliance: true, pay: true, users: true },
-  manager: { submit: false, approve: false, grantApprove: false, compliance: 'view', pay: false, users: false },
-  member:  { submit: false, approve: false, grantApprove: false, compliance: 'view', pay: false, users: false },
-  rep:     { submit: 'grant', approve: false, grantApprove: false, compliance: 'view', pay: false, users: false },
 };
 
 function load() {
@@ -51,7 +39,6 @@ function persist() {
 
 export const state = {
   get: (k) => (k ? data[k] : { ...data }),
-  caps: () => CAPS[data.role] || CAPS.owner,
 
   set(patch, opts = {}) {
     let changed = false;

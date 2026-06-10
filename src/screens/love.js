@@ -64,8 +64,7 @@ export const love = {
         </div>`;
       }).join('')}
       <div class="sticky-actions">
-        <button class="btn ghost" data-action="share">${icon('share', 16)} Share</button>
-        <button class="btn" data-action="love-to-cart">Start a cart</button>
+        <button class="btn full" data-action="love-to-cart">Start a cart</button>
       </div>`;
     return base('Love list', { back: true, headerRight: C.hActions([{ icon: 'search', go: 'S005', label: 'Search' }]), body });
   },
