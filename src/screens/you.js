@@ -12,6 +12,8 @@ export const you = {
     const tax = state.get('taxId');
     const role = state.get('role');
     const tiles = [
+      { ic: 'bag', label: 'Orders', go: 'S301' },
+      { ic: 'cart', label: 'Carts', go: 'S201' },
       { ic: 'heart', label: 'Love list', go: 'S010' },
       { ic: 'user', label: 'My details', go: 'S402' },
       { ic: 'pin', label: 'Address book', go: 'S403' },
@@ -19,7 +21,6 @@ export const you = {
       { ic: 'shield', label: 'Compliance', go: 'S408' },
       { ic: 'refresh', label: 'Connected POS', go: 'S413' },
       { ic: 'bell', label: 'Notifications', go: 'S411' },
-      { ic: 'eye-off', label: 'Privacy on the floor', go: 'S412' },
       { ic: 'help', label: 'Help & support', go: 'S704' },
     ];
     const body = `
@@ -127,18 +128,6 @@ export const you = {
   // S411 Notification settings (alias S702)
   S411() {
     return base('Notifications', { back: true, body: notifSettingsBody() });
-  },
-
-  // S412 Privacy on the floor — toggle-only, nothing to configure
-  S412() {
-    const on = state.get('privacyOn');
-    return base('Privacy on the floor', { back: true, body: `
-      ${C.switchRow('Privacy on the floor', on, { sub: 'On by default on the showroom floor', action: 'toggle-privacy' })}
-      <p class="muted">While it's on, your numbers render as dots so a neighbor can't read them over your shoulder. Whenever something sensitive is on-screen, the eye appears in the header — tap it to reveal, tap again to re-mask.</p>
-      ${C.sectionLabel('What gets masked')}
-      <div class="chip-row"><span class="chip">Negotiated wholesale</span><span class="chip">On-hand stock</span><span class="chip">Past spend & margin</span><span class="chip">Credit balance</span><span class="chip">Reorder quantity</span></div>
-      <div class="card" style="max-width:none"><span class="muted" style="font-size:var(--fs-nano)">PREVIEW</span>
-        <div class="row-between"><span class="muted">Your price</span>${C.maskField('<b>$18 wholesale</b>', 'wholesale')}</div></div>` });
   },
 
   // S413 Connected POS

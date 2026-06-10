@@ -73,7 +73,7 @@ function renderFlows() {
     <span class="cid">${f.id}</span><span class="cnm">${esc(f.name)}</span><span class="cph">${f.phase}</span></button>`).join('');
   return `
     <button class="c-item" data-flow-walk style="border-color:var(--accent);background:color-mix(in srgb,var(--accent) 6%,transparent)">
-      <span class="cid">▶</span><span class="cnm"><b>${esc(walkthrough.name)}</b><br/><span class="muted" style="font-size:var(--fs-nano)">F1 → F2 → F6 → F7 → F12</span></span></button>
+      <span class="cid">▶</span><span class="cnm"><b>${esc(walkthrough.name)}</b><br/><span class="muted" style="font-size:var(--fs-nano)">${esc(walkthrough.flows.join(' → '))}</span></span></button>
     ${player}
     <div class="c-group-h">All flows <span>${flows.length}</span></div>
     <div class="console-list">${items}</div>`;
@@ -130,10 +130,6 @@ function renderVars() {
     <div class="var-group"><span class="gl">Persona & role</span>
       ${row('Role', '§02b capabilities', seg('role', [{ v: 'owner', l: 'Owner' }, { v: 'manager', l: 'Manager' }, { v: 'member', l: 'Member' }, { v: 'rep', l: 'Rep' }], s.role))}
     </div>
-    <div class="var-group"><span class="gl">Privacy on the floor</span>
-      ${row('Privacy', 'masked by default', seg('privacyOn', [{ v: true, l: 'On' }, { v: false, l: 'Off' }], s.privacyOn))}
-
-    </div>
     <div class="var-group"><span class="gl">Live data</span>
       ${row('POS', 'stock & reorder (§07-H)', seg('pos', [{ v: 'connected', l: 'Live' }, { v: 'connecting', l: 'Conn…' }, { v: 'disconnected', l: 'Off' }], s.pos))}
       ${row('Exclusivity tier', 'discovery & locks', seg('tier', [{ v: 'standard', l: 'Std' }, { v: 'mid', l: 'Mid' }, { v: 'top', l: 'Top' }], s.tier))}
@@ -153,7 +149,7 @@ function renderVars() {
 // ---------- TELEMETRY ----------
 function renderTelemetry() {
   const log = state.getTelemetry();
-  if (!log.length) return `<div class="tel-empty">No events yet. Tap around the app — §07-G events (scan, cart, privacy, payment…) log here as affordances fire.</div>`;
+  if (!log.length) return `<div class="tel-empty">No events yet. Tap around the app — §07-G events (scan, cart, love, payment…) log here as affordances fire.</div>`;
   return `<button class="btn ghost sm full" data-tel-clear style="margin-bottom:var(--s-2)">Clear log</button>
     <div class="telemetry">${log.map((e) => `<div class="tel-row"><span class="ts">${e.n}</span><span class="te">${esc(e.event)}</span>${e.source ? `<span class="tsrc">${esc(e.source)}</span>` : ''}</div>`).join('')}</div>`;
 }

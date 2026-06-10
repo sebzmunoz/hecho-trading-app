@@ -160,9 +160,6 @@ export const carts = {
         <button class="btn" data-action="approve-submit" data-cart="${c.id}">Approve</button></div>` });
   },
 
-  // S210 Privacy toggle (sheet, also screen)
-  S210() { return base('Privacy on the floor', { back: true, body: privacyBody() }); },
-
   // S211 Add to cart (sheet, also screen)
   S211(params) { return base('Add to cart', { back: true, body: addToCartBody(params.p || 'p-throw') }); },
 
@@ -205,11 +202,6 @@ export function shareBody() {
     </div>
     <div class="input-group"><label>Note</label><textarea class="textarea" placeholder="Optional note"></textarea></div>
     <button class="btn full" data-action="send-share">Send to selected</button>`;
-}
-export function privacyBody() {
-  return `
-    ${C.switchRow('Privacy on the floor', state.get('privacyOn'), { sub: 'Mask wholesale, stock, spend, and credit', action: 'toggle-privacy' })}
-    <p class="muted">One switch, nothing to configure. Whenever something sensitive is on-screen, the eye appears in the header — tap it to reveal everything, tap again to re-mask.</p>`;
 }
 export function addToCartBody(pid) {
   const p = D.productById[pid] || D.products[0];

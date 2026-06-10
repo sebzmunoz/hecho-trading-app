@@ -1,6 +1,5 @@
 import * as C from '../components.js';
 import * as D from '../data.js';
-import { state } from '../state.js';
 import { icon } from '../icons.js';
 import { base } from './shop.js';
 
@@ -16,23 +15,29 @@ export const onboarding = {
       </div>`, flush: false });
   },
 
-  // S502 Welcome (3-card carousel)
+  // S502 Entry — the first interactive screen: logo + current/new choice.
+  // Account & settings sits in the corner; deeper auth stays one tap away.
   S502() {
-    const cards = [
-      { ic: 'scan', t: 'Scan the shelf', b: 'Point at any product on the floor. I resolve it to your live stock.' },
-      { ic: 'draft', t: 'Build a draft', b: 'Drop lines into a named draft cart from scan, search, or a style guide.' },
-      { ic: 'reorder', t: 'Reorder smart', b: 'Past orders become starting points, ranked by what actually sells.' },
-    ];
     const body = `
-      <div class="welcome">
-        ${mark('108px')}
-        <div class="carousel" id="welcomeCarousel">
-          <div class="carousel-track">${cards.map((c) => `<div class="slide"><div class="slide-ic">${icon(c.ic, 56)}</div><h3>${c.t}</h3><p class="muted">${c.b}</p></div>`).join('')}</div>
+      <div class="entry">
+        <button class="corner-btn" data-go="S401" aria-label="Account & settings">${icon('user', 20)}</button>
+        <div class="entry-brand">${mark('min(210px, 56%)')}
+          <p class="entry-tag">Wholesale, straight from the floor.</p></div>
+        <div class="entry-choices">
+          <button class="entry-card" data-go="S001">
+            <span class="ec-ic">${icon('bag', 26)}</span>
+            <span class="ec-body"><b>Current customer</b><span>Shop the floor with your account</span></span>
+            <span class="ec-arr">${icon('chevron-right', 18)}</span>
+          </button>
+          <button class="entry-card" data-action="register">
+            <span class="ec-ic">${icon('sparkle', 26)}</span>
+            <span class="ec-body"><b>New to Hecho</b><span>Apply to become a retailer — quick review</span></span>
+            <span class="ec-arr">${icon('chevron-right', 18)}</span>
+          </button>
         </div>
-        <div class="dots" id="welcomeDots">${cards.map((_, i) => `<button class="dot ${i === 0 ? 'is-on' : ''}" data-slide="${i}" aria-label="Card ${i + 1}"></button>`).join('')}</div>
-        <div class="stack" style="width:100%"><button class="btn full" data-go="S503">Sign in</button><button class="btn ghost full" data-go="S503">Skip</button></div>
+        <button class="entry-alt" data-go="S503">Sign in another way</button>
       </div>`;
-    return base('', { noTabbar: true, hideHeader: true, body, onMount: wireCarousel });
+    return base('', { noTabbar: true, hideHeader: true, body });
   },
 
   // S503 Sign in
@@ -116,25 +121,6 @@ export const onboarding = {
       </div>`, flush: true });
   },
 };
-
-// Welcome carousel wiring: clickable dots, swipe, gentle auto-advance.
-function wireCarousel(root) {
-  const car = root.querySelector('#welcomeCarousel');
-  if (!car) return;
-  const track = car.querySelector('.carousel-track');
-  const dots = [...root.querySelectorAll('#welcomeDots .dot')];
-  const n = track.children.length;
-  let i = 0;
-  const go = (k) => { i = (k + n) % n; track.style.transform = `translateX(-${i * 100}%)`; dots.forEach((d, j) => d.classList.toggle('is-on', j === i)); };
-  dots.forEach((d) => d.addEventListener('click', () => { go(parseInt(d.dataset.slide, 10)); restart(); }));
-  let sx = null;
-  car.addEventListener('pointerdown', (e) => { sx = e.clientX; });
-  car.addEventListener('pointerup', (e) => { if (sx == null) return; const dx = e.clientX - sx; if (dx < -40) go(i + 1); else if (dx > 40) go(i - 1); sx = null; restart(); });
-  if (window._welcomeTimer) clearInterval(window._welcomeTimer);
-  const auto = () => { if (state.get('reducedMotion')) return; window._welcomeTimer = setInterval(() => go(i + 1), 3600); };
-  const restart = () => { if (window._welcomeTimer) clearInterval(window._welcomeTimer); auto(); };
-  auto();
-}
 
 // Retailer registration (apply for an account, then await Hecho approval).
 export function registrationBody() {

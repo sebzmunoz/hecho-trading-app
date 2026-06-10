@@ -6,7 +6,6 @@
 let renderFn = null;
 let suppress = false;
 const stack = [];                 // history of {id, params, query}
-export const TAB_HOME = { shop: 'S001', scan: 'S101', carts: 'S201', orders: 'S301', you: 'S401', retailers: 'S602' };
 
 function parseRoute(str) {
   // accept "S004?p=x" | "#/S004?p=x" | deep links
@@ -70,11 +69,6 @@ export const nav = {
     }
     return false;
   },
-  // switch tab → go to that tab's home (resetting the stack to that tab)
-  tab(tabId) {
-    const home = TAB_HOME[tabId];
-    if (home) this.go(home, { resetStack: true });
-  },
   current() { return stack[stack.length - 1] || parseRoute('S001'); },
   canBack() { return stack.length > 1; },
   // re-render current route (used when a Variable changes)
@@ -89,8 +83,8 @@ export function initRouter(fn) {
     stack.push(r);
     renderFn && renderFn(r, { direction: 'forward' });
   });
-  // initial route
-  const initial = location.hash ? parseRoute(location.hash) : parseRoute('S001');
+  // initial route — a cold open lands on the entry choice screen
+  const initial = location.hash ? parseRoute(location.hash) : parseRoute('S502');
   stack.push(initial);
   renderFn && renderFn(initial, { direction: 'init' });
 }

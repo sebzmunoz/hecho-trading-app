@@ -2,7 +2,7 @@
 // App boot + route renderer + global action handling.
 // ============================================================
 import { state, applyEnvironment } from './state.js';
-import { nav, initRouter, TAB_HOME } from './router.js';
+import { nav, initRouter } from './router.js';
 import { registry } from './registry.js';
 import { initPanel, onRouteChange } from './panel.js';
 import { icon } from './icons.js';
@@ -20,7 +20,6 @@ const appHeader = $('#appHeader');
 const screenBody = $('#screenBody');
 const screenScroll = $('#screen-scroll');
 const netSlot = $('#netSlot');
-const tabbarWrap = $('#tabbarWrap');
 
 window.HECHO = { nav, state };
 
@@ -39,11 +38,11 @@ function renderRoute(route, { direction } = {}) {
   try { spec = entry.render(route.params || {}) || {}; }
   catch (err) { console.error('render error', route.id, err); spec = registry.S803.render({}); }
 
-  // header
+  // header — hub-and-spoke: every screen except the hubs can get back home
   if (spec.hideHeader) { appHeader.hidden = true; }
   else {
     appHeader.hidden = false;
-    const showBack = spec.back || nav.canBack();
+    const showBack = spec.back || nav.canBack() || !['S001', 'S501', 'S502'].includes(route.id);
     appHeader.classList.toggle('on-camera', !!spec.camera);
     appHeader.innerHTML = `
       ${showBack ? `<button class="back" data-back aria-label="Back">${icon('chevron-left', 22)}</button>` : `<span style="width:8px"></span>`}
@@ -65,38 +64,12 @@ function renderRoute(route, { direction } = {}) {
   screenBody.innerHTML = spec.body || '';
   screenScroll.scrollTop = 0;
 
-  // tab bar
-  if (spec.noTabbar) tabbarWrap.hidden = true;
-  else { tabbarWrap.hidden = false; tabbarWrap.innerHTML = tabbar(spec.tab); }
-
-  // privacy eye — appears only when the screen actually shows sensitive info
-  if (!spec.hideHeader && screenBody.querySelector('.mask-inline, .privacy-row')) {
-    const on = state.get('privacyOn');
-    const actions = appHeader.lastElementChild;
-    actions.insertAdjacentHTML('beforeend',
-      `<button class="hicon" data-action="privacy-toggle" aria-pressed="${on}"
-        aria-label="${on ? 'Privacy on the floor is on. Tap to reveal sensitive values.' : 'Privacy is off. Tap to mask sensitive values.'}">${icon(on ? 'eye-off' : 'eye', 22)}</button>`);
-  }
-
   // wiring
   C.wireScene(screenBody);
   C.wireSteppers(screenBody, () => C.recomputeTotals(screenBody));
   if (spec.onMount) try { spec.onMount(screenBody); } catch (e) { console.error(e); }
 
   onRouteChange(route);
-}
-
-function tabbar(active) {
-  const rep = state.get('role') === 'rep';
-  const tabs = [
-    { id: 'shop', label: 'Shop', ic: 'home' },
-    { id: 'scan', label: 'Scan', ic: 'scan' },
-    { id: 'carts', label: 'Carts', ic: 'cart' },
-    { id: 'orders', label: 'Orders', ic: 'bag' },
-    rep ? { id: 'retailers', label: 'Retailers', ic: 'building' } : { id: 'you', label: 'You', ic: 'user' },
-  ];
-  return `<nav class="tabbar" role="tablist" aria-label="Primary">${tabs.map((t) =>
-    `<button class="tab ${t.id === active ? 'is-active' : ''}" data-tab="${t.id}" aria-selected="${t.id === active}"><span class="dot"></span>${icon(t.ic, 24)}<span>${t.label}</span></button>`).join('')}</nav>`;
 }
 
 // ---------- global delegation ----------
@@ -106,8 +79,6 @@ screenFrame.addEventListener('click', (e) => {
   const nestedAct = e.target.closest('[data-action]');
   const actWins = nestedAct && goEl && goEl !== nestedAct && goEl.contains(nestedAct);
   if (goEl && goEl.getAttribute('data-go') && !actWins) { e.preventDefault(); C.closeAllOverlays(); state.setEphemeral('_state', null); nav.go(goEl.dataset.go); return; }
-  const tabEl = e.target.closest('[data-tab]');
-  if (tabEl) { e.preventDefault(); C.closeAllOverlays(); state.setEphemeral('_state', null); nav.tab(tabEl.dataset.tab); return; }
   const backEl = e.target.closest('[data-back]');
   if (backEl) { e.preventDefault(); if (!nav.back()) nav.go('S001'); return; }
   const segEl = e.target.closest('.segmented [data-val]');
@@ -144,13 +115,6 @@ function handleAction(action, el) {
   const T = state.telemetry.bind(state);
   switch (action) {
     // ---- navigation-ish ----
-    case 'privacy-toggle': {
-      const revealing = state.get('privacyOn');
-      state.set({ privacyOn: !revealing });
-      if (revealing) T('privacy.reveal', 'toggle', nav.current().id);
-      nav.refresh();
-      break;
-    }
     case 'new-cart': C.openSheet({ title: 'New cart', html: newCartBody() }); break;
     case 'create-cart': C.closeAllOverlays(); T('cart.created', 'manual', 'c-new'); nav.go('S202?cart=c-back'); C.toast('Draft created', { positive: true }); break;
     case 'smart-reorder': C.closeAllOverlays(); T('cart.smart_reorder.accepted', 'order', 'c-back'); nav.go('S202?cart=c-back'); C.toast('Smart reorder ready — accept lines', { positive: true }); break;
@@ -187,9 +151,6 @@ function handleAction(action, el) {
       break;
     case 'email-receipt': C.toast('Receipt emailed', { positive: true }); break;
     case 'reemail': C.toast('Invoice re-emailed', { positive: true }); break;
-
-    // ---- privacy ----
-    case 'toggle-privacy': state.set({ privacyOn: !state.get('privacyOn') }); nav.refresh(); break;
 
     // ---- scanning ----
     case 'simulate-scan': T('scan.result.shown', 'barcode', 'p-throw'); nav.go('S102?p=p-throw'); break;
@@ -258,8 +219,6 @@ function handleAction(action, el) {
     case 'add-method': C.openSheet({ title: 'Add a payment method', html: addMethodBody() }); break;
     case 'add-card': C.closeAllOverlays(); C.openSheet({ title: 'Add a card', html: addCardBody() }); break;
     case 'save-card': state.addCard({ id: 'm-card2', kind: 'card', label: 'Credit / debit card', sub: '•••• 8210', icon: 'card' }); C.closeAllOverlays(); nav.refresh(); C.toast('Card added', { positive: true }); break;
-
-    // ---- privacy masked-fields checklist ----
 
     // ---- notifications ----
     case 'snooze-custom': C.openSheet({ title: 'Snooze for…', html: snoozeCustomBody() }); break;

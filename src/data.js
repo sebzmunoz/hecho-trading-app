@@ -48,27 +48,33 @@ export const products = [
   // Etta & East
   { id: 'p-linen', brand: 'etta', name: 'Washed Linen Napkins', variant: 'Set of 4 · Flax', wholesale: 16, msrp: 38, map: true, pack: 6, velocity: 0.7, onHand: 9, lastOrderQty: 12, lastOrder: 'one month ago', cat: 'Textiles', illo: 'scarf', season: 'in' },
   { id: 'p-throw', brand: 'etta', name: 'Wool Throw', variant: 'Oat', wholesale: 34, msrp: 78, map: true, pack: 4, velocity: 0.5, onHand: 3, lastOrderQty: 8, lastOrder: 'two weeks ago', cat: 'Textiles', illo: 'throw', season: 'in' },
+  { id: 'p-runner', brand: 'etta', name: 'Linen Table Runner', variant: 'Flax', wholesale: 22, msrp: 48, map: true, pack: 4, velocity: 0.4, onHand: 6, lastOrderQty: 4, lastOrder: 'two months ago', cat: 'Home', illo: 'scarf', season: 'in' },
   // Lavender Thorne
   { id: 'p-tallow', brand: 'lavender', name: 'Tallow Moisturizer', variant: '2 oz', wholesale: 18, msrp: 38, map: true, pack: 12, velocity: 1.4, onHand: 4, lastOrderQty: 24, lastOrder: 'two weeks ago', cat: 'Body', illo: 'jar', season: null },
   { id: 'p-balm', brand: 'lavender', name: 'Wild Lip Balm', variant: 'Mint', wholesale: 4, msrp: 9, map: false, pack: 24, velocity: 2.1, onHand: 0, restock: 'back in about two weeks', lastOrderQty: 48, lastOrder: 'three weeks ago', cat: 'Body', illo: 'tube', season: null },
+  { id: 'p-clbar', brand: 'lavender', name: 'Tallow Cleansing Bar', variant: 'Unscented', wholesale: 8, msrp: 18, map: false, pack: 12, velocity: 0.9, onHand: 10, lastOrderQty: 12, lastOrder: 'one month ago', cat: 'Beauty', illo: 'bar', season: null },
   // El Arroyo
   { id: 'p-cards', brand: 'arroyo', name: 'A-Frame Card Pack', variant: 'Assorted 10', wholesale: 9, msrp: 20, map: false, pack: 10, velocity: 1.0, onHand: 14, lastOrderQty: 20, lastOrder: 'one month ago', cat: 'Stationery', illo: 'pen', season: null },
   { id: 'p-napkins', brand: 'arroyo', name: 'Cocktail Napkins', variant: 'Box of 20', wholesale: 6, msrp: 14, map: false, pack: 12, velocity: 1.3, onHand: 5, lastOrderQty: 24, lastOrder: 'two weeks ago', cat: 'Gifts', illo: 'bar', season: 'in' },
   // Frida Vida
   { id: 'p-tumbler', brand: 'frida', name: 'Talavera Tumbler', variant: 'Cobalt', wholesale: 11, msrp: 26, map: false, pack: 8, velocity: 0.9, onHand: 3, lastOrderQty: 16, lastOrder: 'three weeks ago', cat: 'Home', illo: 'mug', season: null },
   { id: 'p-towel', brand: 'frida', name: 'Marigold Tea Towel', variant: 'Set of 2', wholesale: 7, msrp: 16, map: false, pack: 10, velocity: 0.6, onHand: 12, lastOrderQty: 10, lastOrder: 'two months ago', cat: 'Home', illo: 'scarf', season: 'off' },
+  { id: 'p-ornament', brand: 'frida', name: 'Talavera Ornament Set', variant: 'Set of 3', wholesale: 9, msrp: 22, map: false, pack: 8, velocity: 0.5, onHand: 8, lastOrderQty: 8, lastOrder: 'two months ago', cat: 'Gifts', illo: 'charm', season: 'off' },
   // Beljoy
   { id: 'p-bracelet', brand: 'beljoy', name: 'Beaded Bracelet Stack', variant: 'Sunset', wholesale: 12, msrp: 28, map: true, pack: 6, velocity: 0.8, onHand: 7, lastOrderQty: 12, lastOrder: 'one month ago', cat: 'Jewelry', illo: 'charm', season: null },
   { id: 'p-hoops', brand: 'beljoy', name: 'Confetti Hoops', variant: 'Multi', wholesale: 9, msrp: 22, map: false, pack: 8, velocity: 1.1, onHand: 0, restock: 'back in about a week', lastOrderQty: 16, lastOrder: 'two weeks ago', cat: 'Jewelry', illo: 'charm', season: 'in' },
+  { id: 'p-bagcharm', brand: 'beljoy', name: 'Beaded Bag Charm', variant: 'Sunset', wholesale: 8, msrp: 18, map: false, pack: 10, velocity: 0.7, onHand: 9, lastOrderQty: 10, lastOrder: 'one month ago', cat: 'Accessories', illo: 'charm', season: null },
   // Pom Pom London (mid, launching)
   { id: 'p-necklace', brand: 'pompom', name: 'Birthstone Necklace', variant: 'Gold · June', wholesale: 24, msrp: 58, map: true, pack: 6, velocity: 0.5, onHand: 5, lastOrderQty: 6, lastOrder: 'two months ago', cat: 'Jewelry', illo: 'charm', season: 'in' },
   { id: 'p-charmb', brand: 'pompom', name: 'Charm Bracelet', variant: 'Gold', wholesale: 22, msrp: 52, map: true, pack: 6, velocity: 0.4, onHand: 8, lastOrderQty: 6, lastOrder: 'one month ago', cat: 'Jewelry', illo: 'charm', season: 'in' },
   // Ellie Rose
   { id: 'p-tote', brand: 'ellie', name: 'Canvas Market Tote', variant: 'Sand', wholesale: 19, msrp: 46, map: false, pack: 8, velocity: 0.9, onHand: 6, lastOrderQty: 8, lastOrder: 'one month ago', cat: 'Bags', illo: 'tote', season: 'in' },
   { id: 'p-cross', brand: 'ellie', name: 'Quilted Crossbody', variant: 'Clay', wholesale: 28, msrp: 64, map: true, pack: 6, velocity: 0.4, onHand: 2, lastOrderQty: 6, lastOrder: 'two months ago', cat: 'Bags', illo: 'bag', season: 'in' },
+  { id: 'p-pouch', brand: 'ellie', name: 'Canvas Zip Pouch', variant: 'Sand', wholesale: 9, msrp: 22, map: false, pack: 10, velocity: 0.8, onHand: 11, lastOrderQty: 10, lastOrder: 'one month ago', cat: 'Accessories', illo: 'bag', season: null },
   // Popkle
   { id: 'p-boba', brand: 'popkle', name: 'Pop Lift Boba', variant: 'Pink', wholesale: 6, msrp: 14, map: false, pack: 12, velocity: 1.6, onHand: 4, lastOrderQty: 24, lastOrder: 'two weeks ago', cat: 'Novelty', illo: 'charm', season: null },
   { id: 'p-pen', brand: 'popkle', name: 'Jelly Gel Pen', variant: 'Set of 5', wholesale: 7, msrp: 16, map: false, pack: 10, velocity: 0.8, onHand: 14, lastOrderQty: 10, lastOrder: 'two months ago', cat: 'Novelty', illo: 'pen', season: null },
+  { id: 'p-sticker', brand: 'popkle', name: 'Boba Sticker Pack', variant: 'Pack of 12', wholesale: 4, msrp: 10, map: false, pack: 20, velocity: 1.2, onHand: 16, lastOrderQty: 20, lastOrder: 'one month ago', cat: 'Gifts', illo: 'pen', season: null },
   // The New Savant (top)
   { id: 'p-candle', brand: 'savant', name: 'Vanguard Candle', variant: '9 oz', wholesale: 16, msrp: 36, map: true, pack: 6, velocity: 1.0, onHand: 5, lastOrderQty: 12, lastOrder: 'three weeks ago', cat: 'Candles', illo: 'candle', season: 'in' },
   { id: 'p-incense', brand: 'savant', name: 'Cedar Incense', variant: 'Box of 30', wholesale: 6, msrp: 15, map: false, pack: 12, velocity: 0.7, onHand: 8, lastOrderQty: 12, lastOrder: 'one month ago', cat: 'Home', illo: 'incense', season: 'off' },
@@ -308,4 +314,3 @@ export const posVendors = [
 // ---- Helpers ----
 export const usd = (n) => n.toLocaleString('en-US');
 export const money = (n) => `$${n.toLocaleString('en-US')}`;
-export const SENSITIVE = ['wholesale', 'stock', 'spend', 'credit', 'recommended'];

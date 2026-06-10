@@ -6,7 +6,7 @@
 export const flows = [
   { id: 'F1', name: 'First-time setup & onboarding', persona: 'All', phase: 'P0', steps: [
     { screen: 'S501', text: 'Cold launch. The brand mark holds during boot.' },
-    { screen: 'S502', text: 'Welcome — three cards: scan, draft, reorder.' },
+    { screen: 'S502', text: 'Entry: current customer goes straight to the floor; new customers apply.', branch: { label: 'Branch · new customer applies', screen: 'S503' } },
     { screen: 'S503', text: 'Sign in by email magic link or SSO.' },
     { screen: 'S504', text: 'Magic link sent. Open it on this device.' },
     { screen: 'S505', text: 'The link returns — verifying.' },
@@ -83,12 +83,6 @@ export const flows = [
     { screen: 'S604', text: 'Co-shop live in the retailer\'s draft.' },
     { screen: 'S606', text: 'Send a memo via chat. Switch back any time.' },
   ] },
-  { id: 'F12', name: 'Turning on Privacy on the floor', persona: 'P1·P2', phase: 'P1', steps: [
-    { screen: 'S412', text: 'Privacy is ON by default. One switch, nothing to configure.' },
-    { screen: 'S004', text: 'Sensitive values render as dots. The eye appears in the header whenever something sensitive is on-screen.' },
-    { screen: 'S210', text: 'Flip privacy fast from the header quick toggle.' },
-    { screen: 'S707', text: 'Tap the eye: everything reveals. Tap again: everything re-masks.' },
-  ] },
   { id: 'F13', name: 'Discovering a style guide', persona: 'P1·P2', phase: 'P2', steps: [
     { screen: 'S001', text: 'Shop home features a hero style guide.' },
     { screen: 'S002', text: 'Editorial spread, multi-brand, the look list.' },
@@ -112,9 +106,9 @@ export const flows = [
 
 export const flowById = Object.fromEntries(flows.map((f) => [f.id, f]));
 
-// Stakeholder walkthrough (acceptance criteria): F1 → F2 → F15 → F6 → F7 → F12
+// Stakeholder walkthrough (acceptance criteria): F1 → F2 → F15 → F6 → F7
 export const walkthrough = {
   name: '2-minute walkthrough',
-  line: 'Set up, scan a real shelf, love it for later, reorder smart, submit and track, then protect it on the floor.',
-  flows: ['F1', 'F2', 'F15', 'F6', 'F7', 'F12'],
+  line: 'Set up, scan a real shelf, love it for later, reorder smart, then submit and track.',
+  flows: ['F1', 'F2', 'F15', 'F6', 'F7'],
 };

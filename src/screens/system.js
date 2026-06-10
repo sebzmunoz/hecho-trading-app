@@ -71,17 +71,6 @@ export const system = {
       <div class="stack tight">${D.brands.map((b) => { const seen = D.canSee(b, state.get('tier')); return C.brandCard(b, { locked: !seen }); }).join('')}</div>` });
   },
 
-  // S707 Privacy holding state (transient)
-  S707() {
-    const on = state.get('privacyOn');
-    return base('Privacy demo', { back: true, body: `
-      <div class="center-col pad-block">${icon(on ? 'eye-off' : 'eye', 56)}
-        <h3>${on ? 'Masked' : 'Revealed'}</h3>
-        <p class="muted">${on ? 'Sensitive values render as dots. Tap the eye in the header to reveal them.' : 'Everything is visible. Tap the eye to re-mask before you turn the phone around.'}</p></div>
-      <div class="card" style="max-width:none"><div class="row-between"><span class="muted">Your price</span>${C.maskField('<b>$18 wholesale</b>', 'wholesale')}</div>
-        <div class="row-between"><span class="muted">On hand</span>${C.maskField('<b>14 units</b>', 'stock')}</div></div>` });
-  },
-
   // S708 Live stock — the 9 brands you manage (replaces the floor map)
   S708() {
     const f = state.get('_state'); // 'low' | 'out' | null

@@ -51,7 +51,6 @@ const META = {
   S207: { name: 'MOQ-not-met state', group: 'Carts', tab: 'carts', states: S('default') },
   S208: { name: 'Approval inbox', group: 'Carts', tab: 'carts', states: S('default', 'empty') },
   S209: { name: 'Approval review', group: 'Carts', tab: 'carts', states: S('default') },
-  S210: { name: 'Privacy toggle', group: 'Carts', tab: 'carts', states: S('default') },
   S211: { name: 'Add to cart sheet', group: 'Carts', tab: 'carts', states: S('default') },
   S212: { name: 'Shop the look sheet', group: 'Carts', tab: 'carts', states: S('default') },
   // ---- Orders ----
@@ -78,7 +77,6 @@ const META = {
   S409: { name: 'Tax-ID upload', group: 'You', tab: 'you', states: S('default') },
   S410: { name: 'Tax-ID hold', group: 'You', tab: 'you', states: S('default') },
   S411: { name: 'Notification settings', group: 'You', tab: 'you', states: S('default') },
-  S412: { name: 'Privacy on the floor settings', group: 'You', tab: 'you', states: S('default') },
   S413: { name: 'Connected POS', group: 'You', tab: 'you', states: S('default') },
   S414: { name: 'POS OAuth flow', group: 'You', tab: 'you', states: S('default') },
   S415: { name: 'POS disconnect confirm', group: 'You', tab: 'you', states: S('default') },
@@ -86,7 +84,7 @@ const META = {
   S417: { name: 'Sign out', group: 'You', tab: 'you', states: S('default') },
   // ---- Onboarding ----
   S501: { name: 'Splash', group: 'Onboarding', tab: null, states: S('default') },
-  S502: { name: 'Welcome (3 cards)', group: 'Onboarding', tab: null, states: S('default') },
+  S502: { name: 'Entry — current or new customer', group: 'Onboarding', tab: null, states: S('default') },
   S503: { name: 'Sign in', group: 'Onboarding', tab: null, states: S('default') },
   S504: { name: 'Magic link sent', group: 'Onboarding', tab: null, states: S('default') },
   S505: { name: 'Email verification', group: 'Onboarding', tab: null, states: S('default') },
@@ -109,7 +107,6 @@ const META = {
   S704: { name: 'Help & support', group: 'System', tab: null, states: S('default') },
   S705: { name: 'Style-guide gallery', group: 'System', tab: null, states: S('default') },
   S706: { name: 'Brand directory', group: 'System', tab: null, states: S('default') },
-  S707: { name: 'Privacy holding state', group: 'System', tab: null, states: S('default') },
   S708: { name: 'Live stock board', group: 'System', tab: null, states: S('default', 'low', 'out') },
   S709: { name: 'Brand from QR', group: 'System', tab: null, states: S('default') },
   S710: { name: 'Brand-launch arrival', group: 'System', tab: null, states: S('default') },

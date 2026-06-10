@@ -6,74 +6,35 @@ import { icon } from '../icons.js';
 const visibleBrands = () => D.brands.filter((b) => D.canSee(b, state.get('tier')));
 
 export const shop = {
-  // S001 Shop home — ordered by buyer decision priority: reorder what's
-  // running out → clear what's waiting on you → discover what's new.
+  // S001 Main screen — one calm hub: search, scan, the nine brands.
+  // Love list + carts + account live top right; everything else is a spoke.
   S001() {
+    const lovedN = state.lovedCount();
+    const cartN = D.carts.filter((c) => c.section === 'mine').length;
+    const top = `
+      <div class="home-top">
+        <svg viewBox="0 0 463 168" style="width:92px;height:auto;color:var(--accent)" aria-label="HECHO"><use href="#hecho-mark"/></svg>
+        <span class="ht-actions">${C.hActions([
+          { icon: 'heart', go: 'S010', label: 'Love list', badge: lovedN ? String(lovedN) : '' },
+          { icon: 'cart', go: 'S201', label: 'Carts', badge: cartN ? String(cartN) : '' },
+          { icon: 'user', go: 'S401', label: 'Account & settings' },
+        ])}</span>
+      </div>`;
     if (state.get('_state') === 'empty') {
-      return base('Shop', { tab: 'shop', headerRight: C.tabHeaderActions(), body:
-        C.emptyState({ ic: 'home', title: 'Nothing curated yet', body: "I'll show Hecho-picked guides here until I learn your shop.", primary: { label: 'Browse brands', go: 'S706' } }) });
+      return base('', { hideHeader: true, body: top +
+        C.emptyState({ ic: 'home', title: 'The floor is empty', body: 'No brands are live for your account yet. Your rep is on it.', primary: { label: 'Get help', go: 'S704' } }) });
     }
-    const posOn = state.get('pos') === 'connected';
-    const role = state.get('role');
-    const hero = D.styleGuides[0];
-    // New on the floor: launching first, then gated tiers, then the freshest
-    // general-release brands — six drop tiles, not two.
-    const vb = visibleBrands();
-    const drops = [...vb.filter((b) => b.launching), ...vb.filter((b) => !b.launching && b.tier !== 'standard'), ...vb.filter((b) => !b.launching && b.tier === 'standard').slice(-4)].slice(0, 6);
-    // Resume rail: every draft in motion — mine and shared with me.
-    const openDrafts = D.carts.filter((c) => c.section === 'mine' || c.section === 'shared');
-    const pendingApprovals = D.carts.filter((c) => c.awaiting);
-
-    // 1 · Running low at your store (the reorder motion, POS-driven H1 math)
-    let lowRail = '';
-    if (posOn) {
-      const low = D.lowStockLines(4);
-      if (low.length) lowRail = `
-        <div class="stack tight">
-          <div class="row-between">${C.sectionLabel('Running low at your store')}<button class="chip" data-go="S708" style="min-height:28px;padding:2px 10px;font-size:var(--fs-nano)">Live stock</button></div>
-          <div class="rail">${low.map(({ p, daysLeft }) => {
-            const rec = D.recommendedQty(p, true);
-            const st = D.stockState(p, 'connected');
-            return `<div class="low-card">
-              <span class="thumb-illo" style="width:44px;height:44px;border-radius:var(--r-2);flex:0 0 auto">${C.illo(p.illo, 26)}</span>
-              <span class="lc-body">
-                <b>${C.esc(p.name)}</b>
-                <span class="stock ${st.kind}" style="font-size:var(--fs-nano)"><span class="dot"></span>${C.maskField(`${st.value} left · ~${daysLeft}d`, 'stock')}</span>
-              </span>
-              <button class="btn sm" data-action="add-to-cart" data-p="${p.id}">Add${rec ? ' ×' + rec : ''}</button>
-            </div>`;
-          }).join('')}</div>
-        </div>`;
-    } else {
-      lowRail = C.softPitch();
-    }
-
-    // 2 · Waiting on you (role-aware)
-    const waiting = [];
-    if (role === 'owner' && pendingApprovals.length) {
-      waiting.push(C.listRow({ thumbIcon: 'check', pri: `${pendingApprovals.length} draft${pendingApprovals.length > 1 ? 's' : ''} awaiting your approval`, sec: pendingApprovals.map((c) => c.name).join(' · '), trail: `<span class="badge">${pendingApprovals.length}</span>`, go: 'S208' }));
-    }
-    const pastDue = D.orders.find((o) => o.pastDue);
-    if (role === 'owner' && pastDue) {
-      waiting.push(C.listRow({ thumbIcon: 'card', pri: 'An invoice is past due', sec: `#${pastDue.id} · ${pastDue.due}`, trail: C.statusPill('pastdue'), go: `S304?order=${pastDue.id}` }));
-    }
-    const waitingBlock = waiting.length ? `<div class="stack tight">${C.sectionLabel('Waiting on you')}${waiting.join('')}</div>` : '';
-
     const body = `
+      ${top}
       <div class="search" data-go="S005"><span>${icon('search', 20)}</span><span class="muted" style="flex:1">Search name, SKU, or barcode</span></div>
-      ${lowRail}
-      ${waitingBlock}
-      <div class="stack tight">
-        <div class="row-between">${C.sectionLabel('Featured guide')}<span class="scene-hint"><i></i> Shoppable</span></div>
-        ${C.styleTile(hero, { wide: true })}
-      </div>
-      ${openDrafts.length ? rail('Pick up where you left off', openDrafts.map((c) => C.resumeCard(c)).join('')) : ''}
-      ${rail('New on the floor', drops.map((b) => C.dropCard(b)).join(''))}
-      ${rail('For your shop', D.products.slice(0, 6).map((p) => C.productCard(p)).join(''))}
-      ${C.sectionLabel('Brands')}
+      <button class="scan-cta" data-go="S101">
+        <span class="sc-ic">${icon('scan', 30)}</span>
+        <span class="sc-body"><b>Scan a product</b><span>Point at any barcode on the floor</span></span>
+      </button>
+      ${C.sectionLabel('The nine brands')}
       <div class="brand-grid">${D.brands.map((b) => C.brandTile(b)).join('')}</div>
-      <div class="grid-2"><button class="btn ghost sm" data-go="S705">All style guides</button><button class="btn ghost sm" data-go="S007">Browse categories</button></div>`;
-    return base('Shop', { tab: 'shop', headerRight: C.tabHeaderActions({ search: false }), body });
+      <div class="grid-2"><button class="btn ghost sm" data-go="S705">Style guides</button><button class="btn ghost sm" data-go="S708">Live stock</button></div>`;
+    return base('', { hideHeader: true, body });
   },
 
   // S002 Style guide detail — the illustration IS the shop surface: every
@@ -95,12 +56,31 @@ export const shop = {
     return base(g.title, { back: true, headerRight: C.hActions([{ icon: 'share', action: 'share', label: 'Share' }]), body });
   },
 
-  // S003 Brand page
+  // S003 Brand page — category cards first; products live one level down
+  // (S003?brand=x&cat=y). 'all' is the everything view.
   S003(params) {
     const b = D.brandById[params.brand] || D.brands[0];
     if (!D.canSee(b, state.get('tier'))) return shop.S804({ brand: b.id });
     const prods = D.productsByBrand(b.id);
     const saved = state.isBrandSaved(b.id);
+
+    // category view: the products themselves
+    if (params.cat) {
+      const all = params.cat === 'all';
+      const list = all ? prods : prods.filter((p) => p.cat === params.cat);
+      const body = `
+        <div class="grid-2">${list.map((p) => C.productCard(p)).join('')}</div>
+        ${list.length ? '' : C.emptyState({ ic: 'tag', title: 'Nothing here yet', body: 'This category is empty for now.' })}`;
+      return base(all ? 'All products' : params.cat, { back: true, eyebrow: b.name, headerRight: C.hActions([{ icon: 'search', go: 'S005' }]), body });
+    }
+
+    const cats = [...new Set(prods.map((p) => p.cat))];
+    const catCards = cats.map((cat) => {
+      const inCat = prods.filter((p) => p.cat === cat);
+      return `<button class="card cat-card" data-go="S003?brand=${b.id}&cat=${encodeURIComponent(cat)}">
+        <span class="thumb-illo cc-art">${C.illo(inCat[0].illo, 36)}</span>
+        <b>${C.esc(cat)}</b><span class="muted">${inCat.length} product${inCat.length > 1 ? 's' : ''}</span></button>`;
+    }).join('');
     const body = `
       <div class="thumb-illo" style="border-radius:var(--r-4);padding:var(--s-6)">${C.illo(prods[0]?.illo || 'jar', 96)}</div>
       <h3>${b.name}</h3>
@@ -108,8 +88,12 @@ export const shop = {
       <p class="muted">${b.story}</p>
       <div class="row-between"><span class="moq">${icon('cart', 12)}MOQ $${b.moq}</span>
         <button class="chip ${saved ? 'is-selected' : ''}" data-action="save-brand" data-brand="${b.id}" aria-pressed="${saved}">${icon('star', 13)} ${saved ? 'Saved' : 'Save brand'}</button></div>
-      ${C.sectionLabel('Catalog')}
-      <div class="grid-2">${prods.map((p) => C.productCard(p)).join('')}</div>`;
+      ${C.sectionLabel('Shop by category')}
+      <div class="grid-2">${catCards}
+        <button class="card cat-card" data-go="S003?brand=${b.id}&cat=all">
+          <span class="thumb-illo cc-art">${icon('grid', 28)}</span>
+          <b>All products</b><span class="muted">${prods.length} total</span></button>
+      </div>`;
     return base(b.name, { back: true, headerRight: C.hActions([{ icon: 'search', go: 'S005' }, { icon: 'share', action: 'share' }]), body });
   },
 
@@ -157,7 +141,7 @@ export const shop = {
       <div class="chip-row">${D.recentSearches.map((s) => `<button class="chip" data-action="run-search" data-q="${C.esc(s)}">${C.esc(s)}</button>`).join('')}</div>
       ${C.sectionLabel('Trending')}
       <div class="chip-row">${D.trendingChips.map((s) => `<button class="chip" data-action="run-search" data-q="${C.esc(s)}">${C.esc(s)}</button>`).join('')}</div>
-      <button class="btn ghost full" data-go="S101">Scan a barcode instead</button>`;
+      <div class="grid-2"><button class="btn ghost" data-go="S101">Scan instead</button><button class="btn ghost" data-go="S007">Browse categories</button></div>`;
     return base('Search', { back: true, body, onMount: (root) => { const i = root.querySelector('input'); i && i.addEventListener('keydown', (e) => { if (e.key === 'Enter') window.HECHO.nav.go('S006?q=' + encodeURIComponent(i.value)); }); } });
   },
 
@@ -223,9 +207,6 @@ export const shop = {
 };
 
 // ---- local helpers ----
-function rail(title, inner) {
-  return `<div class="stack tight"><div class="row-between">${C.sectionLabel(title)}</div><div class="rail tiles">${inner}</div></div>`;
-}
 function noResults() {
   return `${C.emptyState({ ic: 'search', title: 'Nothing matched', body: 'Try a SKU or forward the email.' })}
     <div class="grid-2"><button class="btn ghost sm" data-action="forward-email">${icon('mail', 16)} Forward an email</button><button class="btn ghost sm" data-action="upload-file">${icon('download', 16)} Upload a file</button></div>`;

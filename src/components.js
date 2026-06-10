@@ -126,22 +126,10 @@ export function lockChip(label = 'Higher tier') {
   return `<span class="lock-chip">${icon('lock', 12)}${esc(label)}</span>`;
 }
 
-// ---- Privacy on the floor (§07-D) — toggle-only ----
-// One global switch. Sensitive values render masked while it's ON; the eye
-// in the header (shown only when sensitive info is on-screen) flips it.
-const MASK_ARIA = 'Hidden. Tap the eye in the header to reveal.';
-export function fieldMasked() {
-  return state.get('privacyOn');
-}
-export function maskField(valueHTML, field) {
-  if (!fieldMasked()) return `<span class="mask-inline is-open" data-field="${field}"><span class="mv">${valueHTML}</span></span>`;
-  return `<span class="mask-inline" data-field="${field}" role="img" aria-label="${esc(MASK_ARIA)}"><span class="mv">${valueHTML}</span><span class="mdots" aria-hidden="true">●●●</span></span>`;
-}
-// Full privacy row (label left, masked value right) — same toggle.
-export function privacyRow(label, valueHTML, field) {
-  return `<div class="privacy-row ${fieldMasked() ? 'is-masked' : 'is-revealing'}" data-field="${field}">
-    <span class="label">${esc(label)}</span>
-    <span class="value"><span class="value-content">${valueHTML}</span></span></div>`;
+// Privacy on the floor was removed — values always render plainly.
+// maskField stays as a pass-through so the many call sites need no edits.
+export function maskField(valueHTML) {
+  return valueHTML;
 }
 // Animated success mark for confirmation screens.
 export function successMark() {
@@ -347,7 +335,7 @@ export function switchRow(label, checked, { sub = '', action = '' } = {}) {
     <label class="switch"><input type="checkbox" ${checked ? 'checked' : ''} ${action ? `data-action="${action}"` : ''} aria-label="${esc(label)}" /><span class="track"></span><span class="thumb"></span></label></div>`;
 }
 
-// ---- Header action icons (search / bell / privacy / etc.) ----
+// ---- Header action icons (search / bell / etc.) ----
 export function hActions(list) {
   return list.map((a) => {
     const attr = a.go ? `data-go="${a.go}"` : (a.action ? `data-action="${a.action}"` : '');
@@ -355,9 +343,7 @@ export function hActions(list) {
     return `<button class="hicon" ${attr} aria-label="${esc(a.label || a.icon)}">${icon(a.icon, 22)}${badge}</button>`;
   }).join('');
 }
-// Standard header for the five primary tabs: search + notifications + privacy quick-toggle.
-// The privacy eye is NOT part of these static actions — the route renderer
-// appends it only when the rendered screen actually contains sensitive info.
+// Standard header actions for primary screens: search + love list + notifications.
 export function tabHeaderActions({ search = 'S005', bell = true, love = true } = {}) {
   const list = [];
   if (search) list.push({ icon: 'search', go: search, label: 'Search' });

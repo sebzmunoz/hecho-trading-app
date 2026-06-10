@@ -1045,3 +1045,47 @@ footer .marquee span{display:inline-flex;align-items:flex-start;gap:.05em;animat
 .love-src svg{flex:0 0 auto}
 .love-note{display:inline-flex;align-items:center;gap:var(--s-1);font-size:var(--fs-nano);color:var(--accent-text);font-style:italic}
 .love-note svg{flex:0 0 auto}
+
+/* ============================================================
+   Simplified IA — entry screen, home hub, brand category cards.
+   ============================================================ */
+/* Entry (S502): logo, current/new choice, account in the corner */
+.entry{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:var(--s-6);position:relative;padding:var(--s-4)}
+.entry .corner-btn{position:absolute;top:var(--s-3);inset-inline-end:var(--s-3);width:var(--control-md);height:var(--control-md);border-radius:50%;display:grid;place-items:center;color:var(--fg-soft);background:var(--surface);border:var(--bw-1) solid var(--line);cursor:pointer}
+.entry .corner-btn:hover{background:var(--surface-dim)}
+.entry-brand{display:flex;flex-direction:column;align-items:center;gap:var(--s-3)}
+.entry-brand svg{color:var(--accent)}
+.entry-tag{font-size:var(--fs-caption);color:var(--fg-soft);letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+.entry-choices{display:flex;flex-direction:column;gap:var(--s-3);width:100%;max-width:340px}
+.entry-card{display:flex;align-items:center;gap:var(--s-3);width:100%;padding:var(--s-4);background:var(--surface);border:var(--bw-1) solid var(--line);border-radius:var(--r-3);cursor:pointer;text-align:start;font-family:var(--f);transition:border-color var(--d-fast),background var(--d-fast)}
+.entry-card:hover{border-color:var(--accent-text);background:var(--surface-2)}
+.entry-card:focus-visible{outline:var(--focus-w) solid var(--focus);outline-offset:var(--focus-offset)}
+.entry-card .ec-ic{width:48px;height:48px;border-radius:var(--r-2);background:linear-gradient(135deg,var(--surface-2),var(--surface-dim));display:grid;place-items:center;color:var(--accent);flex:0 0 auto}
+.entry-card .ec-body{display:flex;flex-direction:column;gap:2px;flex:1;min-width:0}
+.entry-card .ec-body b{font-size:var(--fs-body);color:var(--fg)}
+.entry-card .ec-body span{font-size:var(--fs-caption);color:var(--fg-soft)}
+.entry-card .ec-arr{color:var(--fg-mute);flex:0 0 auto;display:inline-flex}
+.entry-alt{background:none;border:0;color:var(--fg-soft);font-family:var(--f);font-size:var(--fs-caption);font-weight:600;text-decoration:underline;text-underline-offset:3px;cursor:pointer}
+
+/* Home hub (S001): logo row with love / cart / account */
+.home-top{display:flex;align-items:center;justify-content:space-between;gap:var(--s-3);min-height:44px}
+.home-top .ht-actions{display:flex;gap:2px}
+.home-top .hicon{width:var(--control-md);height:var(--control-md);border-radius:50%;display:grid;place-items:center;color:var(--fg);position:relative;background:none;border:0;cursor:pointer}
+.home-top .hicon:hover{background:var(--surface-dim)}
+.home-top .hicon svg{width:22px;height:22px}
+.home-top .hicon .badge{position:absolute;top:2px;right:2px}
+
+/* Scan CTA — the single biggest action on the floor */
+.scan-cta{display:flex;align-items:center;gap:var(--s-4);width:100%;padding:var(--s-4) var(--s-5);background:var(--action);color:var(--on-action);border:0;border-radius:var(--r-3);cursor:pointer;font-family:var(--f);text-align:start;transition:background var(--d-fast)}
+.scan-cta:hover{background:var(--action-hover)}
+.scan-cta:focus-visible{outline:var(--focus-w) solid var(--focus);outline-offset:var(--focus-offset)}
+.scan-cta .sc-ic{flex:0 0 auto;display:inline-flex}
+.scan-cta .sc-body{display:flex;flex-direction:column;gap:2px}
+.scan-cta .sc-body b{font-size:var(--fs-h4,17px);font-weight:700}
+.scan-cta .sc-body span{font-size:var(--fs-caption);opacity:.85}
+
+/* Brand category cards (S003) */
+.cat-card{max-width:none;align-items:flex-start;gap:var(--s-2);cursor:pointer}
+.cat-card .cc-art{width:48px;height:48px;border-radius:var(--r-2)}
+.cat-card b{font-size:var(--fs-body)}
+.cat-card .muted{font-size:var(--fs-caption)}
