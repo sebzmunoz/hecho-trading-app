@@ -66,6 +66,11 @@ export const shop = {
       <h3>${b.name}</h3>
       ${b.launching ? C.banner(`<b>First-look open now.</b> New collection pinned below.`, { kind: '', ic: 'sparkle', action: { label: 'The drop', go: `S009?brand=${b.id}` } }) : ''}
       <p class="muted">${b.story}</p>
+      ${b.founder ? `${C.sectionLabel('From the founder')}
+      <div class="card" style="max-width:none;flex-direction:row;gap:var(--s-3);align-items:flex-start">
+        <span class="avatar dark" style="flex:0 0 auto">${C.esc(b.founder.split(' ').map((w) => w[0]).slice(0, 2).join(''))}</span>
+        <span style="min-width:0"><b>${C.esc(b.founder)}</b><p class="muted" style="margin-top:2px;font-size:var(--fs-caption)">${C.esc(b.founderStory)}</p></span>
+      </div>` : ''}
       <div class="row-between"><span class="moq">${icon('cart', 12)}MOQ $${b.moq}</span>
         <button class="chip ${saved ? 'is-selected' : ''}" data-action="save-brand" data-brand="${b.id}" aria-pressed="${saved}">${icon('star', 13)} ${saved ? 'Saved' : 'Save brand'}</button></div>
       ${C.sectionLabel('Shop by category')}
@@ -111,8 +116,7 @@ export const shop = {
       ${C.sectionLabel('Variant')}
       <div class="chip-row" data-chipgroup>${variantChips}</div>
       <div class="card" style="max-width:none">
-        <div class="row-between"><span class="muted">Your price</span>${p.map ? `<span class="pill">${icon('info', 12)} MAP $${p.msrp}</span>` : ''}</div>
-        <div class="row-between"><span></span>${C.pricePair(p)}</div>
+        <div class="row-between"><span class="muted">Your price</span>${C.pricePair(p)}</div>
         ${accountRows}
       </div>
       ${C.sectionLabel('Quantity')}

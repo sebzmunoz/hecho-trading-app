@@ -47,7 +47,7 @@ export const carts = {
           <div class="row-between"><b>${b.name}</b><span class="moq ${met ? '' : 'unmet'}" data-moq="${bid}" data-min="${b.moq}">${met ? icon('check', 12) + 'MOQ met' : icon('warning', 12) + '$' + b.moq + ' · $' + (b.moq - sub) + ' to go'}</span></div>
           ${lines.map(([p, q]) => `<div class="line-row" data-line data-price="${p.wholesale}" data-brand="${bid}">
             <span class="thumb thumb-illo" style="width:40px;height:40px;flex:0 0 auto">${C.illo(p.illo, 22)}</span>
-            <span class="body" style="flex:1;min-width:0"><span class="pri">${p.name}</span><span class="sec">${p.variant}${p.map ? ' · MAP' : ''}</span></span>
+            <span class="body" style="flex:1;min-width:0"><span class="pri">${p.name}</span><span class="sec">${p.variant}</span></span>
             <span class="line-trail">${C.stepper(q, { id: p.id })}<span data-linetotal class="muted" style="font-size:var(--fs-caption)">${C.money(p.wholesale * q)}</span></span></div>`).join('')}
         </div>`;
       }).join('')}
