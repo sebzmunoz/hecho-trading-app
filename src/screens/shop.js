@@ -3,8 +3,6 @@ import * as D from '../data.js';
 import { state } from '../state.js';
 import { icon } from '../icons.js';
 
-const visibleBrands = () => D.brands.filter((b) => D.canSee(b, state.get('tier')));
-
 export const shop = {
   // S001 Shop home — ordered by buyer decision priority: reorder what's
   // running out → clear what's waiting on you → discover what's new.
@@ -13,27 +11,25 @@ export const shop = {
       return base('Shop', { tab: 'shop', headerRight: C.tabHeaderActions(), body:
         C.emptyState({ ic: 'home', title: 'Nothing curated yet', body: "I'll show Hecho-picked guides here until I learn your shop.", primary: { label: 'Browse brands', go: 'S706' } }) });
     }
-    const posOn = state.get('pos') === 'connected';
     const role = state.get('role');
     const hero = D.styleGuides[0];
-    // New launches: launching first, then gated tiers, then the freshest
-    // general-release brands — six drop tiles, not two.
-    const vb = visibleBrands();
-    const drops = [...vb.filter((b) => b.launching), ...vb.filter((b) => !b.launching && b.tier !== 'standard'), ...vb.filter((b) => !b.launching && b.tier === 'standard').slice(-4)].slice(0, 6);
+    // New launches: launching first, then the freshest general-release
+    // brands — six drop tiles, not two.
+    const drops = [...D.brands.filter((b) => b.launching), ...D.brands.filter((b) => !b.launching).slice(-5)].slice(0, 6);
     // Resume rail: every draft in motion — mine and shared with me.
     const openDrafts = D.carts.filter((c) => c.section === 'mine' || c.section === 'shared');
     const pendingApprovals = D.carts.filter((c) => c.awaiting);
 
-    // 1 · Running low at your store (the reorder motion, POS-driven H1 math)
+    // 1 · Running low at your store (the reorder motion, H1 math)
     let lowRail = '';
-    if (posOn) {
+    {
       const low = D.lowStockLines(4);
       if (low.length) lowRail = `
         <div class="stack tight">
           <div class="row-between">${C.sectionLabel('Running low at your store')}<button class="chip" data-go="S708" style="min-height:28px;padding:2px 10px;font-size:var(--fs-nano)">Live stock</button></div>
           <div class="rail">${low.map(({ p, daysLeft }) => {
-            const rec = D.recommendedQty(p, true);
-            const st = D.stockState(p, 'connected');
+            const rec = D.recommendedQty(p);
+            const st = D.stockState(p);
             return `<div class="low-card">
               <span class="thumb-illo" style="width:44px;height:44px;border-radius:var(--r-2);flex:0 0 auto">${C.illo(p.illo, 26)}</span>
               <span class="lc-body">
@@ -44,8 +40,6 @@ export const shop = {
             </div>`;
           }).join('')}</div>
         </div>`;
-    } else {
-      lowRail = C.softPitch();
     }
 
     // 2 · Waiting on you (role-aware)
@@ -99,13 +93,13 @@ export const shop = {
   // S003 Brand page
   S003(params) {
     const b = D.brandById[params.brand] || D.brands[0];
-    if (!D.canSee(b, state.get('tier'))) return shop.S804({ brand: b.id });
     const prods = D.productsByBrand(b.id);
     const saved = state.isBrandSaved(b.id);
+    const launching = b.launching || state.get('_state') === 'launching';
     const body = `
       <div class="thumb-illo" style="border-radius:var(--r-4);padding:var(--s-6)">${C.illo(prods[0]?.illo || 'jar', 96)}</div>
       <h3>${b.name}</h3>
-      ${b.launching ? C.banner(`<b>First-look open now.</b> New collection pinned below.`, { kind: '', ic: 'sparkle', action: { label: 'The drop', go: `S009?brand=${b.id}` } }) : ''}
+      ${launching ? C.banner(`<b>First-look open now.</b> New collection pinned below.`, { kind: '', ic: 'sparkle', action: { label: 'The drop', go: `S009?brand=${b.id}` } }) : ''}
       <p class="muted">${b.story}</p>
       ${b.founder && state.get('role') !== 'rep' ? `${C.sectionLabel('From the founder')}
       <div class="card" style="max-width:none;flex-direction:row;gap:var(--s-3);align-items:flex-start">
@@ -123,9 +117,8 @@ export const shop = {
   S004(params) {
     const p = D.productById[params.p] || D.products[0];
     const b = D.brandById[p.brand];
-    if (!D.canSee(b, state.get('tier'))) return shop.S804({ brand: b.id });
     const variantOut = state.get('_state') === 'oos';
-    const rec = D.recommendedQty(p, state.get('pos') === 'connected');
+    const rec = D.recommendedQty(p);
     // Variant alternates coherent with the product's category — never apparel
     // sizes on a candle. Last alternate renders OOS in the 'oos' state.
     const ALTS = { Textiles: ['Clay', 'Dune'], Body: ['4 oz', '8 oz'], Stationery: ['Assorted 20'], Gifts: ['Box of 40'], Home: ['Terracotta', 'Sage'], Jewelry: ['Silver', 'Rose gold'], Bags: ['Olive', 'Black'], Novelty: ['Blue', 'Mint'], Candles: ['14 oz'] };
@@ -147,9 +140,8 @@ export const shop = {
         ${C.stockRow(p)}
         <div class="hairline"></div>
         <div class="row-between"><span class="muted">Margin at MSRP</span>${C.maskField(`${Math.round((1 - p.wholesale / p.msrp) * 100)}%`, 'spend')}</div>
-        <p class="muted" style="font-size:var(--fs-nano)">${rec ? `Behavior model: ${C.esc(D.whyString(p, state.get('pos') === 'connected'))}` : 'Connect a POS for a reorder recommendation.'}</p>
+        <p class="muted" style="font-size:var(--fs-nano)">${rec ? `Behavior model: ${C.esc(D.whyString(p))}` : `First order — start with a pack of ${p.pack}.`}</p>
       </div>
-      ${state.get('pos') !== 'connected' ? C.softPitch() : ''}
       <div class="sticky-actions"><button class="btn ghost" data-action="save-template">Save</button><button class="btn" data-action="add-to-cart" data-p="${p.id}">Add to cart${rec ? ` · ${C.maskField(String(rec), 'recommended')}` : ''}</button></div>`;
     return base(p.name, { back: true, headerRight: C.hActions([{ icon: 'share', action: 'share' }]), body });
   },
@@ -172,11 +164,11 @@ export const shop = {
     if (state.get('_state') === 'empty') {
       return base(`"${q}"`, { back: true, body: `${noResults()}` });
     }
-    const matchBrands = visibleBrands().filter((b) => b.name.toLowerCase().includes(String(q).toLowerCase())).slice(0, 2);
+    const matchBrands = D.brands.filter((b) => b.name.toLowerCase().includes(String(q).toLowerCase())).slice(0, 2);
     const matchProds = D.products.filter((p) => p.name.toLowerCase().includes(String(q).toLowerCase()) || true).slice(0, 6);
     const body = `
       <div class="search" data-go="S005"><span>${icon('search', 20)}</span><span class="muted" style="flex:1">${C.esc(q)}</span></div>
-      <div class="chip-row"><button class="chip" data-action="filters">${icon('filter', 14)} Filters</button>${visibleBrands().slice(0, 4).map((b) => `<button class="chip">${b.name}</button>`).join('')}</div>
+      <div class="chip-row"><button class="chip" data-action="filters">${icon('filter', 14)} Filters</button>${D.brands.slice(0, 4).map((b) => `<button class="chip">${b.name}</button>`).join('')}</div>
       ${matchBrands.length ? C.sectionLabel('Brands') + '<div class="stack tight">' + matchBrands.map((b) => C.listRow({ thumbIcon: 'building', pri: b.name, sec: b.cats.join(' · '), go: `S003?brand=${b.id}` })).join('') + '</div>' : ''}
       ${C.sectionLabel('Products')}
       <div class="stack tight">${matchProds.map((p) => C.listRow({ thumb: `<span class="thumb-illo" style="width:44px;height:44px;border-radius:var(--r-2)">${C.illo(p.illo, 24)}</span>`, pri: p.name, sec: D.brandById[p.brand].name, trail: `<button class="btn sm icon-only" data-action="add-to-cart" data-p="${p.id}" aria-label="Quick add">${icon('plus', 16)}</button>`, go: `S004?p=${p.id}` })).join('')}</div>`;
@@ -189,7 +181,7 @@ export const shop = {
       ${C.sectionLabel('Categories')}
       <div class="grid-2">${['Apparel', 'Home', 'Beauty', 'Gifts', 'Pantry', 'Ceramics'].map((c) => `<button class="card" style="max-width:none;align-items:flex-start" data-go="S006?q=${c}"><b>${c}</b></button>`).join('')}</div>
       ${C.sectionLabel('Brands A–Z')}
-      <div class="stack tight">${visibleBrands().slice().sort((a, b) => a.name.localeCompare(b.name)).map((b) => C.listRow({ thumbIcon: 'building', pri: b.name, sec: b.cats.join(' · '), go: `S003?brand=${b.id}` })).join('')}</div>`;
+      <div class="stack tight">${D.brands.slice().sort((a, b) => a.name.localeCompare(b.name)).map((b) => C.listRow({ thumbIcon: 'building', pri: b.name, sec: b.cats.join(' · '), go: `S003?brand=${b.id}` })).join('')}</div>`;
     return base('Browse', { back: true, headerRight: C.hActions([{ icon: 'search', go: 'S005' }]), body });
   },
 
@@ -201,9 +193,11 @@ export const shop = {
   // S009 Brand launch detail
   S009(params) {
     const b = D.brandById[params.brand] || D.brandById['pompom'];
-    const closed = state.get('_state') === 'closed';
-    if (closed) {
-      return base(b.name, { back: true, body: C.fullscreenState({ ic: 'lock', title: 'First-look has closed', body: `Join the waitlist and I'll open ${b.name} to you the moment your tier clears.`, actions: [{ label: 'Join the waitlist', action: 'request-access' }, { label: 'Back', ghost: true, action: 'back' }] }) });
+    const requested = state.get('_state') === 'requested';
+    if (state.get('_state') === 'closed' || requested) {
+      return base(b.name, { back: true, body: C.fullscreenState({ ic: 'lock', title: 'First-look has closed',
+        body: requested ? `You're on the list — I'll ping you the moment ${b.name} reopens.` : `Join the waitlist and I'll open ${b.name} to you the moment the drop reopens.`,
+        actions: requested ? [{ label: 'On the waitlist', ghost: true }, { label: 'Back', ghost: true, action: 'back' }] : [{ label: 'Join the waitlist', action: 'request-access' }, { label: 'Back', ghost: true, action: 'back' }] }) });
     }
     const body = `
       <div class="thumb-illo" style="border-radius:var(--r-4);padding:var(--s-6)">${C.illo('hat', 96)}</div>
@@ -214,16 +208,6 @@ export const shop = {
       <div class="grid-2">${D.productsByBrand(b.id).map((p) => C.productCard(p)).join('')}</div>
       <div class="sticky-actions"><button class="btn ghost" data-action="remind">Remind me</button><button class="btn" data-go="S003?brand=${b.id}">Open the drop</button></div>`;
     return base('First-look', { back: true, body });
-  },
-
-  // S804 Locked · tier-gated (lives in edge but reused heavily from shop)
-  S804(params) {
-    const b = D.brandById[params.brand] || D.brandById['savant'];
-    const requested = state.get('_state') === 'requested';
-    return base(b.name, { back: true, body:
-      C.fullscreenState({ ic: 'lock', title: 'This brand opens at a higher tier',
-        body: `Your buyers see the full ${b.name} line once you reach the next tier. I can let your rep know you're interested.`,
-        actions: requested ? [{ label: 'Request sent', ghost: true }] : [{ label: 'Request access', action: 'request-access', go: '' }, { label: 'Read brand story', ghost: true }] }) });
   },
 };
 

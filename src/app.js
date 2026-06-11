@@ -23,6 +23,17 @@ const tabbarWrap = $('#tabbarWrap');
 
 window.HECHO = { nav, state };
 
+// States these screens render themselves; the generic loading / error
+// fallback in renderRoute leaves them alone. (Declared before boot —
+// initRouter renders the first route synchronously.)
+const SELF_STATES = {
+  S001: ['empty'], S003: ['launching'], S004: ['oos'], S006: ['empty'],
+  S009: ['closed', 'requested'], S101: ['perm', 'lowlight', 'identifying'],
+  S106: ['error'], S201: ['empty'], S202: ['conflict'], S208: ['empty'],
+  S301: ['empty'], S308: ['error'], S310: ['empty'], S602: ['empty'],
+  S604: ['conflict'], S701: ['empty'], S708: ['low', 'out'],
+};
+
 // ---------- boot ----------
 C.initOverlays($('#overlayRoot'), $('#toastHost'));
 applyEnvironment();
@@ -34,8 +45,14 @@ wireChrome();
 function renderRoute(route, { direction } = {}) {
   if (direction !== 'refresh') state.setEphemeral('_state', null);
   const entry = registry[route.id] || registry.S803;
+  const st = state.get('_state');
+  const own = (SELF_STATES[entry.id] || []).includes(st);
   let spec;
-  try { spec = entry.render(route.params || {}) || {}; }
+  try {
+    if (st === 'loading' && !own) spec = { title: entry.name, tab: entry.tab, back: true, body: C.skeleton(5) };
+    else if (st === 'error' && !own) spec = { title: entry.name, tab: entry.tab, back: true, body: C.fullscreenState({ ic: 'warning', title: 'Something went wrong', body: 'Something went wrong on my end. Try again.', actions: [{ label: 'Try again', action: 'retry' }, { label: 'Get help', ghost: true, go: 'S704' }] }) };
+    else spec = entry.render(route.params || {}) || {};
+  }
   catch (err) { console.error('render error', route.id, err); spec = registry.S803.render({}); }
 
   // header
@@ -50,8 +67,8 @@ function renderRoute(route, { direction } = {}) {
       <div style="display:flex;gap:2px">${spec.headerRight || ''}</div>`;
   }
 
-  // network bar
-  const net = state.get('network');
+  // network bar — the panel's per-screen 'offline' state shows it too
+  const net = st === 'offline' ? 'offline' : state.get('network');
   netSlot.innerHTML = net === 'offline'
     ? `<div class="offline-bar">${icon('wifi_off', 16)}<span>Offline · changes save locally</span></div>`
     : net === 'slow'
@@ -123,7 +140,6 @@ screenFrame.addEventListener('click', (e) => {
 function curSource() {
   const id = nav.current().id;
   if (id === 'S102') return 'barcode';
-  if (id === 'S104') return 'photo';
   if (id === 'S106') return 'manual';
   return 'manual';
 }
@@ -181,11 +197,10 @@ function handleAction(action, el) {
 
     // ---- scanning ----
     case 'simulate-scan': T('scan.result.shown', 'barcode', 'p-throw'); nav.go('S102?p=p-throw'); break;
-    case 'capture-photo': nav.go('S104'); break;
     case 'flash': C.toast('Flash toggled'); break;
     case 'library': C.toast('Opening photo library…'); break;
 
-    // ---- tier / brand ----
+    // ---- brand ----
     case 'request-access': T('brand.requested_access', 'brand', 'savant'); state.setEphemeral('_state', 'requested'); nav.refresh(); C.toast('Request sent — your rep will follow up', { positive: true }); break;
     case 'save-brand': { const saved = state.toggleSavedBrand(el.dataset.brand); T('brand.saved', 'brand', el.dataset.brand); nav.refresh(); C.toast(saved ? 'Brand saved' : 'Removed from saved'); break; }
     case 'save-template': C.toast('Saved as a personal template', { positive: true }); break;
@@ -204,8 +219,6 @@ function handleAction(action, el) {
     case 'add-card': C.closeAllOverlays(); C.openSheet({ title: 'Add a card', html: addCardBody() }); break;
     case 'save-card': state.addCard({ id: 'm-card2', kind: 'card', label: 'Credit / debit card', sub: '•••• 8210', icon: 'card' }); C.closeAllOverlays(); nav.refresh(); C.toast('Card added', { positive: true }); break;
 
-    // ---- privacy masked-fields checklist ----
-
     // ---- notifications ----
     case 'snooze-custom': C.openSheet({ title: 'Snooze for…', html: snoozeCustomBody() }); break;
     case 'snooze-apply': C.closeAllOverlays(); C.toast('Snoozed'); break;
@@ -221,10 +234,6 @@ function handleAction(action, el) {
 
     case 'close-overlay': C.closeTopOverlay(); break;
     case 'noop': break;
-
-    // ---- POS ----
-    case 'connect-pos': state.set({ pos: 'connected' }); nav.go('S413'); C.toast('Shopify connected', { positive: true }); break;
-    case 'disconnect-pos': state.set({ pos: 'disconnected' }); nav.go('S413'); C.toast('Shopify disconnected'); break;
 
     // ---- compliance / account ----
     case 'save-taxid': state.set({ taxId: 'current' }); nav.go('S408'); C.toast('Tax ID updated', { positive: true }); break;

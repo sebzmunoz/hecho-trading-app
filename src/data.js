@@ -11,7 +11,6 @@ export const account = {
   terms: 'Net-30',
   creditLimit: 25000,
   outstanding: 8740,
-  tier: 'top',            // overridden live by the Variables panel
   status: 'approved',     // registered & approved retailer
   email: 'sebz.munoz@gmail.com',
   phone: '+1 (415) 555-0148',
@@ -19,44 +18,44 @@ export const account = {
 };
 
 // ---- The 9 brands Marfa Studio manages through Hecho ----
-// tier = lowest exclusivity level that can see it (§TM). steward = the brand-side
-// user who keeps stock current ("brands set it themselves"). founder/founderStory
-// carry the storytelling block on the brand page (hidden in Rep mode).
+// steward = the brand-side user who keeps stock current ("brands set it
+// themselves"). founder/founderStory carry the storytelling block on the
+// brand page (hidden in Rep mode).
 export const brands = [
-  { id: 'etta', name: 'Etta & East', tier: 'standard', cats: ['Home', 'Textiles'], lead: 21, moq: 500, steward: 'Nadia R.',
+  { id: 'etta', name: 'Etta & East', cats: ['Home', 'Textiles'], lead: 21, moq: 500, steward: 'Nadia R.',
     story: 'Washed linens and slow home textiles, woven in small runs. Earthen palette, nothing loud.',
     founder: 'June Etta Calloway',
     founderStory: 'June wove her first table runners on her grandmother\'s loom in Abilene. Forty years on, she still won\'t ship a weave she hasn\'t slept under at least one season.' },
-  { id: 'lavender', name: 'Lavender Thorne', tier: 'standard', cats: ['Beauty', 'Body'], lead: 14, moq: 250, steward: 'June P.',
+  { id: 'lavender', name: 'Lavender Thorne', cats: ['Beauty', 'Body'], lead: 14, moq: 250, steward: 'June P.',
     story: 'Tallow-based skincare, unscented or wild-harvested. Made in cast-iron batches, labeled by hand.',
     founder: 'Maribel Thorne',
     founderStory: 'A nurse for twelve years, Maribel started rendering tallow on her kitchen stove when nothing on the shelf helped her daughter\'s skin. The cast-iron pots never left.' },
-  { id: 'arroyo', name: 'El Arroyo', tier: 'standard', cats: ['Gifts', 'Stationery'], lead: 12, moq: 200, steward: 'Marco T.',
+  { id: 'arroyo', name: 'El Arroyo', cats: ['Gifts', 'Stationery'], lead: 12, moq: 200, steward: 'Marco T.',
     story: 'The Austin sign you have seen. Witty cards, napkins, and gifts with a one-liner on every one.',
     founder: 'The Vasquez family',
     founderStory: 'The sign started outside the family\'s Austin taqueria in 1975 — one line, changed daily. The one-liners outgrew the menu and became the brand.' },
-  { id: 'frida', name: 'Frida Vida', tier: 'standard', cats: ['Home', 'Gifts'], lead: 18, moq: 300, steward: 'Lupita G.',
+  { id: 'frida', name: 'Frida Vida', cats: ['Home', 'Gifts'], lead: 18, moq: 300, steward: 'Lupita G.',
     story: 'Color-first home and gifts with a Mexican folk-art lean. Talavera glaze, marigold everything.',
     founder: 'Lupita Reyes',
     founderStory: 'Lupita grew up between Puebla and El Paso, glazing talavera in her tío\'s workshop after school. Every collection starts with a color she remembers from home.' },
-  { id: 'beljoy', name: 'Beljoy', tier: 'standard', cats: ['Jewelry', 'Accessories'], lead: 20, moq: 350, steward: 'Camille D.',
+  { id: 'beljoy', name: 'Beljoy', cats: ['Jewelry', 'Accessories'], lead: 20, moq: 350, steward: 'Camille D.',
     story: 'Hand-beaded jewelry made by artisan co-ops. Each stack is strung one bead at a time.',
     founder: 'Camille Bertrand',
     founderStory: 'Camille met her first beading co-op outside Port-au-Prince in 2014 and never really left. Today sixty artisans string every stack by hand, and she knows their names.' },
-  { id: 'pompom', name: 'Pom Pom London', tier: 'mid', cats: ['Jewelry'], lead: 28, moq: 700, launching: true, steward: 'Saskia W.',
-    story: 'Birthstones and charms in recycled gold vermeil. Pom Pom opens to mid-tier and above this season.',
+  { id: 'pompom', name: 'Pom Pom London', cats: ['Jewelry'], lead: 28, moq: 700, launching: true, steward: 'Saskia W.',
+    story: 'Birthstones and charms in recycled gold vermeil. Pom Pom opens on Hecho this season.',
     founder: 'Saskia Pommeroy',
     founderStory: 'A Hatton Garden apprentice turned designer, Saskia recasts vintage charm molds in recycled vermeil from a two-room studio in East London.' },
-  { id: 'ellie', name: 'Ellie Rose', tier: 'standard', cats: ['Bags', 'Accessories'], lead: 16, moq: 400, steward: 'Bea M.',
+  { id: 'ellie', name: 'Ellie Rose', cats: ['Bags', 'Accessories'], lead: 16, moq: 400, steward: 'Bea M.',
     story: 'Everyday canvas and quilted bags, cut and sewn in small batches. Built to be over-used.',
     founder: 'Ellie Rose Tanaka',
     founderStory: 'Ellie sewed her first market tote from her dad\'s retired sailcloth. The bags are still cut the same way — to be over-used, never babied.' },
-  { id: 'popkle', name: 'Popkle', tier: 'standard', cats: ['Gifts', 'Novelty'], lead: 18, moq: 300, steward: 'Kit N.',
+  { id: 'popkle', name: 'Popkle', cats: ['Gifts', 'Novelty'], lead: 18, moq: 300, steward: 'Kit N.',
     story: 'Loud little objects that make a counter fun. Boba keychains, jelly pens, the occasional plush.',
     founder: 'Kit Nakamura',
     founderStory: 'Kit spent six years designing claw-machine prizes in Osaka. Popkle is the counter-top joy they always wanted to make — small, loud, impossible not to pick up.' },
-  { id: 'savant', name: 'The New Savant', tier: 'top', cats: ['Home', 'Candles'], lead: 30, moq: 900, steward: 'Ana M.',
-    story: 'Chicago candles and incense, poured in reserve runs. We show The New Savant to top-tier buyers first.',
+  { id: 'savant', name: 'The New Savant', cats: ['Home', 'Candles'], lead: 30, moq: 900, steward: 'Ana M.',
+    story: 'Chicago candles and incense, poured in reserve runs that sell through fast.',
     founder: 'Ana Maldonado',
     founderStory: 'Ana poured her first reserve run in a Chicago walk-up, naming each scent after a block she\'s lived on. She still approves every batch nose-first.' },
 ];
@@ -96,38 +95,30 @@ export const productById = Object.fromEntries(products.map((p) => [p.id, p]));
 export const productsByBrand = (bid) => products.filter((p) => p.brand === bid);
 
 // ---- §07-H H1: reorder recommendation ----
+// Behavior model: order history + lead time + the store's last counts.
 const roundUpToPack = (n, pack) => Math.ceil(n / pack) * pack;
-export function recommendedQty(p, posConnected = true) {
-  if (!posConnected) return null;
+export function recommendedQty(p) {
   const lead = brandById[p.brand]?.lead ?? 14;
   const need = Math.max(0, Math.ceil(p.velocity * lead) - p.onHand);
   return roundUpToPack(need, p.pack);
 }
-export function whyString(p, posConnected = true) {
+export function whyString(p) {
   const parts = [];
-  if (posConnected) parts.push(`Sold ${Math.round(p.velocity * 30)} in 30d`);
-  if (p.lastOrder) parts.push(`last ordered ${p.lastOrder}`);
+  if (p.lastOrder) parts.push(`Ordered ${p.lastOrderQty} ${p.lastOrder}`);
   if (p.season) parts.push(p.season === 'in' ? 'in season' : 'off season');
   return parts.join(' · ');
 }
 
-// ---- §07-H H3: stock staleness ----
-export function stockState(p, pos) {
-  if (pos === 'disconnected') return { kind: 'unknown', label: 'Last counted ' + p.onHand, value: p.onHand, caption: 'No POS connected · manual count' };
+// ---- §07-H H3: stock state (brands keep their own counts current) ----
+export function stockState(p) {
   if (p.onHand === 0) return { kind: 'out', label: 'Out of stock', value: 0, caption: p.restock ? 'Brand says: ' + p.restock : 'Restock pending' };
-  if (p.onHand <= 4) return { kind: 'low', label: `Low · ${p.onHand}`, value: p.onHand, caption: 'Live · synced just now' };
-  return { kind: 'in', label: `In stock · ${p.onHand}`, value: p.onHand, caption: 'Live · synced just now' };
-}
-
-// ---- Tier visibility (§TM) ----
-const tierRank = { standard: 0, mid: 1, top: 2 };
-export function canSee(brand, accountTier) {
-  return tierRank[accountTier] >= tierRank[brand.tier];
+  if (p.onHand <= 4) return { kind: 'low', label: `Low · ${p.onHand}`, value: p.onHand, caption: 'Set by the brand · current' };
+  return { kind: 'in', label: `In stock · ${p.onHand}`, value: p.onHand, caption: 'Set by the brand · current' };
 }
 
 // ---- "Running low at your store" (Shop home) ----
-// POS-driven: lines the buyer has ordered before, sorted by days of cover
-// left (on_hand / velocity). The motion the low-stock push (§07-B) feeds.
+// Lines the buyer has ordered before, sorted by days of cover left
+// (on_hand / velocity). The motion the low-stock push (§07-B) feeds.
 export function lowStockLines(max = 4) {
   return products
     .filter((p) => p.lastOrderQty > 0 && p.velocity > 0 && p.onHand <= Math.ceil(p.velocity * 7))
@@ -262,10 +253,10 @@ export const notifications = [
 // ---- Rep mode (P3) — retailers, with registration/approval status ----
 // mx/my position each store on the coverage map (S607), in % of the map canvas.
 export const repRetailers = [
-  { id: 'r-marfa', name: 'Marfa Studio', tier: 'top', city: 'Marfa, TX', mx: 56, my: 62, status: 'approved', liveCart: 'Back wall refresh', taxId: 'Current', credit: 'Headroom $16.3k', note: 'Admin approves every cart personally.' },
-  { id: 'r-ojai', name: 'Ojai General', tier: 'standard', city: 'Ojai, CA', mx: 12, my: 38, status: 'approved', liveCart: null, taxId: 'Renews soon', credit: 'Headroom $9.1k', note: 'Staff builds, the admin is hands-off.' },
-  { id: 'r-taos', name: 'Taos Mercantile', tier: 'top', city: 'Taos, NM', mx: 44, my: 22, status: 'approved', liveCart: 'Reserve preview', taxId: 'Current', credit: 'Headroom $40k', note: 'Top-tier. First-look on every drop.' },
-  { id: 'r-bisbee', name: 'Bisbee Co.', tier: 'standard', city: 'Bisbee, AZ', mx: 26, my: 68, status: 'pending', liveCart: null, taxId: 'Pending', credit: 'Awaiting approval', note: 'New application — review the resale cert to approve.' },
+  { id: 'r-marfa', name: 'Marfa Studio', city: 'Marfa, TX', mx: 56, my: 62, status: 'approved', liveCart: 'Back wall refresh', taxId: 'Current', credit: 'Headroom $16.3k', note: 'Admin approves every cart personally.' },
+  { id: 'r-ojai', name: 'Ojai General', city: 'Ojai, CA', mx: 12, my: 38, status: 'approved', liveCart: null, taxId: 'Renews soon', credit: 'Headroom $9.1k', note: 'Staff builds, the admin is hands-off.' },
+  { id: 'r-taos', name: 'Taos Mercantile', city: 'Taos, NM', mx: 44, my: 22, status: 'approved', liveCart: 'Reserve preview', taxId: 'Current', credit: 'Headroom $40k', note: 'First-look on every drop.' },
+  { id: 'r-bisbee', name: 'Bisbee Co.', city: 'Bisbee, AZ', mx: 26, my: 68, status: 'pending', liveCart: null, taxId: 'Pending', credit: 'Awaiting approval', note: 'New application — review the resale cert to approve.' },
 ];
 
 // A prospect mid-application, used by the coverage map to demo the
@@ -275,15 +266,6 @@ export const repProspect = { name: 'Alpine Provisions', city: 'Alpine, TX', mx: 
 export const repAppointments = [
   { retailer: 'Marfa Studio', when: 'in 30 minutes', kind: 'Showroom walk' },
   { retailer: 'Taos Mercantile', when: 'this afternoon', kind: 'Reserve preview' },
-];
-
-// ---- Photo-match candidates (§07-H H2: score 0-1, show >=0.40, best-guess <0.65, cap 5) ----
-export const photoCandidates = [
-  { product: 'p-throw', score: 0.91 },
-  { product: 'p-linen', score: 0.74 },
-  { product: 'p-towel', score: 0.58 },
-  { product: 'p-tote', score: 0.43 },
-  { product: 'p-pen', score: 0.31 }, // below floor — filtered out
 ];
 
 // ---- Search ----
@@ -308,13 +290,6 @@ export const addresses = [
 export const paymentMethods = [
   { id: 'm-ach', kind: 'ach', label: 'ACH bank transfer', sub: 'Lowest fee · 1–2 days', icon: 'bank' },
   { id: 'm-card', kind: 'card', label: 'Saved card', sub: '•••• 4242', icon: 'card' },
-];
-
-// ---- POS vendors ----
-export const posVendors = [
-  { id: 'shopify', name: 'Shopify', status: 'connected', sync: 'synced just now' },
-  { id: 'lightspeed', name: 'Lightspeed', status: 'disconnected' },
-  { id: 'square', name: 'Square', status: 'disconnected' },
 ];
 
 // ---- Helpers ----

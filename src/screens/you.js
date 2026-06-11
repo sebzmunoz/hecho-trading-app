@@ -16,9 +16,7 @@ export const you = {
       { ic: 'pin', label: 'Address book', go: 'S403' },
       { ic: 'user', label: 'Company users', go: 'S405' },
       { ic: 'shield', label: 'Compliance', go: 'S408' },
-      { ic: 'refresh', label: 'Connected POS', go: 'S413' },
       { ic: 'bell', label: 'Notifications', go: 'S411' },
-      { ic: 'eye-off', label: 'Privacy on the floor', go: 'S412' },
       { ic: 'help', label: 'Help & support', go: 'S704' },
     ];
     const body = `
@@ -72,13 +70,17 @@ export const you = {
 
   // S406 Invite user
   S406() {
+    const canInvite = state.caps().users;
     return base('Invite user', { back: true, body: `
-      <div class="input-group"><label>Email</label><input class="input" placeholder="name@store.com" inputmode="email" /></div>
+      <div class="input-group"><label>Email</label><input class="input" placeholder="name@store.com" inputmode="email" ${canInvite ? '' : 'disabled'} /></div>
       ${C.sectionLabel('Role')}
       <div class="chip-row"><button class="chip is-selected">Staff</button></div>
       <p class="muted">Staff build and share drafts but can't submit. The Admin role can't be granted by invite.</p>
-      <button class="btn full" data-action="send-invite">Send invite</button>
-      <button class="btn ghost full" data-action="copy">Copy invite link</button>` });
+      ${!canInvite ? C.banner('<b>Only the admin invites users</b> (§02b).', { ic: 'user' }) : ''}
+      ${canInvite
+        ? `<button class="btn full" data-action="send-invite">Send invite</button>
+      <button class="btn ghost full" data-action="copy">Copy invite link</button>`
+        : `<button class="btn full" aria-disabled="true">Send invite · admin only</button>`}` });
   },
 
   // S407 Roles & permissions
@@ -128,43 +130,6 @@ export const you = {
     return base('Notifications', { back: true, body: notifSettingsBody() });
   },
 
-  // S412 Privacy on the floor — toggle-only, nothing to configure
-  S412() {
-    const on = state.get('privacyOn');
-    return base('Privacy on the floor', { back: true, body: `
-      ${C.switchRow('Privacy on the floor', on, { sub: 'On by default on the showroom floor', action: 'toggle-privacy' })}
-      <p class="muted">While it's on, your numbers render as dots so a neighbor can't read them over your shoulder. Whenever something sensitive is on-screen, the eye appears in the header — tap it to reveal, tap again to re-mask.</p>
-      ${C.sectionLabel('What gets masked')}
-      <div class="chip-row"><span class="chip">Negotiated wholesale</span><span class="chip">On-hand stock</span><span class="chip">Past spend & margin</span><span class="chip">Credit balance</span><span class="chip">Reorder quantity</span></div>
-      <div class="card" style="max-width:none"><span class="muted" style="font-size:var(--fs-nano)">PREVIEW</span>
-        <div class="row-between"><span class="muted">Your price</span>${C.maskField('<b>$18 wholesale</b>', 'wholesale')}</div></div>` });
-  },
-
-  // S413 Connected POS
-  S413() {
-    const pos = state.get('pos');
-    const vendors = D.posVendors.map((v) => v.id === 'shopify' ? { ...v, status: pos === 'connected' ? 'connected' : (pos === 'connecting' ? 'connecting' : 'disconnected') } : v);
-    return base('Connected POS', { back: true, body: `
-      <div class="stack tight">${vendors.map((v) => C.listRow({ thumbIcon: 'refresh', pri: v.name, sec: v.status === 'connected' ? 'Synced just now' : (v.status === 'connecting' ? 'Connecting…' : 'Not connected'), trail: v.status === 'connected' ? '<span class="pill positive">Connected</span>' : `<button class="btn sm" data-go="S414?vendor=${v.id}">Connect</button>` })).join('')}</div>
-      <button class="btn ghost full" data-go="S414">Connect another POS (open API)</button>
-      <p class="muted">A disconnected POS never blocks ordering — stock falls back to "last counted".</p>` });
-  },
-
-  // S414 POS OAuth flow
-  S414(params) {
-    return base('Connect POS', { back: true, noTabbar: true, body: `
-      <div class="center-col pad-block">${icon('globe', 48)}<h3>Sign in to ${params.vendor ? params.vendor[0].toUpperCase() + params.vendor.slice(1) : 'your POS'}</h3><p class="muted">I'll open the vendor's secure login, then bring you back. Multi-store accounts pick a store on return.</p></div>
-      <div class="card" style="max-width:none"><div class="input-group"><label>Store URL</label><input class="input" value="marfa-studio.myshopify.com" /></div></div>
-      <button class="btn full" data-action="connect-pos">Approve & connect</button>
-      <button class="btn ghost full" data-back>Cancel</button>` });
-  },
-
-  // S415 POS disconnect confirm (modal)
-  S415() {
-    return base('Disconnect POS', { back: true, noTabbar: true, body: `
-      <div class="fullscreen-state"><div class="ico">${icon('warning', 48)}</div><h4>Disconnect Shopify?</h4><p>Stock checks return to "no POS connected" and reorder picks lose live data. You can reconnect any time.</p><div class="actions"><button class="btn danger" data-action="disconnect-pos">Disconnect</button><button class="btn ghost" data-back>Cancel</button></div></div>` });
-  },
-
   // S416 Reports
   S416() {
     return base('Reports', { back: true, body: `
@@ -174,7 +139,7 @@ export const you = {
         <div class="card" style="max-width:none"><span class="muted">Reorder rate</span><b style="font-size:var(--fs-h3)">42%</b></div>
       </div>
       ${C.sectionLabel('Top brands')}
-      <div class="stack tight">${['Cedar House', 'Marlow', 'Lavender Thorne'].map((b, i) => C.listRow({ thumbIcon: 'building', pri: b, sec: `${[6, 5, 4][i]} orders`, trail: C.maskField(C.money([5200, 4100, 3300][i]), 'spend') })).join('')}</div>
+      <div class="stack tight">${['The New Savant', 'Etta & East', 'Lavender Thorne'].map((b, i) => C.listRow({ thumbIcon: 'building', pri: b, sec: `${[6, 5, 4][i]} orders`, trail: C.maskField(C.money([5200, 4100, 3300][i]), 'spend') })).join('')}</div>
       <button class="btn ghost full" data-action="export">Email full report</button>` });
   },
 

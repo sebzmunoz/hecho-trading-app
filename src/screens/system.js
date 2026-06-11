@@ -5,8 +5,6 @@ import { icon } from '../icons.js';
 import { base } from './shop.js';
 import { notifSettingsBody } from './you.js';
 
-const visibleBrands = () => D.brands.filter((b) => D.canSee(b, state.get('tier')));
-
 function stockCard(b) {
   const s = D.brandStock(b.id);
   return `<div class="card" style="max-width:none;gap:var(--s-2)">
@@ -27,7 +25,6 @@ export const system = {
     D.notifications.forEach((n) => (groups[n.group] ||= []).push(n));
     const catIcon = (cat) => D.pushCategories.find((c) => c.id === cat)?.icon || 'info';
     return base('Notifications', { back: true, headerRight: C.hActions([{ icon: 'settings', go: 'S702' }]), body: `
-      ${state.get('network') !== 'online' ? '' : ''}
       ${Object.entries(groups).map(([g, items]) => `${C.sectionLabel(g)}<div class="stack tight">${items.map((n) => C.listRow({ thumbIcon: catIcon(n.cat), pri: n.title, sec: n.body, trail: `<span class="muted" style="font-size:var(--fs-nano)">${n.when}</span>`, go: n.deep })).join('')}</div>`).join('')}
       <button class="btn ghost sm full" data-action="mark-read">Mark all read</button>` });
   },
@@ -42,7 +39,7 @@ export const system = {
       ${C.sectionLabel('Products')}
       <div class="stack tight">${D.products.slice(0, 2).map((p) => C.listRow({ thumb: `<span class="thumb thumb-illo">${C.illo(p.illo, 24)}</span>`, pri: p.name, sec: D.brandById[p.brand].name, go: `S004?p=${p.id}` })).join('')}</div>
       ${C.sectionLabel('Orders')}
-      <div class="stack tight">${C.listRow({ thumbIcon: 'bag', pri: 'Order #4790', sec: 'Shipped · Marlow, Lavender Thorne', go: 'S302?order=4790' })}</div>
+      <div class="stack tight">${C.listRow({ thumbIcon: 'bag', pri: 'Order #4790', sec: 'Shipped · Etta & East, Lavender Thorne', go: 'S302?order=4790' })}</div>
       ${C.sectionLabel('Carts')}
       <div class="stack tight">${C.listRow({ thumbIcon: 'draft', pri: 'Back wall refresh', sec: '4 brands', go: 'S202?cart=c-back' })}</div>` });
   },
@@ -53,7 +50,7 @@ export const system = {
       <div class="search"><span>${icon('search', 20)}</span><input placeholder="Search help" aria-label="Search help" /></div>
       <button class="btn full" data-go="S606">${icon('chat', 16)} Chat with your rep</button>
       ${C.sectionLabel('FAQ')}
-      <div class="stack tight">${['How does Privacy on the floor work?', 'What happens if my POS disconnects?', 'How do approvals work?', 'When is an order settled?'].map((q) => C.listRow({ thumbIcon: 'help', pri: q })).join('')}</div>
+      <div class="stack tight">${['How does Privacy on the floor work?', 'How do brands keep stock current?', 'How do approvals work?', 'When is an order settled?'].map((q) => C.listRow({ thumbIcon: 'help', pri: q })).join('')}</div>
       <button class="btn ghost full" data-action="email-support">Email Hecho support</button>` });
   },
 
@@ -67,8 +64,8 @@ export const system = {
   // S706 Brand directory
   S706() {
     return base('Brands', { back: true, headerRight: C.hActions([{ icon: 'search', go: 'S005' }]), body: `
-      <div class="chip-row"><button class="chip is-selected">All</button><button class="chip">My tier</button><button class="chip">Invitation-only</button><button class="chip">Launching</button></div>
-      <div class="stack tight">${D.brands.map((b) => { const seen = D.canSee(b, state.get('tier')); return C.brandCard(b, { locked: !seen }); }).join('')}</div>` });
+      <div class="chip-row"><button class="chip is-selected">All</button><button class="chip">New</button><button class="chip">Launching</button></div>
+      <div class="stack tight">${D.brands.map((b) => C.brandCard(b)).join('')}</div>` });
   },
 
   // S707 Privacy holding state (transient)
@@ -97,7 +94,7 @@ export const system = {
 
   // S709 Brand from QR (a brand tag scanned on the floor)
   S709(params) {
-    const b = D.brandById[params.brand] || D.brands.find((x) => D.canSee(x, state.get('tier'))) || D.brands[0];
+    const b = D.brandById[params.brand] || D.brands[0];
     const s = D.brandStock(b.id);
     return base(b.name, { back: true, body: `
       <div class="thumb-illo" style="border-radius:var(--r-4);padding:var(--s-6)">${C.illo(D.productsByBrand(b.id)[0]?.illo || 'jar', 80)}</div>

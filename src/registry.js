@@ -24,18 +24,16 @@ const META = {
   // ---- Shop ----
   S001: { name: 'Shop home', group: 'Shop', tab: 'shop', states: S('default', 'loading', 'empty', 'offline', 'error') },
   S002: { name: 'Style guide detail', group: 'Shop', tab: 'shop', states: BASE },
-  S003: { name: 'Brand page', group: 'Shop', tab: 'shop', states: S('default', 'locked', 'launching', 'loading', 'offline') },
-  S004: { name: 'Product detail', group: 'Shop', tab: 'shop', states: S('default', 'oos', 'locked', 'loading', 'offline') },
+  S003: { name: 'Brand page', group: 'Shop', tab: 'shop', states: S('default', 'launching', 'loading', 'offline') },
+  S004: { name: 'Product detail', group: 'Shop', tab: 'shop', states: S('default', 'oos', 'loading', 'offline') },
   S005: { name: 'Search', group: 'Shop', tab: 'shop', states: S('default') },
   S006: { name: 'Search results', group: 'Shop', tab: 'shop', states: S('default', 'empty', 'loading', 'offline') },
   S007: { name: 'Category index', group: 'Shop', tab: 'shop', states: S('default', 'loading', 'offline') },
   S008: { name: 'Filters sheet', group: 'Shop', tab: 'shop', states: S('default') },
-  S009: { name: 'Brand launch detail', group: 'Shop', tab: 'shop', states: S('default', 'closed') },
+  S009: { name: 'Brand launch detail', group: 'Shop', tab: 'shop', states: S('default', 'closed', 'requested') },
   // ---- Scan ----
   S101: { name: 'Scanner viewfinder', group: 'Scan', tab: 'scan', states: S('default', 'identifying', 'lowlight', 'perm', 'offline') },
   S102: { name: 'Scan result', group: 'Scan', tab: 'scan', states: S('default') },
-  S103: { name: 'Photo recognition', group: 'Scan', tab: 'scan', states: S('default') },
-  S104: { name: 'Photo result', group: 'Scan', tab: 'scan', states: S('default', 'nomatch') },
   S105: { name: 'Permission denied (camera)', group: 'Scan', tab: 'scan', states: S('default') },
   S106: { name: 'Manual SKU entry', group: 'Scan', tab: 'scan', states: S('default', 'error', 'offline') },
   // ---- Carts ----
@@ -48,7 +46,6 @@ const META = {
   S207: { name: 'MOQ-not-met state', group: 'Carts', tab: 'carts', states: S('default') },
   S208: { name: 'Approval inbox', group: 'Carts', tab: 'carts', states: S('default', 'empty') },
   S209: { name: 'Approval review', group: 'Carts', tab: 'carts', states: S('default') },
-  S210: { name: 'Privacy toggle', group: 'Carts', tab: 'carts', states: S('default') },
   S211: { name: 'Add to cart sheet', group: 'Carts', tab: 'carts', states: S('default') },
   S212: { name: 'Shop the look sheet', group: 'Carts', tab: 'carts', states: S('default') },
   // ---- Orders ----
@@ -75,10 +72,6 @@ const META = {
   S409: { name: 'Tax-ID upload', group: 'You', tab: 'you', states: S('default') },
   S410: { name: 'Tax-ID hold', group: 'You', tab: 'you', states: S('default') },
   S411: { name: 'Notification settings', group: 'You', tab: 'you', states: S('default') },
-  S412: { name: 'Privacy on the floor settings', group: 'You', tab: 'you', states: S('default') },
-  S413: { name: 'Connected POS', group: 'You', tab: 'you', states: S('default') },
-  S414: { name: 'POS OAuth flow', group: 'You', tab: 'you', states: S('default') },
-  S415: { name: 'POS disconnect confirm', group: 'You', tab: 'you', states: S('default') },
   S416: { name: 'Reports', group: 'You', tab: 'you', states: S('default') },
   S417: { name: 'Sign out', group: 'You', tab: 'you', states: S('default') },
   // ---- Onboarding ----
@@ -90,7 +83,6 @@ const META = {
   S506: { name: 'Account picker', group: 'Onboarding', tab: null, states: S('default') },
   S507: { name: 'Camera permission prompt', group: 'Onboarding', tab: null, states: S('default') },
   S508: { name: 'Notification permission prompt', group: 'Onboarding', tab: null, states: S('default') },
-  S509: { name: 'POS connect invite', group: 'Onboarding', tab: null, states: S('default') },
   S510: { name: 'First showroom-visit cue', group: 'Onboarding', tab: null, states: S('default') },
   // ---- Rep ----
   S601: { name: 'Rep account picker', group: 'Rep mode', tab: 'retailers', states: S('default') },
@@ -115,7 +107,6 @@ const META = {
   S801: { name: 'Offline (no cache)', group: 'Edge & states', tab: null, states: S('default') },
   S802: { name: 'Empty', group: 'Edge & states', tab: null, states: S('default') },
   S803: { name: 'Generic error', group: 'Edge & states', tab: null, states: S('default') },
-  S804: { name: 'Locked · tier-gated', group: 'Edge & states', tab: null, states: S('default', 'requested') },
   S805: { name: 'Locked · tax-ID expired', group: 'Edge & states', tab: null, states: S('default') },
   S806: { name: 'Locked · MOQ not met', group: 'Edge & states', tab: null, states: S('default') },
   S807: { name: 'Sync conflict resolver', group: 'Edge & states', tab: null, states: S('default') },

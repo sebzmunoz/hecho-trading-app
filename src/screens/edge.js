@@ -3,7 +3,6 @@ import * as D from '../data.js';
 import { state } from '../state.js';
 import { icon } from '../icons.js';
 import { base } from './shop.js';
-import { shop } from './shop.js';
 
 export const edge = {
   // S801 Offline (no cache)
@@ -22,9 +21,6 @@ export const edge = {
   S803() {
     return base('Something went wrong', { noTabbar: true, body: C.fullscreenState({ ic: 'warning', title: 'Something went wrong', body: 'Something went wrong on my end. Try again.', actions: [{ label: 'Try again', action: 'retry' }, { label: 'Get help', ghost: true, go: 'S704' }] }) });
   },
-
-  // S804 Locked · tier-gated  (delegates to the shop implementation)
-  S804(params) { return shop.S804(params); },
 
   // S805 Locked · tax-ID expired (alias of S410)
   S805() {

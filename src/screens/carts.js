@@ -25,7 +25,6 @@ export const carts = {
     const pending = D.carts.filter((c) => c.section === 'pending');
     const isOwner = state.get('role') === 'admin';
     const body = `
-      ${state.get('network') !== 'online' ? '' : ''}
       ${C.sectionLabel('Mine')}
       <div class="stack tight">${mine.map(C.draftCard).join('')}</div>
       ${C.sectionLabel('Shared with me')}
@@ -81,6 +80,7 @@ export const carts = {
   S204(params) {
     const c = D.cartById[params.cart] || D.carts[0];
     const tax = state.get('taxId');
+    const caps = state.caps();
     const offline = state.get('network') !== 'online';
     const total = D.cartTotal(c);
     const overLimit = D.account.outstanding + total > D.account.creditLimit;
@@ -126,8 +126,15 @@ export const carts = {
       ${freeShip}
       <div class="card" style="max-width:none"><div class="row-between"><b>Order total</b><span class="price"><span class="v">${D.usd(total)}</span><span class="currency">USD</span></span></div></div>
       ${offline ? C.banner('You\'re offline — Submit needs a connection.', { kind: 'caution', ic: 'wifi_off' }) : ''}
+      ${caps.submit !== true ? C.banner(caps.submit === 'grant'
+        ? '<b>Rep view.</b> Submitting on the retailer\'s behalf needs their per-account grant (§02b).'
+        : '<b>Staff can\'t submit.</b> Send this for approval and the admin takes it from here.', { ic: 'user' }) : ''}
       <div class="sticky-actions"><button class="btn ghost" data-back>Edit lines</button>
-        <button class="btn" data-action="confirm-submit" data-cart="${c.id}" ${offline ? 'aria-disabled="true"' : ''}>Submit order</button></div>`;
+        ${caps.submit === true
+          ? `<button class="btn" data-action="confirm-submit" data-cart="${c.id}" ${offline ? 'aria-disabled="true"' : ''}>Submit order</button>`
+          : (caps.submit === 'grant'
+            ? `<button class="btn" aria-disabled="true">Needs retailer grant</button>`
+            : `<button class="btn" data-action="share-cart" data-cart="${c.id}">Request approval</button>`)}</div>`;
     return base('Review & submit', { back: true, noTabbar: true, body });
   },
 
@@ -160,6 +167,9 @@ export const carts = {
 
   // S208 Approval inbox (owner)
   S208() {
+    if (!state.caps().approve) {
+      return base('Approvals', { back: true, body: C.emptyState({ ic: 'check', title: 'Approvals are the admin\'s queue', body: 'Drafts you send for sign-off show their status in Carts.', primary: { label: 'Back to Carts', go: 'S201' } }) });
+    }
     const pending = D.carts.filter((c) => c.section === 'pending' || c.awaiting);
     if (!pending.length || state.get('_state') === 'empty') {
       return base('Approvals', { back: true, body: C.emptyState({ ic: 'check', title: 'Nothing to approve', body: 'Drafts your team sends for sign-off show up here.' }) });
@@ -175,16 +185,15 @@ export const carts = {
     const total = D.cartTotal(c);
     const groups = brandGroups(c);
     return base('Review draft', { back: true, noTabbar: true, body: `
-      <div class="card" style="max-width:none"><div class="row-between"><b>${c.name}</b><span class="muted">${c.author}</span></div><span class="muted">${D.cartBrandCount(c)} brands · ${C.money(total)}</span></div>
-      ${Object.entries(groups).map(([bid, lines]) => `<div class="card" style="max-width:none;gap:var(--s-2)"><b>${D.brandById[bid].name}</b>${lines.map(([p, q]) => `<div class="row-between"><span>${p.name} ×${q}</span><span class="muted">${C.money(p.wholesale * q)}</span></div>`).join('')}</div>`).join('')}
+      <div class="card" style="max-width:none"><div class="row-between"><b>${c.name}</b><span class="muted">${c.author}</span></div><span class="muted">${D.cartBrandCount(c)} brands · ${C.maskField(C.money(total), 'spend')}</span></div>
+      ${Object.entries(groups).map(([bid, lines]) => `<div class="card" style="max-width:none;gap:var(--s-2)"><b>${D.brandById[bid].name}</b>${lines.map(([p, q]) => `<div class="row-between"><span>${p.name} ×${q}</span><span class="muted">${C.maskField(C.money(p.wholesale * q), 'spend')}</span></div>`).join('')}</div>`).join('')}
       <div class="sticky-actions" style="flex-wrap:wrap">
         <button class="btn ghost sm" data-action="send-back">Send back</button>
         <button class="btn ghost sm" data-go="S202?cart=${c.id}">Edit & own</button>
-        <button class="btn" data-action="approve-submit" data-cart="${c.id}">Approve</button></div>` });
+        ${state.caps().approve
+          ? `<button class="btn" data-action="approve-submit" data-cart="${c.id}">Approve</button>`
+          : `<button class="btn" aria-disabled="true">Admin only</button>`}</div>` });
   },
-
-  // S210 Privacy toggle (sheet, also screen)
-  S210() { return base('Privacy on the floor', { back: true, body: privacyBody() }); },
 
   // S211 Add to cart (sheet, also screen)
   S211(params) { return base('Add to cart', { back: true, body: addToCartBody(params.p || 'p-throw') }); },
@@ -229,15 +238,10 @@ export function shareBody() {
     <div class="input-group"><label>Note</label><textarea class="textarea" placeholder="Optional note"></textarea></div>
     <button class="btn full" data-action="send-share">Send to selected</button>`;
 }
-export function privacyBody() {
-  return `
-    ${C.switchRow('Privacy on the floor', state.get('privacyOn'), { sub: 'Mask wholesale, stock, spend, and credit', action: 'toggle-privacy' })}
-    <p class="muted">One switch, nothing to configure. Whenever something sensitive is on-screen, the eye appears in the header — tap it to reveal everything, tap again to re-mask.</p>`;
-}
 export function addToCartBody(pid) {
   const p = D.productById[pid] || D.products[0];
   const b = D.brandById[p.brand];
-  const rec = D.recommendedQty(p, state.get('pos') === 'connected') || 12;
+  const rec = D.recommendedQty(p) || 12;
   return `
     <div class="card" style="max-width:none;gap:var(--s-3)" data-line data-price="${p.wholesale}">
       <div style="display:flex;gap:var(--s-3);align-items:center">
@@ -258,9 +262,6 @@ export function shopLookBody(gid) {
   const lines = g.lines.map((id) => D.productById[id]).filter(Boolean);
   return `
     <p class="muted">${g.title} — pick or skip each line, then add the set.</p>
-    <div class="stack tight">${lines.map((p, i) => {
-      const locked = !D.canSee(D.brandById[p.brand], state.get('tier'));
-      return `<label class="list-row dense" style="cursor:pointer;${locked ? 'opacity:.55' : ''}"><span class="thumb thumb-illo" style="width:40px;height:40px">${C.illo(p.illo, 22)}</span><span class="body"><span class="pri">${p.name}${locked ? ' · locked' : ''}</span><span class="sec">${D.brandById[p.brand].name} · $${p.wholesale}</span></span><span class="trail">${locked ? C.lockChip() : `<span class="choice"><input type="checkbox" checked /><span class="box"></span></span>`}</span></label>`;
-    }).join('')}</div>
+    <div class="stack tight">${lines.map((p) => `<label class="list-row dense" style="cursor:pointer"><span class="thumb thumb-illo" style="width:40px;height:40px">${C.illo(p.illo, 22)}</span><span class="body"><span class="pri">${p.name}</span><span class="sec">${D.brandById[p.brand].name} · $${p.wholesale}</span></span><span class="trail"><span class="choice"><input type="checkbox" checked /><span class="box"></span></span></span></label>`).join('')}</div>
     <button class="btn full" data-action="confirm-look" data-guide="${g.id}">Add ${lines.length} items</button>`;
 }

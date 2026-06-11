@@ -55,9 +55,9 @@ export const orders = {
       <div class="photo-frame r-4-5" style="background:var(--surface)"><div style="position:absolute;inset:0;padding:var(--s-5);display:flex;flex-direction:column;gap:var(--s-3)">
         <div class="row-between"><b style="font-size:var(--fs-h4)">INVOICE</b><span class="muted">${o.invoice}</span></div>
         <div class="hairline"></div>
-        ${o.lines.map(([pid, q]) => { const p = D.productById[pid]; return `<div class="row-between" style="font-size:var(--fs-caption)"><span>${p.name} ×${q}</span><span>${C.money(p.wholesale * q)}</span></div>`; }).join('')}
+        ${o.lines.map(([pid, q]) => { const p = D.productById[pid]; return `<div class="row-between" style="font-size:var(--fs-caption)"><span>${p.name} ×${q}</span>${C.maskField(C.money(p.wholesale * q), 'spend')}</div>`; }).join('')}
         <div class="hairline"></div>
-        <div class="row-between"><b>Total</b><b>${C.money(o.total)}</b></div>
+        <div class="row-between"><b>Total</b>${C.maskField(`<b>${C.money(o.total)}</b>`, 'spend')}</div>
         <div class="row-between"><span class="muted">Terms</span><span class="muted">${o.due}</span></div>
       </div></div>
       <div class="grid-2"><button class="btn ghost sm" data-action="reemail">${icon('mail', 16)} Re-email</button><button class="btn ghost sm" data-action="download">${icon('download', 16)} Download</button></div>
@@ -149,6 +149,7 @@ export const orders = {
 export function paymentBody(orderId) {
   const o = D.orderById[orderId] || D.orders[0];
   const offline = state.get('network') !== 'online';
+  const canPay = state.caps().pay;
   const methods = [...D.paymentMethods, ...state.get('cards')];
   const methodRow = (m, i) => `<label class="list-row" style="cursor:pointer"><span class="thumb">${icon(m.icon, 22)}</span><span class="body"><span class="pri">${C.esc(m.label)}</span><span class="sec">${C.esc(m.sub)}</span></span><span class="trail"><span class="choice"><input type="radio" name="pay" ${i === 0 ? 'checked' : ''} /><span class="box round"></span></span></span></label>`;
   return `
@@ -157,8 +158,11 @@ export function paymentBody(orderId) {
     <div class="stack tight">${methods.map(methodRow).join('')}</div>
     <button class="btn ghost sm full" data-action="add-method">+ Add a payment method</button>
     ${offline ? C.banner("You're offline — pay needs a connection.", { kind: 'caution', ic: 'wifi_off' }) : ''}
+    ${!canPay ? C.banner('<b>Only the admin pays invoices</b> (§02b). You can view everything here.', { ic: 'user' }) : ''}
     <p class="muted" style="font-size:var(--fs-nano)">Partial payment isn't supported — the amount is fixed.</p>
-    <button class="btn full" data-action="confirm-pay" data-order="${o.id}" ${offline ? 'aria-disabled="true"' : ''}>Pay ${C.money(o.total)}</button>`;
+    ${canPay
+      ? `<button class="btn full" data-action="confirm-pay" data-order="${o.id}" ${offline ? 'aria-disabled="true"' : ''}>Pay ${C.money(o.total)}</button>`
+      : `<button class="btn full" aria-disabled="true">Pay ${C.money(o.total)} · admin only</button>`}`;
 }
 
 // Add-method chooser + card form (opened as sheets)

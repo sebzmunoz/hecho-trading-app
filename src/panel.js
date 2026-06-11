@@ -131,12 +131,9 @@ function renderVars() {
       ${row('Role', '§02b capabilities', seg('role', [{ v: 'admin', l: 'Admin' }, { v: 'staff', l: 'Staff' }, { v: 'rep', l: 'Rep' }], s.role))}
     </div>
     <div class="var-group"><span class="gl">Privacy on the floor</span>
-      ${row('Privacy', 'masked by default', seg('privacyOn', [{ v: true, l: 'On' }, { v: false, l: 'Off' }], s.privacyOn))}
-
+      ${row('Privacy', 'the header eye toggle', seg('privacyOn', [{ v: true, l: 'On' }, { v: false, l: 'Off' }], s.privacyOn))}
     </div>
-    <div class="var-group"><span class="gl">Live data</span>
-      ${row('POS', 'stock & reorder (§07-H)', seg('pos', [{ v: 'connected', l: 'Live' }, { v: 'connecting', l: 'Conn…' }, { v: 'disconnected', l: 'Off' }], s.pos))}
-      ${row('Exclusivity tier', 'discovery & locks', seg('tier', [{ v: 'standard', l: 'Std' }, { v: 'mid', l: 'Mid' }, { v: 'top', l: 'Top' }], s.tier))}
+    <div class="var-group"><span class="gl">Account</span>
       ${row('Tax-ID', 'submit gating (F10)', seg('taxId', [{ v: 'current', l: 'Current' }, { v: 'renews', l: 'Renews' }, { v: 'expired', l: 'Expired' }], s.taxId))}
     </div>
     <div class="var-group"><span class="gl">Environment</span>

@@ -13,7 +13,6 @@ export const flows = [
     { screen: 'S506', text: 'Multi-account holder picks an account.', branch: { label: 'Branch · invite path', screen: 'S503' } },
     { screen: 'S507', text: 'Camera rationale before the OS prompt.' },
     { screen: 'S508', text: 'Notification categories preview.' },
-    { screen: 'S509', text: 'Optional POS connect, skippable.' },
     { screen: 'S510', text: 'Showroom arrival cue offers wayfinding.' },
     { screen: 'S001', text: 'Land on Shop home.' },
   ] },
@@ -23,11 +22,10 @@ export const flows = [
     { screen: 'S211', text: 'Add to cart — pick a draft, set quantity.' },
     { screen: 'S101', text: 'Sheet collapses, viewfinder live again with a confirmation chip.', branch: { label: 'Branch · camera denied', screen: 'S105' } },
   ] },
-  { id: 'F3', name: 'Photo-identifying a product', persona: 'P1·P2', phase: 'P1', steps: [
+  { id: 'F3', name: 'Looking up a product by hand', persona: 'P1·P2', phase: 'P1', steps: [
     { screen: 'S101', text: 'Open the scanner.' },
-    { screen: 'S103', text: 'Switch to photo mode.' },
-    { screen: 'S104', text: 'Up to five candidates ranked by confidence.', branch: { label: 'Branch · no match', screen: 'S104?_=nomatch' } },
-    { screen: 'S004', text: 'Tap a candidate → product detail.' },
+    { screen: 'S106', text: 'No barcode in reach — enter the SKU by hand.', branch: { label: 'Branch · SKU not found', screen: 'S106?_=error' } },
+    { screen: 'S004', text: 'Look up → product detail.' },
     { screen: 'S211', text: 'Add to cart.' },
   ] },
   { id: 'F4', name: 'Building a named draft cart', persona: 'P1·P2', phase: 'P0', steps: [
@@ -48,7 +46,7 @@ export const flows = [
   { id: 'F6', name: 'Smart reorder from past orders', persona: 'P1·P2', phase: 'P1', steps: [
     { screen: 'S201', text: 'Tap Smart reorder.' },
     { screen: 'S203', text: 'Smart reorder template selected.' },
-    { screen: 'S202', text: 'Builder lists proposed lines with the why; accept piece by piece.', branch: { label: 'Branch · no POS', screen: 'S413' } },
+    { screen: 'S202', text: 'Builder lists proposed lines with the why; accept piece by piece.', branch: { label: 'Branch · MOQ not met', screen: 'S207' } },
     { screen: 'S204', text: 'Continue to submit.' },
   ] },
   { id: 'F7', name: 'Submitting an order & its lifecycle', persona: 'P1', phase: 'P0', steps: [
@@ -84,11 +82,9 @@ export const flows = [
     { screen: 'S604', text: 'Co-shop live in the retailer\'s draft.' },
     { screen: 'S606', text: 'Send a memo via chat. Switch back any time.' },
   ] },
-  { id: 'F12', name: 'Turning on Privacy on the floor', persona: 'P1·P2', phase: 'P1', steps: [
-    { screen: 'S412', text: 'Privacy is ON by default. One switch, nothing to configure.' },
-    { screen: 'S004', text: 'Sensitive values render as dots. The eye appears in the header whenever something sensitive is on-screen.' },
-    { screen: 'S210', text: 'Flip privacy fast from the header quick toggle.' },
-    { screen: 'S707', text: 'Tap the eye: everything reveals. Tap again: everything re-masks.' },
+  { id: 'F12', name: 'Privacy on the floor', persona: 'P1·P2', phase: 'P1', steps: [
+    { screen: 'S004', text: 'Privacy is ON by default — sensitive values render as dots. The eye appears in the header whenever something sensitive is on-screen.' },
+    { screen: 'S707', text: 'Tap the eye: everything reveals. Tap again: everything re-masks. One toggle, nothing to configure.' },
   ] },
   { id: 'F13', name: 'Discovering a style guide', persona: 'P1·P2', phase: 'P2', steps: [
     { screen: 'S001', text: 'Shop home features a hero style guide.' },
@@ -97,9 +93,9 @@ export const flows = [
     { screen: 'S202', text: 'Picked lines flow into the chosen draft.' },
   ] },
   { id: 'F14', name: 'Receiving a brand-launch notification', persona: 'P1', phase: 'P2', steps: [
-    { screen: 'S701', text: 'A brand-drop push arrives (tier-gated).' },
+    { screen: 'S701', text: 'A brand-drop push arrives.' },
     { screen: 'S710', text: 'Brand-launch arrival with first-look phrase.' },
-    { screen: 'S009', text: 'First-look detail — Open the drop.', branch: { label: 'Branch · below tier', screen: 'S804?brand=marquee' } },
+    { screen: 'S009', text: 'First-look detail — Open the drop.', branch: { label: 'Branch · first-look closed', screen: 'S009?_=closed' } },
     { screen: 'S003', text: 'Land on the brand page with the new collection.' },
   ] },
 ];

@@ -117,14 +117,6 @@ export function brandChip(bid, { go = true } = {}) {
   const attr = go ? `data-go="S003?brand=${bid}"` : '';
   return `<button class="chip" ${attr}>${esc(b.name)}</button>`;
 }
-export function tierBadge(tier) {
-  const map = { standard: 'Standard', mid: 'Mid tier', top: 'Top tier' };
-  return `<span class="tag">${esc(map[tier] || tier)}</span>`;
-}
-export function lockChip(label = 'Higher tier') {
-  return `<span class="lock-chip">${icon('lock', 12)}${esc(label)}</span>`;
-}
-
 // ---- Privacy on the floor (§07-D) — toggle-only ----
 // One global switch. Sensitive values render masked while it's ON; the eye
 // in the header (shown only when sensitive info is on-screen) flips it.
@@ -151,7 +143,6 @@ export function successMark() {
 
 // ---- Price pair (A1) ----
 export function pricePair(p, { masked = true, compact = false } = {}) {
-  const tier = state.get('tier');
   const inner = `<span class="price ${compact ? 'compact' : ''}"><span class="v">${p.wholesale}</span><span class="currency">USD</span>${p.msrp ? `<span class="msrp">$${p.msrp}</span>` : ''}</span>`;
   if (masked) return maskField(inner, 'wholesale');
   return inner;
@@ -159,10 +150,8 @@ export function pricePair(p, { masked = true, compact = false } = {}) {
 
 // ---- Stock check row (A3 + H3) ----
 export function stockRow(p, { masked = true } = {}) {
-  const pos = state.get('pos');
-  const st = D.stockState(p, pos);
-  const cls = st.kind === 'unknown' ? 'unknown' : st.kind;
-  const inner = `<span class="stock ${cls}"><span class="dot"></span>${esc(st.label)}</span>`;
+  const st = D.stockState(p);
+  const inner = `<span class="stock ${st.kind}"><span class="dot"></span>${esc(st.label)}</span>`;
   const body = masked ? maskField(inner, 'stock') : inner;
   return `<div class="row-between"><span class="muted">Stock</span>${body}</div>
     <div class="muted" style="font-size:var(--fs-nano)">${esc(st.caption)}</div>`;
@@ -188,15 +177,8 @@ export function listRow({ thumbIcon, thumb, pri, sec, trail, go, current, dense,
 }
 
 // ---- Cards ----
-export function productCard(p, { go = true, lockedView = false } = {}) {
+export function productCard(p, { go = true } = {}) {
   const b = D.brandById[p.brand];
-  if (lockedView) {
-    return `<div class="card product is-locked">
-      <div class="img thumb-illo">${illo(p.illo, 64)}</div>
-      <div class="lock-over">${lockChip('Higher tier')}<span class="price-hidden">Pricing hidden</span></div>
-      <div class="body"><span class="brand">${esc(b.name)}</span><span class="nm">${esc(p.name)}</span></div>
-    </div>`;
-  }
   return `<${go ? 'button' : 'div'} class="card product" ${go ? `data-go="S004?p=${p.id}"` : ''} style="text-align:start">
     <div class="img thumb-illo">${illo(p.illo, 64)}</div>
     <div class="body"><span class="brand">${esc(b.name)}</span><span class="nm">${esc(p.name)}</span>
@@ -250,10 +232,9 @@ export function resumeCard(c) {
 // Drop tile — "New launches" rail. Visual-first: product art on top,
 // brand + status underneath.
 export function dropCard(b) {
-  const locked = !D.canSee(b, state.get('tier'));
   const p = D.productsByBrand(b.id)[0];
-  const tag = locked ? lockChip() : (b.launching ? `<span class="tag coral">Launching</span>` : `<span class="tag">New</span>`);
-  return `<button class="drop-card ${locked ? 'is-locked' : ''}" data-go="${locked ? `S804?brand=${b.id}` : `S003?brand=${b.id}`}">
+  const tag = b.launching ? `<span class="tag coral">Launching</span>` : `<span class="tag">New</span>`;
+  return `<button class="drop-card" data-go="S003?brand=${b.id}">
     <span class="dc-art thumb-illo">${illo(p ? p.illo : 'jar', 44)}</span>
     <span class="dc-name">${esc(b.name)}</span>
     <span class="dc-tag">${tag}</span>
@@ -262,23 +243,15 @@ export function dropCard(b) {
 
 // Brand tile — the Brands wall: nine big image cards in one grid, no scroll.
 export function brandTile(b, i = 0) {
-  const locked = !D.canSee(b, state.get('tier'));
   const p = D.productsByBrand(b.id)[0];
-  return `<button class="brand-tile ${locked ? 'is-locked' : ''}" data-go="${locked ? `S804?brand=${b.id}` : `S003?brand=${b.id}`}" aria-label="${esc(b.name)}${locked ? ', higher tier' : ''}">
+  return `<button class="brand-tile" data-go="S003?brand=${b.id}" aria-label="${esc(b.name)}">
     <span class="bt-art">${illo(p ? p.illo : 'jar', 54)}</span>
     <span class="bt-name">${esc(b.name)}</span>
-    ${locked ? `<span class="bt-lock">${icon('lock', 12)}</span>` : ''}
   </button>`;
 }
 
-export function brandCard(b, { locked = false } = {}) {
+export function brandCard(b) {
   const nameEl = `<span class="name" style="flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(b.name)}</span>`;
-  if (locked) {
-    return `<button class="card brand is-locked" data-go="S804?brand=${b.id}" style="text-align:start">
-      <div class="head">${nameEl}<span style="flex:0 0 auto;margin-inline-start:var(--s-2)">${lockChip()}</span></div>
-      <p class="muted">${esc(b.cats.join(' · '))}</p>
-    </button>`;
-  }
   const trail = b.launching ? `<span class="tag coral">Launching</span>` : `<span style="color:var(--fg-mute)">${icon('chevron-right', 18)}</span>`;
   return `<button class="card brand" data-go="S003?brand=${b.id}" style="text-align:start">
     <div class="head">${nameEl}<span style="flex:0 0 auto;margin-inline-start:var(--s-2);display:inline-flex">${trail}</span></div>
@@ -390,15 +363,6 @@ export function recomputeTotals(root) {
     else { chip.className = 'moq unmet'; chip.innerHTML = `${icon('warning', 12)}$${min} · $${min - sub} to go`; }
   });
   return grand;
-}
-
-// Soft pitch card (E4) — connect a POS.
-export function softPitch() {
-  if (state.get('pos') === 'connected') return '';
-  return `<div class="banner" style="flex-direction:column;align-items:flex-start;gap:var(--s-2)">
-    <div class="row-between" style="width:100%">${icon('refresh', 20)}<b style="flex:1;margin-inline-start:var(--s-2)">Connect a POS for live stock</b></div>
-    <p class="muted">I'll show live on-hand and sharper reorder picks once a POS is linked.</p>
-    <button class="btn sm" data-go="S413">Connect a POS</button></div>`;
 }
 
 // ====================================================================

@@ -5,15 +5,9 @@
 
 const KEY = 'hecho-proto-state-v1';
 
-const ALL_MASK_FIELDS = ['wholesale', 'stock', 'spend', 'credit', 'recommended'];
-
 const DEFAULTS = {
   role: 'admin',        // admin | staff | rep   (§02b)
   privacyOn: true,      // Privacy on the floor — ON by default (§07-D)
-  gesture: 'hold',      // hold | tap | off  (double-tap removed)
-  maskFields: ALL_MASK_FIELDS.slice(), // which sensitive fields are masked (checklist)
-  pos: 'connected',     // connected | connecting | disconnected (§07-H H3)
-  tier: 'top',          // standard | mid | top  (§TM) — top = you manage all 9 brands
   taxId: 'renews',      // current | renews | expired (F10)
   network: 'online',    // online | offline | slow (§07-A)
   theme: 'light',       // light | dark
@@ -23,7 +17,6 @@ const DEFAULTS = {
   cards: [],            // payment cards added in-session
   stateOverride: null,  // per-screen state forced from the panel
 };
-export { ALL_MASK_FIELDS };
 
 // Capabilities per role (§02b roles & capabilities matrix)
 const CAPS = {
@@ -35,12 +28,13 @@ const CAPS = {
 function load() {
   try {
     const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
-    // migration: the double-tap reveal mode was removed from settings
-    if (saved.gesture === 'double') saved.gesture = 'hold';
     // migration: owner→admin, manager/member→staff
     if (saved.role === 'owner') saved.role = 'admin';
     if (saved.role === 'manager' || saved.role === 'member') saved.role = 'staff';
-    return { ...DEFAULTS, ...saved, stateOverride: null };
+    const merged = { ...DEFAULTS, ...saved, stateOverride: null };
+    // drop state from removed features (POS, tiers, privacy gestures/checklist)
+    for (const k of ['pos', 'tier', 'gesture', 'maskFields']) delete merged[k];
+    return merged;
   } catch { return { ...DEFAULTS }; }
 }
 
@@ -99,14 +93,6 @@ export const state = {
     if (i >= 0) data.savedBrands.splice(i, 1); else data.savedBrands.push(id);
     persist();
     return this.isBrandSaved(id);
-  },
-
-  // ---- masked-fields checklist ----
-  isFieldMasked(field) { return data.maskFields.includes(field); },
-  toggleMaskField(field) {
-    const i = data.maskFields.indexOf(field);
-    if (i >= 0) data.maskFields.splice(i, 1); else data.maskFields.push(field);
-    persist(); this.emit();
   },
 
   // ---- payment cards ----

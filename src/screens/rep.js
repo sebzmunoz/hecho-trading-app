@@ -13,11 +13,15 @@ export const rep = {
     return base('Switch retailer', { back: true, body: `
       <div class="search"><span>${icon('search', 20)}</span><input placeholder="Find a retailer" aria-label="Search retailers" /></div>
       ${C.sectionLabel('Recent')}
-      <div class="stack tight">${D.repRetailers.map((r) => C.listRow({ thumb: `<span class="avatar">${r.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}</span>`, pri: r.name, sec: `${r.city} · ${r.tier} tier`, trail: r.taxId === 'Expired' ? C.statusPill('expired') : '', go: '', attrs: `data-action="pick-retailer" data-r="${r.id}"` })).join('')}</div>` });
+      <div class="stack tight">${D.repRetailers.map((r) => C.listRow({ thumb: `<span class="avatar">${r.name.split(' ').map((w) => w[0]).slice(0, 2).join('')}</span>`, pri: r.name, sec: r.city, trail: r.taxId === 'Expired' ? C.statusPill('expired') : '', go: '', attrs: `data-action="pick-retailer" data-r="${r.id}"` })).join('')}</div>` });
   },
 
   // S602 Rep dashboard
   S602() {
+    if (state.get('_state') === 'empty') {
+      return base('Rep dashboard', { tab: 'retailers', headerRight: C.hActions([{ icon: 'chat', go: 'S606' }, { icon: 'swap', action: 'role-switch' }]), body:
+        C.emptyState({ ic: 'building', title: 'No retailers yet', body: 'Retailers Hecho assigns to you land here, with their live carts and appointments.' }) });
+    }
     const cur = retById[state.get('repAccount')] || D.repRetailers[0];
     const live = D.repRetailers.filter((r) => r.liveCart);
     const pending = D.repRetailers.filter((r) => r.status === 'pending');
@@ -61,6 +65,7 @@ export const rep = {
     const groups = {};
     c.lines.forEach(([pid, q]) => { const p = D.productById[pid]; (groups[p.brand] ||= []).push([p, q]); });
     return base('Co-shop', { back: true, body: `
+      ${state.get('_state') === 'conflict' ? C.banner('<b>This draft changed elsewhere.</b> Resolve before you keep editing.', { kind: 'caution', ic: 'warning', action: { label: 'Resolve', go: 'S807' } }) : ''}
       ${C.banner(`<b>Editing ${r.name}'s draft as rep.</b> Changes are visible to the retailer.`, { ic: 'user' })}
       <div class="card" style="max-width:none"><b>${c.name}</b><span class="muted">${D.cartBrandCount(c)} brands · ${C.money(D.cartTotal(c))}</span></div>
       ${Object.entries(groups).map(([bid, lines]) => `<div class="card" style="max-width:none;gap:var(--s-2)"><b>${D.brandById[bid].name}</b>${lines.map(([p, q]) => `<div class="row-between"><span>${p.name} ×${q}</span><span class="muted">${C.money(p.wholesale * q)}</span></div>`).join('')}</div>`).join('')}
@@ -97,7 +102,7 @@ export const rep = {
       ${C.banner(`<b>Exclusivity conflict.</b> ${pros.name} (applying) is ${pros.distance} from ${near.name} — inside its ${pros.radius} radius.`, { kind: 'caution', ic: 'warning' })}
       ${C.sectionLabel('On the map')}
       <div class="stack tight">
-        ${D.repRetailers.map((r) => C.listRow({ thumb: `<span class="avatar sm">${initials(r.name)}</span>`, pri: r.name, sec: `${r.city} · ${r.tier} tier`, trail: r.status === 'pending' ? C.statusPill('pending', 'Applying') : C.statusPill('current', 'Stocking'), go: '', attrs: `data-action="pick-retailer" data-r="${r.id}" data-then="S603"` })).join('')}
+        ${D.repRetailers.map((r) => C.listRow({ thumb: `<span class="avatar sm">${initials(r.name)}</span>`, pri: r.name, sec: r.city, trail: r.status === 'pending' ? C.statusPill('pending', 'Applying') : C.statusPill('current', 'Stocking'), go: '', attrs: `data-action="pick-retailer" data-r="${r.id}" data-then="S603"` })).join('')}
         ${C.listRow({ thumbIcon: 'warning', pri: pros.name, sec: `${pros.city} · ${pros.distance} from ${near.name}`, trail: `<button class="btn sm" data-action="flag-conflict">Flag</button>` })}
       </div>` });
   },
@@ -107,9 +112,9 @@ export const rep = {
     const bubble = (mine, txt) => `<div style="display:flex;justify-content:${mine ? 'flex-end' : 'flex-start'}"><div style="max-width:80%;padding:var(--s-2) var(--s-3);border-radius:var(--r-3);background:${mine ? 'var(--action-sm)' : 'var(--surface-dim)'};color:${mine ? 'var(--on-action)' : 'var(--fg)'};font-size:var(--fs-caption)">${txt}</div></div>`;
     return base(D.account.rep, { back: true, body: `
       <div class="stack tight">
-        ${bubble(false, 'Hey — added the Mirador hat to your Back wall draft. Holler if you want it out.')}
-        ${bubble(true, 'Perfect. Can you check Cedar House lead time?')}
-        ${bubble(false, '24 days right now. I can hold a slot if you submit this week.')}
+        ${bubble(false, 'Hey — added the Wool Throw to your Back wall draft. Holler if you want it out.')}
+        ${bubble(true, 'Perfect. Can you check Etta & East lead time?')}
+        ${bubble(false, '21 days right now. I can hold a slot if you submit this week.')}
       </div>
       <div class="sticky-actions" style="gap:var(--s-2)"><button class="btn ghost icon-only" data-action="library" aria-label="Photo">${icon('image', 18)}</button><button class="btn ghost icon-only" data-action="voice" aria-label="Voice">${icon('mic', 18)}</button><input class="input" placeholder="Message" style="flex:2" /><button class="btn sm" data-action="send-msg">Send</button></div>` });
   },
