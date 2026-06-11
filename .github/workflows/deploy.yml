@@ -1,8 +1,11 @@
-name: Deploy prototype to GitHub Pages
+name: Deploy prototypes to GitHub Pages
+
+# One Pages site, two builds: /flagship from main, /mvp from feature/love-list.
+# Both branches carry this same workflow so a push to either redeploys both.
 
 on:
   push:
-    branches: [main]
+    branches: [main, feature/love-list]
   workflow_dispatch:
 
 permissions:
@@ -21,14 +24,30 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
+      - name: Checkout Flagship (main)
         uses: actions/checkout@v4
+        with:
+          ref: main
+          path: flagship
+      - name: Checkout MVP (feature/love-list)
+        uses: actions/checkout@v4
+        with:
+          ref: feature/love-list
+          path: mvp
+      - name: Assemble combined site
+        run: |
+          mkdir -p site
+          rsync -a --exclude='.git' --exclude='.github' flagship/ site/flagship/
+          rsync -a --exclude='.git' --exclude='.github' mvp/ site/mvp/
+          cp flagship/landing/index.html site/index.html
+          cp -r flagship/app site/app
+          touch site/.nojekyll
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload site
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.'
+          path: site
       - name: Deploy
         id: deployment
         uses: actions/deploy-pages@v4
