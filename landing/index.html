@@ -5,101 +5,101 @@
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Hecho · Choose a build</title>
 <meta name="description" content="Hecho Trading Co. wholesale showroom app — two prototype builds on the turntable: the Flagship full prototype and the simplified MVP." />
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&display=swap" rel="stylesheet" />
 <style>
   :root {
     --cream: #faf3e7;
-    --cream-dim: #d9cbb6;
     --ink: #2b1d16;
-    --ink-deep: #211410;
     --terra: #b4532a;
     --terra-bright: #d96a3b;
     --line: #e7d9c5;
     --surface: #fffdf8;
+    --muted: #8a7766;
+    --logo-cutout: var(--cream);
     --sans: Avenir, 'Avenir Next', Futura, 'Century Gothic', 'Trebuchet MS', sans-serif;
-    --serif: 'Fraunces', Georgia, serif;
+    --stage-x: 72%;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { height: 100%; overflow: hidden; }
-  body {
-    background: var(--ink-deep);
-    color: var(--cream);
-    font-family: var(--sans);
-    -webkit-font-smoothing: antialiased;
-  }
+  body { background: var(--cream); color: var(--ink); font-family: var(--sans); -webkit-font-smoothing: antialiased; }
 
   #stage { position: fixed; inset: 0; display: block; cursor: grab; touch-action: none; }
   #stage.dragging { cursor: grabbing; }
 
-  /* ---------- overlay UI ---------- */
-  #ui { position: fixed; inset: 0; pointer-events: none; display: flex; flex-direction: column;
-        justify-content: space-between; padding: clamp(18px, 3.4vh, 36px) clamp(18px, 3.5vw, 44px); z-index: 4; }
-  #ui > * { pointer-events: none; }
+  /* ---------- left info panel ---------- */
+  #ui { position: fixed; inset: 0; pointer-events: none; z-index: 4; }
   #ui a, #ui button { pointer-events: auto; }
-
-  .masthead { text-align: center; }
-  .masthead h1 {
-    font-family: var(--sans); font-weight: 800; font-size: clamp(20px, 2.6vw, 27px);
-    letter-spacing: .42em; text-indent: .42em; color: var(--terra-bright);
+  .panel {
+    position: absolute; left: clamp(22px, 5vw, 84px); top: 0; bottom: 0;
+    width: min(42vw, 560px); display: flex; flex-direction: column; justify-content: center;
+    gap: clamp(10px, 1.8vh, 18px);
   }
-  .masthead p {
-    margin-top: 6px; font-size: clamp(10.5px, 1.15vw, 12.5px); letter-spacing: .24em; text-indent: .24em;
-    text-transform: uppercase; color: var(--cream-dim); opacity: .8;
+  .logo { width: clamp(150px, 16vw, 220px); height: auto; color: var(--terra); display: block; }
+  .eyebrow {
+    font-size: clamp(10.5px, 1.1vw, 12.5px); font-weight: 700; letter-spacing: .26em;
+    text-transform: uppercase; color: var(--muted); margin-top: 2px;
   }
-
-  .caption { text-align: center; }
   .cap-name {
-    font-family: var(--serif); font-style: italic; font-weight: 480;
-    font-size: clamp(44px, 7.4vw, 84px); line-height: 1.04; color: var(--cream);
-    font-variation-settings: 'opsz' 144;
+    font-weight: 800; font-size: clamp(48px, 6.4vw, 92px); line-height: 1; letter-spacing: -.015em;
+    color: var(--ink); margin-top: clamp(8px, 2vh, 20px);
   }
   .cap-name .ch { display: inline-block; will-change: transform, opacity; }
-  .cap-line { margin-top: 10px; font-size: clamp(11px, 1.25vw, 13.5px); letter-spacing: .22em; text-indent: .22em;
-    text-transform: uppercase; color: var(--cream-dim); }
+  .cap-line {
+    font-size: clamp(11px, 1.2vw, 13.5px); font-weight: 700; letter-spacing: .2em;
+    text-transform: uppercase; color: var(--terra); margin-top: 2px; white-space: nowrap;
+  }
+  .cap-feats { list-style: none; margin-top: clamp(6px, 1.4vh, 12px); }
+  .cap-feats li {
+    display: flex; align-items: center; gap: 12px;
+    font-size: clamp(13.5px, 1.35vw, 16px); color: var(--ink); opacity: .82; padding: 4px 0;
+  }
+  .cap-feats li::before {
+    content: ''; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--terra); flex: 0 0 auto;
+  }
   .cap-cta {
-    display: inline-flex; align-items: center; gap: 12px; margin-top: clamp(14px, 2.4vh, 24px);
-    font-family: var(--sans); font-weight: 700; font-size: 13.5px; letter-spacing: .2em; text-indent: .2em;
-    text-transform: uppercase; color: var(--cream); text-decoration: none;
-    border: 1px solid color-mix(in srgb, var(--cream) 36%, transparent);
-    border-radius: 999px; padding: 15px 30px 15px 34px;
-    background: color-mix(in srgb, var(--ink) 55%, transparent);
-    backdrop-filter: blur(6px);
-    transition: border-color .25s ease, background .25s ease, transform .25s ease;
+    align-self: flex-start; display: inline-flex; align-items: center; gap: 12px;
+    margin-top: clamp(12px, 2.4vh, 26px);
+    font-weight: 800; font-size: 13.5px; letter-spacing: .18em; text-indent: .18em; text-transform: uppercase;
+    white-space: nowrap; color: var(--cream); text-decoration: none; background: var(--terra);
+    border: 1px solid var(--terra); border-radius: 999px; padding: 16px 30px 16px 34px;
+    transition: background .25s ease, transform .25s ease, box-shadow .25s ease;
+    box-shadow: 0 10px 26px rgba(180, 83, 42, .25);
   }
   .cap-cta .arr { transition: transform .25s ease; }
-  .cap-cta:hover, .cap-cta:focus-visible { border-color: var(--terra-bright); background: color-mix(in srgb, var(--terra) 26%, transparent); transform: translateY(-2px); }
+  .cap-cta:hover, .cap-cta:focus-visible { background: var(--terra-bright); transform: translateY(-2px); box-shadow: 0 14px 30px rgba(180, 83, 42, .3); }
   .cap-cta:hover .arr { transform: translateX(5px); }
-  .cap-cta:focus-visible { outline: 2px solid var(--terra-bright); outline-offset: 3px; }
-
-  .foot { display: flex; justify-content: space-between; align-items: flex-end;
-    font-size: 10.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--cream-dim); opacity: .65; }
-
-  .hint { position: fixed; left: 50%; bottom: clamp(98px, 17vh, 150px); transform: translateX(-50%);
-    font-size: 10.5px; letter-spacing: .26em; text-indent: .26em; text-transform: uppercase;
-    color: var(--cream-dim); opacity: .55; z-index: 4; pointer-events: none; transition: opacity .6s ease; }
-  .hint.gone { opacity: 0; }
-
-  .turn {
-    position: fixed; top: 50%; transform: translateY(-50%); z-index: 5;
-    width: 54px; height: 54px; border-radius: 50%;
-    border: 1px solid color-mix(in srgb, var(--cream) 26%, transparent);
-    background: color-mix(in srgb, var(--ink) 45%, transparent);
-    color: var(--cream); font-size: 0; cursor: pointer;
-    display: grid; place-items: center; backdrop-filter: blur(6px);
-    transition: border-color .25s ease, background .25s ease;
+  .cap-cta:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
+  .hint-line {
+    margin-top: clamp(10px, 2vh, 18px); font-size: 11px; letter-spacing: .18em;
+    text-transform: uppercase; color: var(--muted); opacity: .8;
   }
-  .turn:hover, .turn:focus-visible { border-color: var(--terra-bright); background: color-mix(in srgb, var(--terra) 30%, transparent); }
-  .turn:focus-visible { outline: 2px solid var(--terra-bright); outline-offset: 3px; }
+  .foot {
+    position: absolute; left: clamp(22px, 5vw, 84px); bottom: clamp(16px, 2.6vh, 28px);
+    font-size: 10.5px; font-weight: 700; letter-spacing: .22em; text-transform: uppercase;
+    color: var(--muted); opacity: .65;
+  }
+
+  /* ---------- turn arrows (flank the phone) ---------- */
+  .turn-wrap {
+    position: fixed; top: 50%; left: var(--stage-x); transform: translate(-50%, -50%);
+    width: var(--wrap-w, 420px); display: flex; justify-content: space-between; align-items: center;
+    z-index: 5; pointer-events: none;
+  }
+  .turn {
+    pointer-events: auto; width: 52px; height: 52px; border-radius: 50%;
+    border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+    font-size: 0; cursor: pointer; display: grid; place-items: center;
+    box-shadow: 0 6px 18px rgba(43, 29, 22, .1);
+    transition: border-color .25s ease, color .25s ease, transform .25s ease;
+  }
+  .turn:hover, .turn:focus-visible { border-color: var(--terra); color: var(--terra); transform: scale(1.06); }
+  .turn:focus-visible { outline: 2px solid var(--terra); outline-offset: 3px; }
   .turn svg { width: 20px; height: 20px; }
-  .turn.left  { left: clamp(14px, 3vw, 40px); }
-  .turn.right { right: clamp(14px, 3vw, 40px); }
 
   /* ---------- atmosphere ---------- */
   .vignette { position: fixed; inset: 0; z-index: 3; pointer-events: none;
-    background: radial-gradient(ellipse 78% 64% at 50% 44%, transparent 52%, rgba(18, 10, 7, .55) 100%); }
-  .grain { position: fixed; inset: -60%; z-index: 6; pointer-events: none; opacity: .055;
+    background: radial-gradient(ellipse 80% 68% at 56% 46%, transparent 58%, rgba(43, 29, 22, .09) 100%); }
+  .grain { position: fixed; inset: -60%; z-index: 6; pointer-events: none; opacity: .035;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
     animation: grain 7s steps(8) infinite; }
   @keyframes grain {
@@ -109,61 +109,93 @@
   @media (prefers-reduced-motion: reduce) { .grain { animation: none; } }
 
   #wipe { position: fixed; inset: 0; z-index: 8; background: var(--cream); opacity: 0; pointer-events: none; }
+  #intro { position: fixed; inset: 0; z-index: 9; background: var(--cream); display: grid; place-items: center; }
+  #intro svg { width: min(300px, 56vw); height: auto; color: var(--terra); opacity: 0; }
 
-  #intro { position: fixed; inset: 0; z-index: 9; background: var(--ink-deep); display: grid; place-items: center; }
-  #intro b { font-weight: 800; font-size: clamp(22px, 3vw, 30px); letter-spacing: .42em; text-indent: .42em; color: var(--terra-bright); opacity: 0; }
+  /* ---------- portrait / narrow ---------- */
+  @media (max-width: 880px), (orientation: portrait) {
+    .panel {
+      left: 0; right: 0; bottom: auto; width: 100%;
+      padding: clamp(18px, 5vh, 40px) clamp(20px, 6vw, 44px) 0;
+      justify-content: flex-start; align-items: center; text-align: center; gap: 8px;
+    }
+    .logo { width: clamp(120px, 30vw, 160px); }
+    .cap-name { font-size: clamp(38px, 11vw, 56px); margin-top: 4px; }
+    .cap-feats { display: none; }
+    .cap-cta { align-self: center; padding: 14px 24px 14px 28px; margin-top: 8px; }
+    .hint-line { display: none; }
+    .foot { left: 0; right: 0; text-align: center; }
+    .turn-wrap { top: 66%; }
+  }
 
   /* ---------- fallback chooser (no JS / no WebGL) ---------- */
   #fallback { position: fixed; inset: 0; z-index: 7; display: grid; place-items: center;
-    background: var(--ink-deep); padding: 24px; overflow: auto; }
+    background: var(--cream); padding: 24px; overflow: auto; }
   .gl-ok #fallback { display: none; }
   #fallback main { width: min(620px, 100%); }
-  #fallback h1 { font-weight: 800; font-size: 34px; letter-spacing: .3em; text-indent: .3em; color: var(--terra-bright); }
-  #fallback p.sub { margin: 10px 0 28px; color: var(--cream-dim); }
-  #fallback a.card { display: block; border: 1px solid #4a3527; border-radius: 16px; padding: 20px 24px; margin: 12px 0;
-    background: #2e2018; color: inherit; text-decoration: none; }
+  #fallback .logo { margin-bottom: 14px; }
+  #fallback p.sub { margin: 6px 0 26px; color: var(--muted); }
+  #fallback a.card { display: block; border: 1px solid var(--line); border-radius: 16px; padding: 20px 24px; margin: 12px 0;
+    background: var(--surface); color: inherit; text-decoration: none; }
   #fallback a.card:hover { border-color: var(--terra-bright); }
-  #fallback a.card b { font-size: 19px; color: var(--terra-bright); }
-  #fallback a.card span { display: block; margin-top: 4px; color: var(--cream-dim); font-size: 14.5px; }
+  #fallback a.card b { font-size: 19px; color: var(--terra); }
+  #fallback a.card span { display: block; margin-top: 4px; color: var(--muted); font-size: 14.5px; }
 </style>
 </head>
 <body>
+
+<!-- HECHO mark symbol — verbatim from the design system -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="hecho-mark" viewBox="0 0 463 168">
+      <path fill="currentColor" d="M385.834 52.9383C385.947 52.932 386.06 52.9263 386.176 52.9218C406.216 52.122 421.205 63.1391 421.173 84.0336C421.162 91.0115 421.451 98.1953 421.254 105.173C421.024 113.322 422.036 122.847 419.994 130.737C418.76 135.613 416.307 140.096 412.864 143.765C407.264 149.785 396.99 152.387 388.977 152.674C367.209 152.957 352.834 142.428 353.18 119.331C353.372 106.435 352.721 92.9446 353.525 80.0455C354.144 74.1472 356.342 67.1174 360.499 62.8304C367.654 55.4524 376.069 53.431 385.834 52.9383Z"/>
+      <path fill="var(--logo-cutout)" d="M386.323 76.1866C393.389 75.4063 397.29 79.7133 397.649 86.4498C397.945 92.0021 397.966 97.4876 397.918 103.052C397.869 108.811 398.11 114.682 397.482 120.412C396.823 126.204 394.308 128.674 388.579 129.192C381.506 129.241 377.167 127.531 376.832 119.626C376.358 108.46 376.236 96.4955 376.925 85.3465C377.293 79.3811 380.634 76.76 386.323 76.1866Z"/>
+      <path fill="currentColor" d="M44.5316 55.4346C49.4981 55.2334 54.6648 55.4077 59.6325 55.4495C65.2707 55.4969 63.9518 63.611 63.9385 67.641L63.8755 84.5731C63.8669 87.5007 63.7639 90.5032 63.9737 93.408C64.2798 96.4214 65.7241 97.1207 68.5391 97.2067C70.9997 97.5028 74.0505 97.0092 76.451 97.216C86.8343 98.1109 85.0757 94.0177 85.0549 85.2022L84.9948 68.8448C84.9844 66.0576 84.8272 63.1732 85.0115 60.3949C85.1028 59.0172 85.4037 57.2144 86.5224 56.2875C88.5117 54.6391 102.665 55.3063 105.847 55.5865C107.576 56.7452 108.337 57.2474 108.411 59.4858C108.512 62.5662 108.444 65.6469 108.435 68.7294L108.414 86.1666L108.427 142.371C108.494 145.611 109.138 147.739 106.236 149.825C105.491 149.945 104.728 150.003 103.975 150.042C100.802 150.207 88.0097 150.753 86.1853 149.016C85.5123 148.376 85.2636 147.387 85.1267 146.498C84.8102 144.445 84.9973 142.169 85.0049 140.091C85.023 135.335 85.1744 130.544 85.0363 125.791C84.9939 124.324 84.8371 122.455 83.6836 121.399C81.9478 119.81 71.8409 120.434 69.2276 120.521C67.7805 120.568 66.2324 120.462 65.1421 121.588C61.6485 125.196 66.1488 145.553 62.7168 149.054C62.1263 149.656 61.2798 149.876 60.4695 149.996C57.9061 150.373 55.1053 150.07 52.5108 150.035C50.3995 150.007 48.2924 150.12 46.182 150.143C43.878 150.167 42.35 149.703 40.6887 148.075C40.2278 144.737 40.4713 139.958 40.4702 136.507L40.4637 116.04L40.4603 79.5658C40.461 73.2211 40.4332 66.8389 40.4987 60.4954C40.5084 59.568 40.5061 57.6511 41.0996 57.0376C42.1946 55.9054 43.0629 55.564 44.5316 55.4346Z"/>
+      <path fill="currentColor" d="M278.52 55.4131C282.984 55.295 287.507 55.3982 291.968 55.4274C297.871 55.4657 296.52 62.9634 296.507 67.1591L296.459 84.2981C296.45 87.2168 296.337 90.2664 296.572 93.1705C296.816 96.1786 298.427 97.0184 301.199 97.1905C303.921 97.3594 306.722 97.209 309.456 97.2128C312.422 97.158 317.166 97.9901 317.498 93.8099C317.735 90.7977 317.638 87.7951 317.629 84.7901L317.572 68.7161C317.566 66.3665 317.082 57.5192 318.752 56.5977C322.219 54.6824 334.558 55.2302 338.455 55.5581C339.903 56.5311 340.753 57.0728 340.834 58.9332C340.974 62.0778 340.902 65.2294 340.893 68.3778L340.868 86.0302L340.881 143.444C340.945 146.621 341.401 148.022 338.561 149.898C335.326 150.27 324.076 150.437 321.099 149.84C320.118 149.644 318.72 149.247 318.16 148.366C316.088 145.101 319.276 125.633 316.664 121.901C316.095 121.086 315.345 120.777 314.392 120.612C312.325 120.255 302.421 120.278 300.492 120.574C299.593 120.712 298.754 120.98 298.007 121.517C297.243 122.067 296.904 122.808 296.692 123.707C296.294 125.396 296.452 127.373 296.459 129.107L296.52 140.215C296.534 142.223 296.672 144.597 296.403 146.563C296.145 148.452 295.583 148.863 294.148 149.872C290.556 150.293 286.443 150.027 282.785 150.112C280.156 150.173 275.981 150.346 273.826 148.769C272.732 146.949 273.098 132.58 273.098 129.561L273.1 98.8646L273.119 71.3973C273.121 67.9998 273.152 64.4883 273.055 61.098C272.922 56.565 274.155 55.5676 278.52 55.4131Z"/>
+      <path fill="currentColor" d="M126.092 55.4271C136.391 55.0521 148.989 55.4158 159.467 55.4088L174.124 55.3903C177.422 55.386 181.032 55.2817 184.281 55.5974C184.973 56.075 186.458 57.1035 186.579 58.0203C187.247 61.917 186.549 66.5023 186.839 70.3509C187.619 80.7037 183.225 78.8331 174.868 78.7952L156.722 78.7225C154.449 78.7164 151.671 78.4154 149.472 78.9408C148.34 79.2113 147.18 79.7194 146.561 80.7601C145.73 82.1581 145.944 86.9694 146.389 88.5238C146.631 89.3697 147.029 90.0699 147.836 90.4755C151.945 92.5409 169.636 89.5677 173.545 91.7682C174.289 92.1875 174.616 92.7617 174.839 93.5663C175.423 95.6724 175.493 111.058 174.591 112.596C174.13 113.383 173.323 113.915 172.451 114.144C170.734 114.595 168.725 114.405 166.959 114.39C163.176 114.359 151.665 113.801 148.694 114.584C147.832 114.811 147.26 115.171 146.815 115.954C145.604 118.081 145.905 122.626 146.54 124.935C146.884 125.602 147.305 126.242 148.066 126.44C150.532 127.08 154.129 126.892 156.696 126.887L173.708 126.848C176.851 126.841 186.716 125.681 186.75 130.048C186.792 135.367 186.898 140.933 186.797 146.281C186.752 148.704 185.351 149.77 183.075 149.944C180.266 150.191 177.355 150.092 174.502 150.085L158.976 150.052L138.156 150.082C134.431 150.094 130.636 150.17 126.939 150.047C124.746 149.812 122.252 149.611 122.106 146.879C121.894 142.899 121.981 138.97 121.982 135.021L121.989 111.787L121.978 77.2098C121.977 71.7328 121.981 66.2557 121.991 60.779C121.996 57.706 122.539 55.7247 126.092 55.4271Z"/>
+      <path fill="currentColor" d="M228.73 52.9374C232.148 52.6946 235.973 53.0681 239.348 53.6347C246.315 54.8044 254.24 59.1441 258.342 64.9474C261.566 69.5095 263.039 74.7352 263.676 80.2094C263.804 81.3267 264.062 82.6919 263.845 83.7898C263.646 84.8061 262.935 85.4542 262.085 85.9826C260.224 87.1407 245.565 90.3133 243.64 89.8409C240.181 88.9919 240.213 82.5058 238.521 79.87C237.297 77.9662 235.446 76.9099 233.264 76.4423C230.293 75.8053 226.412 75.9617 223.798 77.6725C221.643 79.0828 220.544 81.4676 220.03 83.9149C218.788 89.8308 219.43 96.6212 219.426 102.637C219.423 108.365 219.042 114.368 219.754 120.052C219.996 121.992 220.379 124.048 221.48 125.705C222.669 127.496 224.523 128.49 226.595 128.91C228.312 129.257 230.138 129.326 231.884 129.213C242.135 128.55 237.925 118.815 242.576 115.883C243.046 115.586 243.545 115.427 244.101 115.422C247.32 115.39 254.626 117.435 258.134 118.175C260.294 118.661 263.969 119.201 263.904 122.176C263.807 129.253 261.247 137.942 256.212 143.173C244.386 155.466 218.623 155.725 205.704 145.031C193.31 133.965 196.506 116.903 196.036 102.76C195.159 76.3885 195.646 54.5501 228.73 52.9374Z"/>
+      <path fill="currentColor" d="M430.489 40.7188C431.427 40.8617 432.92 41.5116 433.381 42.287C435.773 46.2969 429.692 52.0599 427.415 54.5381C425.02 57.1433 422.772 59.5154 420.245 61.376C419.61 60.7713 418.966 59.9753 418.39 59.3022C416.655 57.2787 414.827 55.4949 412.943 53.6195C418.787 49.5455 423.647 41.3996 430.489 40.7188Z"/>
+      <path fill="currentColor" d="M408.511 33.2319C417.443 32.5595 410.815 47.7653 409.891 52.0118C408.601 51.4701 407.115 50.9833 405.784 50.5156C403.679 49.8179 401.765 49.4972 399.581 48.6694C400.525 44.0361 404.061 35.2841 408.511 33.2319Z"/>
+      <path fill="currentColor" d="M433.433 61.9466C437.962 61.3329 439.008 62.4276 441.59 65.7235C438.453 70.5162 434.088 71.7365 428.94 73.355C427.239 73.9175 426.455 74.2413 424.855 75.0459C424.164 71.0267 423.218 69.0893 421.616 65.3436C424.677 63.3843 429.809 62.449 433.433 61.9466Z"/>
+      <path fill="currentColor" d="M425.998 78.3973C428.888 78.265 432.852 78.153 435.624 78.8645C438.577 79.6232 439.571 80.8873 441.017 83.3576C440.294 84.6955 439.499 85.4404 438.353 86.3913C434.94 88.3725 430.248 88.4159 426.258 88.7871C426.344 86.3055 425.404 79.7605 425.998 78.3973Z"/>
+      <path fill="currentColor" d="M391.098 34.118C397.64 33.7355 396.134 44.1973 396.696 48.384L392.149 48.12C390.174 48.1422 388.198 48.1139 386.223 48.0356C385.941 43.3919 386.514 36.4763 391.098 34.118Z"/>
+      <path fill="currentColor" d="M374.869 35.2355C380.598 34.3707 381.714 44.1345 382.889 48.1548L378.766 48.601C377.347 48.9431 374.234 49.8233 373.012 49.7558C371.729 48.9874 371.641 45.8283 371.627 44.4039C371.589 40.8714 371.25 37.0192 374.869 35.2355Z"/>
+    </symbol>
+  </defs>
+</svg>
 
 <canvas id="stage" aria-hidden="true"></canvas>
 <div class="vignette" aria-hidden="true"></div>
 
 <div id="ui" aria-live="polite">
-  <header class="masthead">
-    <h1>HECHO</h1>
-    <p>Wholesale showroom app · two builds</p>
-  </header>
-  <div class="caption">
+  <aside class="panel">
+    <svg class="logo" viewBox="0 0 463 168" role="img" aria-label="HECHO"><use href="#hecho-mark"/></svg>
+    <p class="eyebrow">Wholesale showroom app · two builds</p>
     <div class="cap-name" id="capName">Flagship</div>
-    <div class="cap-line" id="capLine">The whole floor · 83 screens · 14 flows</div>
+    <p class="cap-line" id="capLine">83 screens · 14 flows</p>
+    <ul class="cap-feats" id="capFeats"></ul>
     <a class="cap-cta" id="capCta" href="flagship/"><span id="capCtaLabel">Enter Flagship</span><span class="arr">→</span></a>
-  </div>
-  <footer class="foot">
-    <span>Drag · ← → · Enter</span>
-    <span>Hecho Trading Co.</span>
-  </footer>
+    <p class="hint-line">Drag the phone · ← → to turn · Enter to open</p>
+  </aside>
+  <footer class="foot">Hecho Trading Co. · Functional prototypes</footer>
 </div>
 
-<div class="hint" id="hint">Drag to turn the table</div>
-
-<button class="turn left" id="turnL" aria-label="Show the other build">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
-</button>
-<button class="turn right" id="turnR" aria-label="Show the other build">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
-</button>
+<div class="turn-wrap" id="turnWrap">
+  <button class="turn" id="turnL" aria-label="Show the other build">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg>
+  </button>
+  <button class="turn" id="turnR" aria-label="Show the other build">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg>
+  </button>
+</div>
 
 <div class="grain" aria-hidden="true"></div>
 <div id="wipe" aria-hidden="true"></div>
-<div id="intro" aria-hidden="true"><b>HECHO</b></div>
+<div id="intro" aria-hidden="true"><svg viewBox="0 0 463 168"><use href="#hecho-mark"/></svg></div>
 
 <div id="fallback">
   <main>
-    <h1>HECHO</h1>
+    <svg class="logo" viewBox="0 0 463 168" role="img" aria-label="HECHO" style="width:180px;color:var(--terra)"><use href="#hecho-mark"/></svg>
     <p class="sub">Wholesale showroom app — two prototype builds.</p>
     <a class="card" href="flagship/"><b>Flagship →</b><span>The full prototype: 83 screens, 14 flows, admin/staff/rep roles, rep mode, and the live control panel.</span></a>
     <a class="card" href="mvp/"><b>MVP →</b><span>The simplified cut: 51 screens, 7 flows, guest shopping, and the love list.</span></a>
@@ -185,216 +217,17 @@ import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.j
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
 const RM = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const COL = { cream: '#faf3e7', ink: '#2b1d16', terra: '#b4532a', terraBright: '#d96a3b', line: '#e7d9c5', surface: '#fffdf8', muted: '#8a7766' };
 const SIDES = [
-  { key: 'flagship', name: 'Flagship', line: 'The whole floor · 83 screens · 14 flows', cta: 'Enter Flagship', href: 'flagship/', warm: '#ffd9ae' },
-  { key: 'mvp', name: 'MVP', line: 'The essentials · 51 screens · 7 flows · the love list', cta: 'Enter MVP', href: 'mvp/', warm: '#ffbf9a' },
+  { key: 'flagship', name: 'Flagship', line: '83 screens · 14 flows', cta: 'Enter Flagship', href: 'flagship/', shot: 'assets/flagship-home.png',
+    feats: ['Admin, staff & rep roles', 'Approvals, payments & rep mode', 'Live control panel — flows, variables, telemetry'] },
+  { key: 'mvp', name: 'MVP', line: '51 screens · 7 flows', cta: 'Enter MVP', href: 'mvp/', shot: 'assets/mvp-home.png',
+    feats: ['Guest shopping straight from entry', 'Barcode scan → product page', 'The love list — capture now, decide later'] },
 ];
 
-// ============================================================
-//  Mini screens — each phone displays a live-drawn miniature of
-//  that build's real home screen (CanvasTexture, redrawn per frame).
-// ============================================================
-const SW = 452, SH = 960, PAD = 30;
-
-function makeScreenCanvas() {
-  const c = document.createElement('canvas');
-  c.width = SW; c.height = SH;
-  return { c, ctx: c.getContext('2d') };
-}
-function clip(ctx) {
-  ctx.clearRect(0, 0, SW, SH);
-  ctx.beginPath(); ctx.roundRect(0, 0, SW, SH, 46); ctx.clip();
-  ctx.fillStyle = COL.cream; ctx.fillRect(0, 0, SW, SH);
-}
-function statusBar(ctx) {
-  ctx.fillStyle = COL.ink; ctx.font = '700 21px ' + FONT;
-  ctx.textAlign = 'left'; ctx.fillText('9:41', PAD + 6, 52);
-  ctx.textAlign = 'right';
-  for (let i = 0; i < 3; i++) { ctx.beginPath(); ctx.roundRect(SW - PAD - 6 - i * 26, 36, 18, 12 + i * 0, 3); ctx.globalAlpha = .85; ctx.fill(); }
-  ctx.globalAlpha = 1; ctx.textAlign = 'left';
-}
-function searchPill(ctx, y) {
-  ctx.fillStyle = COL.surface; ctx.strokeStyle = COL.line; ctx.lineWidth = 2;
-  ctx.beginPath(); ctx.roundRect(PAD, y, SW - PAD * 2, 58, 29); ctx.fill(); ctx.stroke();
-  ctx.strokeStyle = COL.muted; ctx.beginPath(); ctx.arc(PAD + 32, y + 28, 9, 0, 7); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(PAD + 38, y + 35); ctx.lineTo(PAD + 44, y + 41); ctx.stroke();
-  ctx.fillStyle = COL.muted; ctx.font = '400 19px ' + FONT;
-  ctx.fillText('Search name, SKU, or barcode', PAD + 56, y + 36);
-}
-function sectionLabel(ctx, text, y, alpha = 1) {
-  ctx.globalAlpha = alpha;
-  ctx.fillStyle = COL.muted; ctx.font = '700 15px ' + FONT;
-  ctx.save(); ctx.translate(PAD, y);
-  ctx.fillText(text.split('').join(' '), 0, 0);
-  ctx.restore(); ctx.globalAlpha = 1;
-}
-const FONT = "Avenir, 'Avenir Next', Futura, 'Century Gothic', sans-serif";
-
-// small line-art glyphs (the app's illustration language)
-function glyph(ctx, kind, cx, cy, s, color = COL.terra) {
-  ctx.save(); ctx.translate(cx, cy); ctx.scale(s / 40, s / 40);
-  ctx.strokeStyle = color; ctx.lineWidth = 3.2; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  ctx.beginPath();
-  if (kind === 'jar') { ctx.roundRect(-13, -8, 26, 26, 5); ctx.moveTo(-10, -8); ctx.lineTo(-10, -15); ctx.lineTo(10, -15); ctx.lineTo(10, -8); ctx.moveTo(-13, 3); ctx.lineTo(13, 3); }
-  else if (kind === 'throw') { for (let i = 0; i < 3; i++) { ctx.rect(-15 + i, -14 + i * 9, 30 - i * 2, 8); } ctx.moveTo(-9, 13); ctx.lineTo(-9, 19); ctx.moveTo(0, 13); ctx.lineTo(0, 19); ctx.moveTo(9, 13); ctx.lineTo(9, 19); }
-  else if (kind === 'candle') { ctx.roundRect(-9, -6, 18, 24, 3); ctx.moveTo(0, -6); ctx.lineTo(0, -12); ctx.moveTo(0, -19); ctx.quadraticCurveTo(5, -15, 0, -12); ctx.quadraticCurveTo(-5, -15, 0, -19); }
-  else if (kind === 'mug') { ctx.roundRect(-12, -10, 20, 24, 4); ctx.moveTo(8, -4); ctx.arc(8, 2, 6, -Math.PI / 2, Math.PI / 2); }
-  else if (kind === 'charm') { ctx.arc(0, 4, 11, 0, 7); ctx.moveTo(0, -7); ctx.lineTo(0, -14); ctx.moveTo(-5, -14); ctx.lineTo(5, -14); }
-  else if (kind === 'tote') { ctx.moveTo(-12, -4); ctx.lineTo(12, -4); ctx.lineTo(9, 18); ctx.lineTo(-9, 18); ctx.closePath(); ctx.moveTo(-6, -4); ctx.arc(0, -4, 6, Math.PI, 0); }
-  else if (kind === 'pen') { ctx.moveTo(-3, -16); ctx.lineTo(3, -16); ctx.lineTo(3, 8); ctx.lineTo(0, 16); ctx.lineTo(-3, 8); ctx.closePath(); ctx.moveTo(-3, -8); ctx.lineTo(3, -8); }
-  else if (kind === 'scarf') { ctx.rect(-10, -16, 20, 32); ctx.moveTo(-10, -8); ctx.lineTo(10, -8); ctx.moveTo(-10, 8); ctx.lineTo(10, 8); }
-  else if (kind === 'incense') { ctx.roundRect(-13, 12, 26, 5, 2); ctx.moveTo(-6, 12); ctx.lineTo(-6, -10); ctx.moveTo(0, 12); ctx.lineTo(0, -16); ctx.moveTo(6, 12); ctx.lineTo(6, -8); }
-  else if (kind === 'bag') { ctx.roundRect(-11, -4, 22, 20, 3); ctx.moveTo(-11, -4); ctx.lineTo(0, 4); ctx.lineTo(11, -4); ctx.moveTo(-7, -4); ctx.arc(0, -4, 7, Math.PI, 0); }
-  ctx.stroke(); ctx.restore();
-}
-
-// ---------- Flagship: the Shop home ----------
-function drawFlagship(ctx, t) {
-  clip(ctx); statusBar(ctx);
-
-  ctx.fillStyle = COL.ink; ctx.font = '800 40px ' + FONT; ctx.fillText('Shop', PAD, 122);
-  // bell + badge (pulsing) + privacy eye
-  ctx.strokeStyle = COL.ink; ctx.lineWidth = 2.6; ctx.lineCap = 'round';
-  ctx.beginPath(); ctx.moveTo(SW - 122, 112); ctx.quadraticCurveTo(SW - 122, 92, SW - 110, 92); ctx.quadraticCurveTo(SW - 98, 92, SW - 98, 112); ctx.moveTo(SW - 128, 112); ctx.lineTo(SW - 92, 112); ctx.stroke();
-  const pulse = 1 + Math.sin(t * 2.4) * .1;
-  ctx.fillStyle = COL.terra; ctx.beginPath(); ctx.arc(SW - 96, 92, 10 * pulse, 0, 7); ctx.fill();
-  ctx.fillStyle = COL.cream; ctx.font = '700 13px ' + FONT; ctx.textAlign = 'center'; ctx.fillText('3', SW - 96, 97); ctx.textAlign = 'left';
-  ctx.strokeStyle = COL.ink; ctx.beginPath(); ctx.ellipse(SW - 52, 104, 14, 9, 0, 0, 7); ctx.stroke();
-  ctx.beginPath(); ctx.arc(SW - 52, 104, 3.4, 0, 7); ctx.stroke();
-
-  searchPill(ctx, 146);
-
-  sectionLabel(ctx, 'RUNNING LOW AT YOUR STORE', 256);
-  ctx.strokeStyle = COL.line; ctx.fillStyle = COL.surface;
-  ctx.beginPath(); ctx.roundRect(SW - PAD - 96, 238, 96, 28, 14); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = COL.muted; ctx.font = '600 12px ' + FONT; ctx.fillText('LIVE STOCK', SW - PAD - 84, 256);
-
-  // low-stock rail (drifts gently)
-  const dx = Math.sin(t * .55) * 7;
-  const lows = [{ g: 'tube', n: 'Wild Lip Balm', s: '0 left', q: 48 }, { g: 'jar', n: 'Tallow 2 oz', s: '4 left · ~3d', q: 24 }];
-  lows.forEach((it, i) => {
-    const x = PAD + dx + i * 286, y = 278;
-    ctx.fillStyle = COL.surface; ctx.strokeStyle = COL.line; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.roundRect(x, y, 270, 96, 18); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#f6e8d4'; ctx.beginPath(); ctx.roundRect(x + 14, y + 18, 60, 60, 12); ctx.fill();
-    glyph(ctx, it.g, x + 44, y + 48, 34);
-    ctx.fillStyle = COL.ink; ctx.font = '700 16px ' + FONT; ctx.fillText(it.n, x + 86, y + 40);
-    ctx.fillStyle = COL.terra; ctx.beginPath(); ctx.arc(x + 92, y + 62, 4, 0, 7); ctx.fill();
-    ctx.fillStyle = COL.muted; ctx.font = '400 14px ' + FONT; ctx.fillText(it.s, x + 102, y + 67);
-    ctx.fillStyle = COL.terra;
-    ctx.beginPath(); ctx.roundRect(x + 182, y + 52, 76, 30, 15); ctx.fill();
-    ctx.fillStyle = COL.cream; ctx.font = '700 13px ' + FONT; ctx.textAlign = 'center'; ctx.fillText('ADD ×' + it.q, x + 220, y + 72); ctx.textAlign = 'left';
-  });
-
-  sectionLabel(ctx, 'WAITING ON YOU', 426);
-  ctx.fillStyle = COL.surface; ctx.strokeStyle = COL.line;
-  ctx.beginPath(); ctx.roundRect(PAD, 444, SW - PAD * 2, 78, 18); ctx.fill(); ctx.stroke();
-  ctx.strokeStyle = COL.terra; ctx.lineWidth = 3;
-  ctx.beginPath(); ctx.arc(PAD + 40, 483, 17, 0, 7); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(PAD + 32, 483); ctx.lineTo(PAD + 38, 489); ctx.lineTo(PAD + 49, 476); ctx.stroke();
-  ctx.fillStyle = COL.ink; ctx.font = '700 17px ' + FONT; ctx.fillText('1 draft awaiting your approval', PAD + 72, 477);
-  ctx.fillStyle = COL.muted; ctx.font = '400 14px ' + FONT; ctx.fillText('Spring counter · Priya N.', PAD + 72, 500);
-  ctx.fillStyle = COL.terra; ctx.beginPath(); ctx.arc(SW - PAD - 28, 483, 12, 0, 7); ctx.fill();
-  ctx.fillStyle = COL.cream; ctx.font = '700 13px ' + FONT; ctx.textAlign = 'center'; ctx.fillText('1', SW - PAD - 28, 488); ctx.textAlign = 'left';
-
-  sectionLabel(ctx, 'NEW LAUNCHES', 568);
-  const tiles = [{ g: 'charm', n: 'Pom Pom London', tag: 'LAUNCHING', fill: true }, { g: 'mug', n: 'Frida Vida', tag: 'NEW', fill: false }];
-  tiles.forEach((it, i) => {
-    const x = PAD + i * 202, y = 586, w = 188, h = 158;
-    ctx.fillStyle = COL.surface; ctx.strokeStyle = COL.line; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.roundRect(x, y, w, h, 18); ctx.fill(); ctx.stroke();
-    glyph(ctx, it.g, x + w / 2, y + 52, 44);
-    ctx.fillStyle = COL.ink; ctx.font = '700 15px ' + FONT; ctx.textAlign = 'center'; ctx.fillText(it.n, x + w / 2, y + 104);
-    if (it.fill) { ctx.fillStyle = COL.terra; ctx.beginPath(); ctx.roundRect(x + w / 2 - 48, y + 116, 96, 24, 12); ctx.fill(); ctx.fillStyle = COL.cream; }
-    else { ctx.strokeStyle = COL.line; ctx.beginPath(); ctx.roundRect(x + w / 2 - 32, y + 116, 64, 24, 12); ctx.stroke(); ctx.fillStyle = COL.muted; }
-    ctx.font = '700 11px ' + FONT; ctx.fillText(it.tag, x + w / 2, y + 132); ctx.textAlign = 'left';
-  });
-
-  sectionLabel(ctx, 'PICK UP WHERE YOU LEFT OFF', 790, .45);
-  ctx.globalAlpha = .35; ctx.fillStyle = COL.surface; ctx.strokeStyle = COL.line;
-  ctx.beginPath(); ctx.roundRect(PAD, 806, 250, 50, 16); ctx.fill(); ctx.stroke();
-  ctx.beginPath(); ctx.roundRect(PAD + 264, 806, 250, 50, 16); ctx.fill(); ctx.stroke();
-  ctx.globalAlpha = 1;
-
-  // tab bar
-  const ty = SH - 88;
-  ctx.fillStyle = COL.surface; ctx.fillRect(0, ty, SW, 88);
-  ctx.strokeStyle = COL.line; ctx.beginPath(); ctx.moveTo(0, ty); ctx.lineTo(SW, ty); ctx.stroke();
-  const tabs = ['Shop', 'Scan', 'Carts', 'Orders', 'You'];
-  tabs.forEach((label, i) => {
-    const cx = SW / 10 + i * (SW / 5);
-    const on = i === 0;
-    ctx.fillStyle = on ? COL.terra : COL.muted;
-    if (on) { ctx.beginPath(); ctx.arc(cx, ty + 16, 3, 0, 7); ctx.fill(); }
-    ctx.strokeStyle = on ? COL.terra : COL.muted; ctx.lineWidth = 2.6;
-    ctx.beginPath(); ctx.roundRect(cx - 11, ty + 26, 22, 20, 5); ctx.stroke();
-    ctx.font = '600 13px ' + FONT; ctx.textAlign = 'center'; ctx.fillText(label, cx, ty + 68); ctx.textAlign = 'left';
-  });
-}
-
-// ---------- MVP: the hub ----------
-function drawMVP(ctx, t) {
-  clip(ctx); statusBar(ctx);
-
-  ctx.fillStyle = COL.terra; ctx.font = '800 30px ' + FONT;
-  ctx.save(); ctx.translate(PAD, 116);
-  ctx.fillText('H E C H O', 0, 0); ctx.restore();
-  // heart (badge pulses) · cart · user
-  const icons = [SW - 158, SW - 104, SW - 50];
-  ctx.strokeStyle = COL.ink; ctx.lineWidth = 2.6; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-  // heart
-  ctx.beginPath(); ctx.moveTo(icons[0], 112);
-  ctx.bezierCurveTo(icons[0] - 14, 98, icons[0] - 2, 86, icons[0], 96);
-  ctx.bezierCurveTo(icons[0] + 2, 86, icons[0] + 14, 98, icons[0], 112); ctx.stroke();
-  const hp = 1 + Math.sin(t * 2.2 + 1) * .1;
-  ctx.fillStyle = COL.terra; ctx.beginPath(); ctx.arc(icons[0] + 12, 88, 9.5 * hp, 0, 7); ctx.fill();
-  ctx.fillStyle = COL.cream; ctx.font = '700 12px ' + FONT; ctx.textAlign = 'center'; ctx.fillText('5', icons[0] + 12, 92); ctx.textAlign = 'left';
-  // cart
-  ctx.strokeStyle = COL.ink; ctx.beginPath(); ctx.moveTo(icons[1] - 10, 92); ctx.lineTo(icons[1] + 10, 92); ctx.lineTo(icons[1] + 7, 110); ctx.lineTo(icons[1] - 7, 110); ctx.closePath(); ctx.stroke();
-  // user
-  ctx.beginPath(); ctx.arc(icons[2], 94, 6, 0, 7); ctx.moveTo(icons[2] + 10, 112); ctx.arc(icons[2], 112, 10, 0, Math.PI, true); ctx.stroke();
-
-  searchPill(ctx, 150);
-
-  // scan CTA — the MVP centerpiece, with a sweeping scan line
-  const sy = 234, sh2 = 172;
-  ctx.fillStyle = COL.ink; ctx.beginPath(); ctx.roundRect(PAD, sy, SW - PAD * 2, sh2, 24); ctx.fill();
-  const bx = PAD + 26, by = sy + 38, bs = 96;
-  ctx.strokeStyle = COL.cream; ctx.lineWidth = 3.4; ctx.lineCap = 'round';
-  const c = 22;
-  [[bx, by + c, bx, by, bx + c, by], [bx + bs - c, by, bx + bs, by, bx + bs, by + c],
-   [bx + bs, by + bs - c, bx + bs, by + bs, bx + bs - c, by + bs], [bx + c, by + bs, bx, by + bs, bx, by + bs - c]]
-    .forEach(([x1, y1, x2, y2, x3, y3]) => { ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.lineTo(x3, y3); ctx.stroke(); });
-  const ly = by + 10 + ((Math.sin(t * 1.6) * .5 + .5) * (bs - 20));
-  const lg = ctx.createLinearGradient(bx, ly - 8, bx, ly + 8);
-  lg.addColorStop(0, 'rgba(217,106,59,0)'); lg.addColorStop(.5, 'rgba(217,106,59,.95)'); lg.addColorStop(1, 'rgba(217,106,59,0)');
-  ctx.fillStyle = lg; ctx.fillRect(bx + 8, ly - 8, bs - 16, 16);
-  ctx.fillStyle = COL.cream; ctx.font = '800 25px ' + FONT; ctx.fillText('Scan a product', bx + bs + 28, sy + 78);
-  ctx.fillStyle = 'rgba(250,243,231,.62)'; ctx.font = '400 16px ' + FONT; ctx.fillText('Point at any barcode', bx + bs + 28, sy + 106);
-
-  sectionLabel(ctx, 'THE NINE BRANDS', 470);
-  const names = ['Etta & East', 'Lavender', 'El Arroyo', 'Frida Vida', 'Beljoy', 'Pom Pom', 'Ellie Rose', 'Popkle', 'Savant'];
-  const glyphs = ['throw', 'jar', 'pen', 'mug', 'charm', 'charm', 'tote', 'bag', 'candle'];
-  const gw = (SW - PAD * 2 - 24) / 3;
-  names.forEach((n, i) => {
-    const x = PAD + (i % 3) * (gw + 12), y = 490 + Math.floor(i / 3) * 144;
-    ctx.fillStyle = COL.surface; ctx.strokeStyle = COL.line; ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.roundRect(x, y, gw, 132, 16); ctx.fill(); ctx.stroke();
-    glyph(ctx, glyphs[i], x + gw / 2, y + 52, 40);
-    ctx.fillStyle = COL.ink; ctx.font = '600 14px ' + FONT; ctx.textAlign = 'center';
-    ctx.fillText(n, x + gw / 2, y + 110); ctx.textAlign = 'left';
-  });
-}
-
-// ============================================================
-//  Scene
-// ============================================================
 let renderer;
 const stage = document.getElementById('stage');
-try {
-  renderer = new THREE.WebGLRenderer({ canvas: stage, antialias: true });
-} catch (e) { renderer = null; }
+try { renderer = new THREE.WebGLRenderer({ canvas: stage, antialias: true }); }
+catch (e) { renderer = null; }
 
 if (renderer) {
   document.documentElement.classList.add('gl-ok');
@@ -403,11 +236,11 @@ if (renderer) {
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.12;
+  renderer.toneMappingExposure = 1.0;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color('#211410');
-  scene.fog = new THREE.Fog('#211410', 9, 17);
+  scene.background = new THREE.Color('#faf3e7');
+  scene.fog = new THREE.Fog('#faf3e7', 10, 19);
 
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment()).texture;
@@ -415,30 +248,29 @@ if (renderer) {
   const camera = new THREE.PerspectiveCamera(38, 1, .1, 60);
   const look = new THREE.Vector3(0, 1.42, 0);
 
-  // ---------- lights ----------
-  const ambient = new THREE.AmbientLight('#5a4434', .55);
-  scene.add(ambient);
+  // ---------- lights (bright studio on cream) ----------
+  scene.add(new THREE.AmbientLight('#fff3e2', .85));
 
-  const key = new THREE.SpotLight('#ffd9ae', 240, 0, .58, .65, 1.7);
-  key.position.set(2.8, 5.6, 3.2);
+  const key = new THREE.SpotLight('#ffe9d2', 150, 0, .6, .7, 1.7);
+  key.position.set(2.6, 6, 3.4);
   key.castShadow = true;
   key.shadow.mapSize.set(1024, 1024);
   key.shadow.bias = -0.0004;
   scene.add(key, key.target);
   key.target.position.set(0, 1.1, 0);
 
-  const rim = new THREE.DirectionalLight('#f0e2cc', 1.3);
+  const rim = new THREE.DirectionalLight('#ffffff', .9);
   rim.position.set(-3.4, 4.2, -4.4);
   scene.add(rim);
 
-  const cursorLight = new THREE.PointLight('#ffe7c9', 26, 0, 2);
+  const cursorLight = new THREE.PointLight('#fff1de', 14, 0, 2);
   cursorLight.position.set(0, 2, 3.4);
   scene.add(cursorLight);
 
   // ---------- set: floor + pedestal + ring ----------
   const floor = new THREE.Mesh(
-    new THREE.CircleGeometry(15, 48),
-    new THREE.MeshStandardMaterial({ color: '#261812', roughness: .96, metalness: 0 })
+    new THREE.CircleGeometry(16, 48),
+    new THREE.MeshStandardMaterial({ color: '#f1e5d1', roughness: .96, metalness: 0 })
   );
   floor.rotation.x = -Math.PI / 2;
   floor.receiveShadow = true;
@@ -446,80 +278,123 @@ if (renderer) {
 
   const pedestal = new THREE.Mesh(
     new THREE.CylinderGeometry(1.85, 2.05, .22, 64),
-    new THREE.MeshStandardMaterial({ color: '#33221a', roughness: .55, metalness: .15 })
+    new THREE.MeshStandardMaterial({ color: '#fbf4e8', roughness: .6, metalness: .05 })
   );
   pedestal.position.y = .11;
   pedestal.castShadow = pedestal.receiveShadow = true;
   scene.add(pedestal);
 
   const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(2.32, .015, 12, 96),
-    new THREE.MeshStandardMaterial({ color: COL.terra, emissive: COL.terra, emissiveIntensity: .9, roughness: .4 })
+    new THREE.TorusGeometry(2.32, .016, 12, 96),
+    new THREE.MeshStandardMaterial({ color: '#b4532a', emissive: '#b4532a', emissiveIntensity: .55, roughness: .4 })
   );
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = .015;
   scene.add(ring);
 
-  // ---------- phones ----------
+  // ---------- iPhone-style phones with real prototype screenshots ----------
   const turntable = new THREE.Group();
   turntable.position.y = .22;
   scene.add(turntable);
 
-  const PHONE = { w: 1.26, h: 2.62, d: .12, y: 1.5, r: 1.02 };
-  const bodyMat = new THREE.MeshPhysicalMaterial({ color: '#171009', roughness: .3, metalness: .4, clearcoat: 1, clearcoatRoughness: .22 });
+  const PHONE = { w: 1.24, h: 2.66, d: .125, y: 1.55, r: 1.02 };
+  const railMat = new THREE.MeshPhysicalMaterial({ color: '#4a443d', roughness: .32, metalness: .9, clearcoat: .6, clearcoatRoughness: .3 });
+  const darkMat = new THREE.MeshPhysicalMaterial({ color: '#17120e', roughness: .35, metalness: .4, clearcoat: 1, clearcoatRoughness: .25 });
 
-  function makePhone(drawFn) {
-    const g = new THREE.Group();
-    const body = new THREE.Mesh(new RoundedBoxGeometry(PHONE.w, PHONE.h, PHONE.d, 4, .09), bodyMat);
-    body.castShadow = true;
-    g.add(body);
-
-    const { c, ctx } = makeScreenCanvas();
+  // Screen texture: black bezel + rounded screenshot + Dynamic Island.
+  function makeScreenTexture(url) {
+    const CW = 800, CH = 1742, B = 20;
+    const c = document.createElement('canvas');
+    c.width = CW; c.height = CH;
+    const x = c.getContext('2d');
+    x.beginPath(); x.roundRect(0, 0, CW, CH, 96); x.fillStyle = '#0b0907'; x.fill();
     const tex = new THREE.CanvasTexture(c);
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.anisotropy = renderer.capabilities.getMaxAnisotropy();
-    const screenMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, toneMapped: false });
-    const screen = new THREE.Mesh(new THREE.PlaneGeometry(PHONE.w - .12, PHONE.h - .14), screenMat);
-    screen.position.z = PHONE.d / 2 + .004;
-    g.add(screen);
-
-    const notch = new THREE.Mesh(new RoundedBoxGeometry(.34, .05, .015, 2, .024), new THREE.MeshBasicMaterial({ color: '#0c0805' }));
-    notch.position.set(0, PHONE.h / 2 - .17, PHONE.d / 2 + .008);
-    g.add(notch);
-
-    // back camera island (seen mid-spin)
-    const island = new THREE.Mesh(new RoundedBoxGeometry(.32, .32, .035, 2, .06),
-      new THREE.MeshPhysicalMaterial({ color: '#221710', roughness: .35, metalness: .5, clearcoat: 1 }));
-    island.position.set(-.36, PHONE.h / 2 - .42, -PHONE.d / 2 - .012);
-    g.add(island);
-    for (const [lx, ly] of [[-.42, PHONE.h / 2 - .36], [-.3, PHONE.h / 2 - .48]]) {
-      const lens = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, .02, 24),
-        new THREE.MeshPhysicalMaterial({ color: '#0a0605', roughness: .1, metalness: .2, clearcoat: 1 }));
-      lens.rotation.x = Math.PI / 2;
-      lens.position.set(lx, ly, -PHONE.d / 2 - .032);
-      g.add(lens);
-    }
-
-    return { group: g, body, screen, screenMat, ctx, tex, draw: drawFn };
+    const img = new Image();
+    img.onload = () => {
+      x.save();
+      x.beginPath(); x.roundRect(B, B, CW - B * 2, CH - B * 2, 76); x.clip();
+      x.drawImage(img, B, B, CW - B * 2, CH - B * 2);
+      x.restore();
+      // Dynamic Island
+      x.beginPath(); x.roundRect(CW / 2 - 112, 44, 224, 64, 32); x.fillStyle = '#000'; x.fill();
+      tex.needsUpdate = true;
+    };
+    img.src = url;
+    return { tex, aspect: CW / CH };
   }
 
-  const phones = [makePhone(drawFlagship), makePhone(drawMVP)];
+  function makePhone(shotUrl) {
+    const g = new THREE.Group();
+    const body = new THREE.Mesh(new RoundedBoxGeometry(PHONE.w, PHONE.h, PHONE.d, 5, .105), railMat);
+    body.castShadow = true;
+    g.add(body);
+
+    // front glass face (dark) so the bezel reads even at angles
+    const face = new THREE.Mesh(new RoundedBoxGeometry(PHONE.w - .035, PHONE.h - .035, .012, 3, .085), darkMat);
+    face.position.z = PHONE.d / 2 - .002;
+    g.add(face);
+
+    const { tex } = makeScreenTexture(shotUrl);
+    const sw = PHONE.w - .065;
+    const sh = sw * (1742 / 800);
+    const screenMat = new THREE.MeshBasicMaterial({ map: tex, transparent: true, toneMapped: false });
+    const screen = new THREE.Mesh(new THREE.PlaneGeometry(sw, sh), screenMat);
+    screen.position.z = PHONE.d / 2 + .006;
+    g.add(screen);
+
+    // side controls — power right; action + volumes left
+    const btn = (w, h, x, y) => {
+      const m = new THREE.Mesh(new RoundedBoxGeometry(w, h, .05, 2, .015), railMat);
+      m.position.set(x, y, 0);
+      g.add(m);
+    };
+    btn(.035, .42, PHONE.w / 2 + .005, .42);             // power
+    btn(.035, .14, -PHONE.w / 2 - .005, .88);            // action
+    btn(.035, .24, -PHONE.w / 2 - .005, .52);            // vol up
+    btn(.035, .24, -PHONE.w / 2 - .005, .2);             // vol down
+
+    // back camera plateau — three lenses + flash
+    const island = new THREE.Mesh(new RoundedBoxGeometry(.5, .5, .04, 3, .12), darkMat);
+    island.position.set(-.27, PHONE.h / 2 - .42, -PHONE.d / 2 - .015);
+    g.add(island);
+    const lensMat = new THREE.MeshPhysicalMaterial({ color: '#0a0806', roughness: .12, metalness: .3, clearcoat: 1 });
+    const ringMat = new THREE.MeshPhysicalMaterial({ color: '#3a352f', roughness: .3, metalness: .9 });
+    for (const [lx, ly] of [[-.38, PHONE.h / 2 - .31], [-.38, PHONE.h / 2 - .53], [-.16, PHONE.h / 2 - .42]]) {
+      const lr = new THREE.Mesh(new THREE.CylinderGeometry(.075, .075, .02, 24), ringMat);
+      lr.rotation.x = Math.PI / 2; lr.position.set(lx, ly, -PHONE.d / 2 - .04);
+      const lens = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, .022, 24), lensMat);
+      lens.rotation.x = Math.PI / 2; lens.position.set(lx, ly, -PHONE.d / 2 - .045);
+      g.add(lr, lens);
+    }
+    const flash = new THREE.Mesh(new THREE.CylinderGeometry(.024, .024, .02, 16),
+      new THREE.MeshStandardMaterial({ color: '#f6ead2', emissive: '#f6ead2', emissiveIntensity: .25 }));
+    flash.rotation.x = Math.PI / 2;
+    flash.position.set(-.16, PHONE.h / 2 - .24, -PHONE.d / 2 - .03);
+    g.add(flash);
+
+    return { group: g, body, screen, screenMat };
+  }
+
+  const phones = SIDES.map((s) => makePhone(s.shot));
   phones[0].group.position.set(0, PHONE.y, PHONE.r);
   phones[1].group.position.set(0, PHONE.y, -PHONE.r);
   phones[1].group.rotation.y = Math.PI;
-  phones.forEach((p, i) => { p.group.rotation.x = -.045; p.side = i; turntable.add(p.group); });
+  phones.forEach((p, i) => { p.group.rotation.x = -.04; p.side = i; turntable.add(p.group); });
 
   // ============================================================
   //  UI + state
   // ============================================================
   const capName = document.getElementById('capName');
   const capLine = document.getElementById('capLine');
+  const capFeats = document.getElementById('capFeats');
   const capCta = document.getElementById('capCta');
   const capCtaLabel = document.getElementById('capCtaLabel');
-  const hint = document.getElementById('hint');
   const wipe = document.getElementById('wipe');
   const intro = document.getElementById('intro');
   const ui = document.getElementById('ui');
+  const turnWrap = document.getElementById('turnWrap');
 
   let armed = 0, leaving = false;
 
@@ -531,14 +406,15 @@ if (renderer) {
     capName.innerHTML = '';
     for (const ch of s.name) {
       const span = document.createElement('span');
-      span.className = 'ch';
-      span.textContent = ch;
+      span.className = 'ch'; span.textContent = ch;
       capName.appendChild(span);
     }
+    capFeats.innerHTML = s.feats.map((f) => `<li>${f}</li>`).join('');
     if (animate && !RM) {
-      gsap.fromTo(capName.children, { yPercent: 60, opacity: 0, rotateZ: 4 },
-        { yPercent: 0, opacity: 1, rotateZ: 0, duration: .55, stagger: .045, ease: 'back.out(2.2)', overwrite: true });
-      gsap.fromTo([capLine, capCta], { opacity: 0, y: 8 }, { opacity: 1, y: 0, duration: .4, stagger: .08, delay: .15, ease: 'power2.out', overwrite: true });
+      gsap.fromTo(capName.children, { yPercent: 55, opacity: 0 },
+        { yPercent: 0, opacity: 1, duration: .5, stagger: .04, ease: 'back.out(2)', overwrite: true });
+      gsap.fromTo([capLine, ...capFeats.children, capCta], { opacity: 0, y: 10 },
+        { opacity: 1, y: 0, duration: .38, stagger: .06, delay: .1, ease: 'power2.out', overwrite: true });
     }
   }
 
@@ -551,20 +427,19 @@ if (renderer) {
       const front = p.side === side;
       gsap.to(p.group.position, { y: front ? PHONE.y + .1 : PHONE.y - .04, duration: d, ease: 'power2.out', overwrite: 'auto' });
       gsap.to(p.group.scale, { x: front ? 1 : .94, y: front ? 1 : .94, z: front ? 1 : .94, duration: d, ease: 'power2.out', overwrite: 'auto' });
-      gsap.to(p.screenMat.color, { r: front ? 1 : .42, g: front ? 1 : .4, b: front ? 1 : .38, duration: d, overwrite: 'auto' });
+      gsap.to(p.screenMat.color, { r: front ? 1 : .55, g: front ? 1 : .53, b: front ? 1 : .5, duration: d, overwrite: 'auto' });
     });
-    gsap.to(key.color, { ...new THREE.Color(SIDES[side].warm), duration: d || .01, overwrite: 'auto' });
   }
 
   // ---------- turntable rotation ----------
   const rot = { y: 0, v: 0 };
   let dragging = false, lastX = 0, moved = 0, snapTween = null;
 
-  function nearestK(y) { return Math.round(y / Math.PI); }
-  function sideOfK(k) { return ((k % 2) + 2) % 2; }
+  const nearestK = (y) => Math.round(y / Math.PI);
+  const sideOfK = (k) => ((k % 2) + 2) % 2;
 
-  function snap(extra = 0) {
-    const k = nearestK(rot.y + rot.v * 14 + extra);
+  function snap() {
+    const k = nearestK(rot.y + rot.v * 14);
     snapTween = gsap.to(rot, {
       y: k * Math.PI, duration: RM ? .15 : .9, ease: 'power3.out', overwrite: true,
       onUpdate: () => armSide(sideOfK(nearestK(rot.y))),
@@ -573,13 +448,10 @@ if (renderer) {
   }
   function spin(dir) {
     if (leaving) return;
-    dismissHint();
-    const k = nearestK(snapTween && snapTween.isActive() ? gsap.getProperty(rot, 'y') : rot.y) + dir;
+    const k = nearestK(rot.y) + dir;
     snapTween = gsap.to(rot, { y: k * Math.PI, duration: RM ? .15 : .85, ease: 'power3.inOut', overwrite: true });
     armSide(sideOfK(k));
   }
-
-  function dismissHint() { hint.classList.add('gone'); }
 
   stage.addEventListener('pointerdown', (e) => {
     if (leaving) return;
@@ -594,7 +466,6 @@ if (renderer) {
     moved += Math.abs(dx);
     rot.y += dx * .0052;
     rot.v = dx * .0052;
-    if (moved > 8) dismissHint();
     armSide(sideOfK(nearestK(rot.y)));
   });
   function endDrag(e) {
@@ -607,7 +478,6 @@ if (renderer) {
   stage.addEventListener('pointerup', endDrag);
   stage.addEventListener('pointercancel', endDrag);
 
-  // tap a phone → enter (or bring it to the front)
   const ray = new THREE.Raycaster();
   const ndc = new THREE.Vector2();
   function tapAt(x, y) {
@@ -628,7 +498,7 @@ if (renderer) {
   });
 
   capCta.addEventListener('click', (e) => {
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return; // let new-tab clicks through
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
     e.preventDefault();
     enter(armed);
   });
@@ -643,17 +513,17 @@ if (renderer) {
     const wq = new THREE.Quaternion();
     p.group.getWorldQuaternion(wq);
     const normal = new THREE.Vector3(0, 0, 1).applyQuaternion(wq);
-    const dest = wp.clone().addScaledVector(normal, .5);
+    const dest = wp.clone().addScaledVector(normal, .55);
     const dur = RM ? 0 : 1.15;
 
     const tl = gsap.timeline({ defaults: { ease: 'power2.inOut' } });
-    tl.to([ui, hint, '#turnL', '#turnR'], { opacity: 0, duration: .35 }, 0);
+    tl.to([ui, turnWrap], { opacity: 0, duration: .35 }, 0);
     if (!RM) {
       tl.to(camera.position, { x: dest.x, y: dest.y, z: dest.z, duration: dur }, 0);
       tl.to(look, { x: wp.x, y: wp.y, z: wp.z, duration: dur * .7 }, 0);
       tl.to(camera, { fov: 30, duration: dur, onUpdate: () => camera.updateProjectionMatrix() }, 0);
     }
-    tl.to(wipe, { opacity: 1, duration: RM ? .25 : .32 }, RM ? 0 : dur - .28);
+    tl.to(wipe, { opacity: 1, duration: RM ? .25 : .3 }, RM ? 0 : dur - .26);
     tl.call(() => { location.href = SIDES[side].href; });
   }
 
@@ -666,14 +536,31 @@ if (renderer) {
     cursorLight.position.set(nx * 3.4, 2.4 - ny * 1.6, 3.2);
   });
 
-  // ---------- layout ----------
+  // ---------- layout: turntable on the right, info on the left ----------
   function layout() {
-    const a = innerWidth / innerHeight;
+    const W = innerWidth, H = innerHeight;
+    const a = W / H;
+    const portrait = W < 880 || H > W;
     camera.aspect = a;
-    camera.fov = a < .75 ? 46 : a < 1.2 ? 41 : 38;
-    camera.position.set(0, 1.96, a < .75 ? 7.6 : a < 1.2 ? 6.4 : 5.5);
+    camera.fov = portrait ? 46 : 36;
+    camera.position.set(0, 1.96, portrait ? 7.6 : a < 1.5 ? 7.6 : 7.1);
+    look.y = portrait ? 1.42 : 1.5;
     camera.updateProjectionMatrix();
-    renderer.setSize(innerWidth, innerHeight);
+
+    const stageX = portrait ? .5 : .71;           // phone center, as a fraction of viewport width
+    const dx = -(stageX - .5) * W;                // shift the view so the scene lands there
+    const dy = portrait ? -.16 * H : 0;
+    camera.setViewOffset(W, H, dx, dy, W, H);
+
+    // arrows hug the phone: world width of the phone projected to pixels,
+    // measured at the front phone's depth
+    const dist = camera.position.z - (PHONE.r + PHONE.d / 2);
+    const halfH = Math.tan(camera.fov * Math.PI / 360) * dist;
+    const phonePx = (PHONE.w / (halfH * a)) * (W / 2);
+    document.documentElement.style.setProperty('--stage-x', (stageX * 100) + '%');
+    document.documentElement.style.setProperty('--wrap-w', Math.round(phonePx + 230) + 'px');
+
+    renderer.setSize(W, H);
   }
   addEventListener('resize', () => { if (!leaving) layout(); });
   layout();
@@ -685,14 +572,14 @@ if (renderer) {
     intro.remove();
   } else {
     rot.y = -1.1;
-    gsap.set([ui, '#turnL', '#turnR'], { opacity: 0 });
+    gsap.set([ui, turnWrap], { opacity: 0 });
     const it = gsap.timeline();
-    it.to('#intro b', { opacity: 1, duration: .5, ease: 'power1.out' });
-    it.to('#intro b', { opacity: 0, letterSpacing: '.62em', duration: .55, ease: 'power2.in' }, '+=.35');
-    it.to(intro, { opacity: 0, duration: .6, ease: 'power2.inOut', onComplete: () => intro.remove() }, '-=.2');
-    it.to(rot, { y: 0, duration: 1.7, ease: 'power3.out' }, '-=.65');
-    it.to([ui, '#turnL', '#turnR'], { opacity: 1, duration: .8, ease: 'power2.out' }, '-=1.0');
-    it.from('.masthead, .caption, .foot', { y: 16, opacity: 0, duration: .7, stagger: .1, ease: 'power3.out', clearProps: 'transform' }, '-=1.0');
+    it.to('#intro svg', { opacity: 1, duration: .5, ease: 'power1.out' });
+    it.to('#intro svg', { opacity: 0, scale: .94, duration: .5, ease: 'power2.in' }, '+=.3');
+    it.to(intro, { opacity: 0, duration: .55, ease: 'power2.inOut', onComplete: () => intro.remove() }, '-=.2');
+    it.to(rot, { y: 0, duration: 1.7, ease: 'power3.out' }, '-=.6');
+    it.to([ui, turnWrap], { opacity: 1, duration: .8, ease: 'power2.out' }, '-=1.0');
+    it.from('.panel > *', { y: 16, opacity: 0, duration: .6, stagger: .07, ease: 'power3.out', clearProps: 'transform' }, '-=1.0');
   }
 
   // ---------- loop ----------
@@ -701,17 +588,16 @@ if (renderer) {
     const t = clock.getElapsedTime();
     turntable.rotation.y = rot.y;
     if (!RM && !leaving) {
-      phones[armed].group.position.y += Math.sin(t * 1.3) * .0009; // breath
-      ring.material.emissiveIntensity = .75 + Math.sin(t * 1.1) * .25;
+      phones[armed].group.position.y += Math.sin(t * 1.3) * .0009;
+      ring.material.emissiveIntensity = .45 + Math.sin(t * 1.1) * .15;
     }
-    phones.forEach((p) => { p.draw(p.ctx, RM ? 0 : t); p.tex.needsUpdate = true; });
-    const lx = look.x + par.x * .16, ly = look.y - par.y * .1;
+    const lx = look.x + par.x * .14, ly = look.y - par.y * .09;
     camera.lookAt(lx, ly, look.z);
     renderer.render(scene, camera);
   }
   function tick() { frame(); requestAnimationFrame(tick); }
   tick();
-  // headless/hidden-tab hook: advance frames manually (also handy in devtools)
+  // headless/hidden-tab hooks (also handy in devtools)
   window.__step = (n = 1) => { for (let i = 0; i < n; i++) frame(); return clock.getElapsedTime(); };
   window.__tt = { rot, armSide, spin, enter };
 }
