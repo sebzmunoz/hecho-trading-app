@@ -13,7 +13,6 @@ export const system = {
     D.notifications.forEach((n) => (groups[n.group] ||= []).push(n));
     const catIcon = (cat) => D.pushCategories.find((c) => c.id === cat)?.icon || 'info';
     return base('Notifications', { back: true, headerRight: C.hActions([{ icon: 'settings', go: 'S702' }]), body: `
-      ${state.get('network') !== 'online' ? '' : ''}
       ${Object.entries(groups).map(([g, items]) => `${C.sectionLabel(g)}<div class="stack tight">${items.map((n) => C.listRow({ thumbIcon: catIcon(n.cat), pri: n.title, sec: n.body, trail: `<span class="muted" style="font-size:var(--fs-nano)">${n.when}</span>`, go: n.deep })).join('')}</div>`).join('')}
       <button class="btn ghost sm full" data-action="mark-read">Mark all read</button>` });
   },
@@ -28,7 +27,7 @@ export const system = {
       ${C.sectionLabel('Products')}
       <div class="stack tight">${D.products.slice(0, 2).map((p) => C.listRow({ thumb: `<span class="thumb thumb-illo">${C.illo(p.illo, 24)}</span>`, pri: p.name, sec: D.brandById[p.brand].name, go: `S004?p=${p.id}` })).join('')}</div>
       ${C.sectionLabel('Orders')}
-      <div class="stack tight">${C.listRow({ thumbIcon: 'bag', pri: 'Order #4790', sec: 'Shipped · Marlow, Lavender Thorne', go: 'S302?order=4790' })}</div>
+      <div class="stack tight">${C.listRow({ thumbIcon: 'bag', pri: 'Order #4790', sec: 'Shipped · Etta & East, Lavender Thorne', go: 'S302?order=4790' })}</div>
       ${C.sectionLabel('Carts')}
       <div class="stack tight">${C.listRow({ thumbIcon: 'draft', pri: 'Back wall refresh', sec: '4 brands', go: 'S202?cart=c-back' })}</div>` });
   },

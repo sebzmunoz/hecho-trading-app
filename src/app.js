@@ -23,6 +23,16 @@ const netSlot = $('#netSlot');
 
 window.HECHO = { nav, state };
 
+// States these screens render themselves; the generic loading / error
+// fallback in renderRoute leaves them alone. (Declared before boot —
+// initRouter renders the first route synchronously.)
+const SELF_STATES = {
+  S001: ['empty'], S003: ['locked', 'launching'], S004: ['oos', 'locked'],
+  S006: ['empty'], S009: ['closed', 'requested'], S010: ['empty', 'loading'],
+  S101: ['perm', 'lowlight', 'identifying'], S106: ['error'], S201: ['empty'],
+  S202: ['conflict'], S301: ['empty'], S701: ['empty'], S804: ['requested'],
+};
+
 // ---------- boot ----------
 C.initOverlays($('#overlayRoot'), $('#toastHost'));
 applyEnvironment();
@@ -34,8 +44,14 @@ wireChrome();
 function renderRoute(route, { direction } = {}) {
   if (direction !== 'refresh') state.setEphemeral('_state', null);
   const entry = registry[route.id] || registry.S803;
+  const st = state.get('_state');
+  const own = (SELF_STATES[entry.id] || []).includes(st);
   let spec;
-  try { spec = entry.render(route.params || {}) || {}; }
+  try {
+    if (st === 'loading' && !own) spec = { title: entry.name, back: true, body: C.skeleton(5) };
+    else if (st === 'error' && !own) spec = { title: entry.name, back: true, body: C.fullscreenState({ ic: 'warning', title: 'Something went wrong', body: 'Something went wrong on my end. Try again.', actions: [{ label: 'Try again', action: 'retry' }, { label: 'Get help', ghost: true, go: 'S704' }] }) };
+    else spec = entry.render(route.params || {}) || {};
+  }
   catch (err) { console.error('render error', route.id, err); spec = registry.S803.render({}); }
 
   // header — hub-and-spoke: every screen except the hubs can get back home
@@ -50,8 +66,8 @@ function renderRoute(route, { direction } = {}) {
       <div style="display:flex;gap:2px">${spec.headerRight || ''}</div>`;
   }
 
-  // network bar
-  const net = state.get('network');
+  // network bar — the panel's per-screen 'offline' state shows it too
+  const net = st === 'offline' ? 'offline' : state.get('network');
   netSlot.innerHTML = net === 'offline'
     ? `<div class="offline-bar">${icon('wifi_off', 16)}<span>Offline · changes save locally</span></div>`
     : net === 'slow'

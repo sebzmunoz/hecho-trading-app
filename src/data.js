@@ -108,17 +108,17 @@ export function recommendedQty(p) {
   return roundUpToPack(need, p.pack);
 }
 export function whyString(p) {
-  const parts = [`Sold ${Math.round(p.velocity * 30)} in 30d`];
-  if (p.lastOrder) parts.push(`last ordered ${p.lastOrder}`);
+  const parts = [];
+  if (p.lastOrder) parts.push(`Ordered ${p.lastOrderQty} ${p.lastOrder}`);
   if (p.season) parts.push(p.season === 'in' ? 'in season' : 'off season');
   return parts.join(' · ');
 }
 
-// ---- §07-H H3: store stock (signed-in accounts only) ----
+// ---- §07-H H3: stock state (brands keep their own counts current) ----
 export function stockState(p) {
   if (p.onHand === 0) return { kind: 'out', label: 'Out of stock', value: 0, caption: p.restock ? 'Brand says: ' + p.restock : 'Restock pending' };
-  if (p.onHand <= 4) return { kind: 'low', label: `Low · ${p.onHand}`, value: p.onHand, caption: 'Synced just now' };
-  return { kind: 'in', label: `In stock · ${p.onHand}`, value: p.onHand, caption: 'Synced just now' };
+  if (p.onHand <= 4) return { kind: 'low', label: `Low · ${p.onHand}`, value: p.onHand, caption: 'Set by the brand · current' };
+  return { kind: 'in', label: `In stock · ${p.onHand}`, value: p.onHand, caption: 'Set by the brand · current' };
 }
 
 // ---- Tier visibility (§TM) ----

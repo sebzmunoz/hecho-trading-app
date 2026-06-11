@@ -28,7 +28,7 @@ const META = {
   S006: { name: 'Search results', group: 'Shop', tab: 'shop', states: S('default', 'empty', 'loading', 'offline') },
   S007: { name: 'Category index', group: 'Shop', tab: 'shop', states: S('default', 'loading', 'offline') },
   S008: { name: 'Filters sheet', group: 'Shop', tab: 'shop', states: S('default') },
-  S009: { name: 'Brand launch detail', group: 'Shop', tab: 'shop', states: S('default', 'closed') },
+  S009: { name: 'Brand launch detail', group: 'Shop', tab: 'shop', states: S('default', 'closed', 'requested') },
   S010: { name: 'Love list', group: 'Shop', tab: 'shop', states: S('default', 'empty', 'loading', 'offline') },
   S011: { name: 'Love list → cart', group: 'Shop', tab: 'shop', states: S('default') },
   // ---- Scan ----

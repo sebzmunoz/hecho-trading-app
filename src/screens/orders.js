@@ -7,6 +7,9 @@ import { base } from './shop.js';
 export const orders = {
   // S301 Orders index + wallet
   S301(params) {
+    if (state.get('guest')) {
+      return base('Orders', { back: true, body: C.emptyState({ ic: 'bag', title: 'Orders come with an account', body: 'Browse and build carts freely as a guest — your orders and Net-30 wallet appear once your store is set up.', primary: { label: 'Apply to become a retailer', action: 'register' }, secondary: { label: 'I already have an account', go: 'S503' } }) });
+    }
     if (state.get('_state') === 'empty') {
       return base('Orders', { tab: 'orders', headerRight: C.tabHeaderActions(), body: C.emptyState({ ic: 'bag', title: 'No orders yet', body: 'When you submit a draft, it lands here with live status.' , primary: { label: 'Build a cart', go: 'S201' } }) });
     }

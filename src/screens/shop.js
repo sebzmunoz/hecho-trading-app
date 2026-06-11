@@ -40,9 +40,10 @@ export const shop = {
   // (S003?brand=x&cat=y). 'all' is the everything view.
   S003(params) {
     const b = D.brandById[params.brand] || D.brands[0];
-    if (!D.canSee(b, state.get('tier'))) return shop.S804({ brand: b.id });
+    if (!D.canSee(b, state.get('tier')) || state.get('_state') === 'locked') return shop.S804({ brand: b.id });
     const prods = D.productsByBrand(b.id);
     const saved = state.isBrandSaved(b.id);
+    const launching = b.launching || state.get('_state') === 'launching';
 
     // category view: the products themselves
     if (params.cat) {
@@ -64,7 +65,7 @@ export const shop = {
     const body = `
       <div class="thumb-illo" style="border-radius:var(--r-4);padding:var(--s-6)">${C.illo(prods[0]?.illo || 'jar', 96)}</div>
       <h3>${b.name}</h3>
-      ${b.launching ? C.banner(`<b>First-look open now.</b> New collection pinned below.`, { kind: '', ic: 'sparkle', action: { label: 'The drop', go: `S009?brand=${b.id}` } }) : ''}
+      ${launching ? C.banner(`<b>First-look open now.</b> New collection pinned below.`, { kind: '', ic: 'sparkle', action: { label: 'The drop', go: `S009?brand=${b.id}` } }) : ''}
       <p class="muted">${b.story}</p>
       ${b.founder ? `${C.sectionLabel('From the founder')}
       <div class="card" style="max-width:none;flex-direction:row;gap:var(--s-3);align-items:flex-start">
@@ -88,7 +89,7 @@ export const shop = {
   S004(params) {
     const p = D.productById[params.p] || D.products[0];
     const b = D.brandById[p.brand];
-    if (!D.canSee(b, state.get('tier'))) return shop.S804({ brand: b.id });
+    if (!D.canSee(b, state.get('tier')) || state.get('_state') === 'locked') return shop.S804({ brand: b.id });
     const guest = state.get('guest');
     const variantOut = state.get('_state') === 'oos';
     const rec = guest ? null : D.recommendedQty(p);
@@ -172,9 +173,11 @@ export const shop = {
   // S009 Brand launch detail
   S009(params) {
     const b = D.brandById[params.brand] || D.brandById['pompom'];
-    const closed = state.get('_state') === 'closed';
-    if (closed) {
-      return base(b.name, { back: true, body: C.fullscreenState({ ic: 'lock', title: 'First-look has closed', body: `Join the waitlist and I'll open ${b.name} to you the moment your tier clears.`, actions: [{ label: 'Join the waitlist', action: 'request-access' }, { label: 'Back', ghost: true, action: 'back' }] }) });
+    const requested = state.get('_state') === 'requested';
+    if (state.get('_state') === 'closed' || requested) {
+      return base(b.name, { back: true, body: C.fullscreenState({ ic: 'lock', title: 'First-look has closed',
+        body: requested ? `You're on the list — I'll ping you the moment ${b.name} reopens.` : `Join the waitlist and I'll open ${b.name} to you the moment your tier clears.`,
+        actions: requested ? [{ label: 'On the waitlist', ghost: true }, { label: 'Back', ghost: true, action: 'back' }] : [{ label: 'Join the waitlist', action: 'request-access' }, { label: 'Back', ghost: true, action: 'back' }] }) });
     }
     const body = `
       <div class="thumb-illo" style="border-radius:var(--r-4);padding:var(--s-6)">${C.illo('hat', 96)}</div>
