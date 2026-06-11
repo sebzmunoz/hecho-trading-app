@@ -3,18 +3,19 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#F7E9D8" />
 <title>Hecho · Choose a build</title>
 <meta name="description" content="Hecho Trading Co. wholesale showroom app — two prototype builds on the turntable: the Flagship full prototype and the simplified MVP." />
 <style>
   :root {
-    --cream: #faf3e7;
+    --cream: #f7e9d8;
     --ink: #2b1d16;
-    --terra: #b4532a;
-    --terra-bright: #d96a3b;
+    --terra: #e94928;
+    --terra-bright: #ff5e3a;
+    --pink: #ffb4ab;
     --line: #e7d9c5;
     --surface: #fffdf8;
     --muted: #8a7766;
-    --logo-cutout: var(--cream);
     --sans: Avenir, 'Avenir Next', Futura, 'Century Gothic', 'Trebuchet MS', sans-serif;
     --stage-x: 72%;
   }
@@ -63,10 +64,10 @@
     white-space: nowrap; color: var(--cream); text-decoration: none; background: var(--terra);
     border: 1px solid var(--terra); border-radius: 999px; padding: 16px 30px 16px 34px;
     transition: background .25s ease, transform .25s ease, box-shadow .25s ease;
-    box-shadow: 0 10px 26px rgba(180, 83, 42, .25);
+    box-shadow: 0 10px 26px rgba(233, 73, 40, .25);
   }
   .cap-cta .arr { transition: transform .25s ease; }
-  .cap-cta:hover, .cap-cta:focus-visible { background: var(--terra-bright); transform: translateY(-2px); box-shadow: 0 14px 30px rgba(180, 83, 42, .3); }
+  .cap-cta:hover, .cap-cta:focus-visible { background: var(--terra-bright); transform: translateY(-2px); box-shadow: 0 14px 30px rgba(233, 73, 40, .3); }
   .cap-cta:hover .arr { transform: translateX(5px); }
   .cap-cta:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
   .hint-line {
@@ -99,18 +100,38 @@
   /* ---------- atmosphere ---------- */
   .vignette { position: fixed; inset: 0; z-index: 3; pointer-events: none;
     background: radial-gradient(ellipse 80% 68% at 56% 46%, transparent 58%, rgba(43, 29, 22, .09) 100%); }
-  .grain { position: fixed; inset: -60%; z-index: 6; pointer-events: none; opacity: .035;
+  .grain { position: fixed; inset: -10%; z-index: 6; pointer-events: none; opacity: .035;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='240' height='240' filter='url(%23n)'/%3E%3C/svg%3E");
     animation: grain 7s steps(8) infinite; }
   @keyframes grain {
     0% { transform: translate(0, 0); } 25% { transform: translate(-3%, 2%); }
     50% { transform: translate(2%, -3%); } 75% { transform: translate(-2%, -2%); } 100% { transform: translate(0, 0); }
   }
-  @media (prefers-reduced-motion: reduce) { .grain { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .grain, .intro-bloom { animation: none; } }
 
   #wipe { position: fixed; inset: 0; z-index: 8; background: var(--cream); opacity: 0; pointer-events: none; }
-  #intro { position: fixed; inset: 0; z-index: 9; background: var(--cream); display: grid; place-items: center; }
-  #intro svg { width: min(300px, 56vw); height: auto; color: var(--terra); opacity: 0; }
+  #intro {
+    position: fixed; inset: 0; z-index: 9; background: var(--cream);
+    display: grid; place-items: center; overflow: hidden;
+  }
+  .intro-bloom {
+    position: absolute; inset: -25%; pointer-events: none;
+    background:
+      radial-gradient(42% 36% at 28% 66%, rgba(255, 180, 171, .55), transparent 70%),
+      radial-gradient(36% 32% at 74% 28%, rgba(255, 180, 171, .42), transparent 70%),
+      radial-gradient(52% 44% at 58% 84%, rgba(255, 180, 171, .32), transparent 72%);
+    animation: bloom 8s ease-in-out infinite alternate;
+  }
+  @keyframes bloom {
+    from { transform: translate3d(-2%, 1.5%, 0) scale(1); }
+    to { transform: translate3d(2%, -1.5%, 0) scale(1.1); }
+  }
+  .intro-ring {
+    position: absolute; inset: 0; margin: auto; width: min(54vw, 430px); aspect-ratio: 1;
+    border: 2px solid var(--pink); border-radius: 50%; opacity: 0; pointer-events: none;
+  }
+  #intro svg { width: min(320px, 58vw); height: auto; color: var(--terra); position: relative; }
+  #intro .i-l, #intro .i-s path { opacity: 0; }
 
   /* ---------- portrait / narrow ---------- */
   @media (max-width: 880px), (orientation: portrait) {
@@ -148,8 +169,8 @@
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
   <defs>
     <symbol id="hecho-mark" viewBox="0 0 463 168">
-      <path fill="currentColor" d="M385.834 52.9383C385.947 52.932 386.06 52.9263 386.176 52.9218C406.216 52.122 421.205 63.1391 421.173 84.0336C421.162 91.0115 421.451 98.1953 421.254 105.173C421.024 113.322 422.036 122.847 419.994 130.737C418.76 135.613 416.307 140.096 412.864 143.765C407.264 149.785 396.99 152.387 388.977 152.674C367.209 152.957 352.834 142.428 353.18 119.331C353.372 106.435 352.721 92.9446 353.525 80.0455C354.144 74.1472 356.342 67.1174 360.499 62.8304C367.654 55.4524 376.069 53.431 385.834 52.9383Z"/>
-      <path fill="var(--logo-cutout)" d="M386.323 76.1866C393.389 75.4063 397.29 79.7133 397.649 86.4498C397.945 92.0021 397.966 97.4876 397.918 103.052C397.869 108.811 398.11 114.682 397.482 120.412C396.823 126.204 394.308 128.674 388.579 129.192C381.506 129.241 377.167 127.531 376.832 119.626C376.358 108.46 376.236 96.4955 376.925 85.3465C377.293 79.3811 380.634 76.76 386.323 76.1866Z"/>
+      <!-- The O: counter is a true cut-out (evenodd subpath), never a painted fill -->
+      <path fill="currentColor" fill-rule="evenodd" d="M385.834 52.9383C385.947 52.932 386.06 52.9263 386.176 52.9218C406.216 52.122 421.205 63.1391 421.173 84.0336C421.162 91.0115 421.451 98.1953 421.254 105.173C421.024 113.322 422.036 122.847 419.994 130.737C418.76 135.613 416.307 140.096 412.864 143.765C407.264 149.785 396.99 152.387 388.977 152.674C367.209 152.957 352.834 142.428 353.18 119.331C353.372 106.435 352.721 92.9446 353.525 80.0455C354.144 74.1472 356.342 67.1174 360.499 62.8304C367.654 55.4524 376.069 53.431 385.834 52.9383ZM386.323 76.1866C393.389 75.4063 397.29 79.7133 397.649 86.4498C397.945 92.0021 397.966 97.4876 397.918 103.052C397.869 108.811 398.11 114.682 397.482 120.412C396.823 126.204 394.308 128.674 388.579 129.192C381.506 129.241 377.167 127.531 376.832 119.626C376.358 108.46 376.236 96.4955 376.925 85.3465C377.293 79.3811 380.634 76.76 386.323 76.1866Z"/>
       <path fill="currentColor" d="M44.5316 55.4346C49.4981 55.2334 54.6648 55.4077 59.6325 55.4495C65.2707 55.4969 63.9518 63.611 63.9385 67.641L63.8755 84.5731C63.8669 87.5007 63.7639 90.5032 63.9737 93.408C64.2798 96.4214 65.7241 97.1207 68.5391 97.2067C70.9997 97.5028 74.0505 97.0092 76.451 97.216C86.8343 98.1109 85.0757 94.0177 85.0549 85.2022L84.9948 68.8448C84.9844 66.0576 84.8272 63.1732 85.0115 60.3949C85.1028 59.0172 85.4037 57.2144 86.5224 56.2875C88.5117 54.6391 102.665 55.3063 105.847 55.5865C107.576 56.7452 108.337 57.2474 108.411 59.4858C108.512 62.5662 108.444 65.6469 108.435 68.7294L108.414 86.1666L108.427 142.371C108.494 145.611 109.138 147.739 106.236 149.825C105.491 149.945 104.728 150.003 103.975 150.042C100.802 150.207 88.0097 150.753 86.1853 149.016C85.5123 148.376 85.2636 147.387 85.1267 146.498C84.8102 144.445 84.9973 142.169 85.0049 140.091C85.023 135.335 85.1744 130.544 85.0363 125.791C84.9939 124.324 84.8371 122.455 83.6836 121.399C81.9478 119.81 71.8409 120.434 69.2276 120.521C67.7805 120.568 66.2324 120.462 65.1421 121.588C61.6485 125.196 66.1488 145.553 62.7168 149.054C62.1263 149.656 61.2798 149.876 60.4695 149.996C57.9061 150.373 55.1053 150.07 52.5108 150.035C50.3995 150.007 48.2924 150.12 46.182 150.143C43.878 150.167 42.35 149.703 40.6887 148.075C40.2278 144.737 40.4713 139.958 40.4702 136.507L40.4637 116.04L40.4603 79.5658C40.461 73.2211 40.4332 66.8389 40.4987 60.4954C40.5084 59.568 40.5061 57.6511 41.0996 57.0376C42.1946 55.9054 43.0629 55.564 44.5316 55.4346Z"/>
       <path fill="currentColor" d="M278.52 55.4131C282.984 55.295 287.507 55.3982 291.968 55.4274C297.871 55.4657 296.52 62.9634 296.507 67.1591L296.459 84.2981C296.45 87.2168 296.337 90.2664 296.572 93.1705C296.816 96.1786 298.427 97.0184 301.199 97.1905C303.921 97.3594 306.722 97.209 309.456 97.2128C312.422 97.158 317.166 97.9901 317.498 93.8099C317.735 90.7977 317.638 87.7951 317.629 84.7901L317.572 68.7161C317.566 66.3665 317.082 57.5192 318.752 56.5977C322.219 54.6824 334.558 55.2302 338.455 55.5581C339.903 56.5311 340.753 57.0728 340.834 58.9332C340.974 62.0778 340.902 65.2294 340.893 68.3778L340.868 86.0302L340.881 143.444C340.945 146.621 341.401 148.022 338.561 149.898C335.326 150.27 324.076 150.437 321.099 149.84C320.118 149.644 318.72 149.247 318.16 148.366C316.088 145.101 319.276 125.633 316.664 121.901C316.095 121.086 315.345 120.777 314.392 120.612C312.325 120.255 302.421 120.278 300.492 120.574C299.593 120.712 298.754 120.98 298.007 121.517C297.243 122.067 296.904 122.808 296.692 123.707C296.294 125.396 296.452 127.373 296.459 129.107L296.52 140.215C296.534 142.223 296.672 144.597 296.403 146.563C296.145 148.452 295.583 148.863 294.148 149.872C290.556 150.293 286.443 150.027 282.785 150.112C280.156 150.173 275.981 150.346 273.826 148.769C272.732 146.949 273.098 132.58 273.098 129.561L273.1 98.8646L273.119 71.3973C273.121 67.9998 273.152 64.4883 273.055 61.098C272.922 56.565 274.155 55.5676 278.52 55.4131Z"/>
       <path fill="currentColor" d="M126.092 55.4271C136.391 55.0521 148.989 55.4158 159.467 55.4088L174.124 55.3903C177.422 55.386 181.032 55.2817 184.281 55.5974C184.973 56.075 186.458 57.1035 186.579 58.0203C187.247 61.917 186.549 66.5023 186.839 70.3509C187.619 80.7037 183.225 78.8331 174.868 78.7952L156.722 78.7225C154.449 78.7164 151.671 78.4154 149.472 78.9408C148.34 79.2113 147.18 79.7194 146.561 80.7601C145.73 82.1581 145.944 86.9694 146.389 88.5238C146.631 89.3697 147.029 90.0699 147.836 90.4755C151.945 92.5409 169.636 89.5677 173.545 91.7682C174.289 92.1875 174.616 92.7617 174.839 93.5663C175.423 95.6724 175.493 111.058 174.591 112.596C174.13 113.383 173.323 113.915 172.451 114.144C170.734 114.595 168.725 114.405 166.959 114.39C163.176 114.359 151.665 113.801 148.694 114.584C147.832 114.811 147.26 115.171 146.815 115.954C145.604 118.081 145.905 122.626 146.54 124.935C146.884 125.602 147.305 126.242 148.066 126.44C150.532 127.08 154.129 126.892 156.696 126.887L173.708 126.848C176.851 126.841 186.716 125.681 186.75 130.048C186.792 135.367 186.898 140.933 186.797 146.281C186.752 148.704 185.351 149.77 183.075 149.944C180.266 150.191 177.355 150.092 174.502 150.085L158.976 150.052L138.156 150.082C134.431 150.094 130.636 150.17 126.939 150.047C124.746 149.812 122.252 149.611 122.106 146.879C121.894 142.899 121.981 138.97 121.982 135.021L121.989 111.787L121.978 77.2098C121.977 71.7328 121.981 66.2557 121.991 60.779C121.996 57.706 122.539 55.7247 126.092 55.4271Z"/>
@@ -191,7 +212,27 @@
 
 <div class="grain" aria-hidden="true"></div>
 <div id="wipe" aria-hidden="true"></div>
-<div id="intro" aria-hidden="true"><svg viewBox="0 0 463 168"><use href="#hecho-mark"/></svg></div>
+<div id="intro" aria-hidden="true">
+  <div class="intro-bloom"></div>
+  <div class="intro-ring" id="introRing"></div>
+  <!-- inline copy of the mark (not <use>) so each letter can be choreographed -->
+  <svg id="introMark" viewBox="0 0 463 168" fill="currentColor">
+    <g class="i-l"><path d="M44.5316 55.4346C49.4981 55.2334 54.6648 55.4077 59.6325 55.4495C65.2707 55.4969 63.9518 63.611 63.9385 67.641L63.8755 84.5731C63.8669 87.5007 63.7639 90.5032 63.9737 93.408C64.2798 96.4214 65.7241 97.1207 68.5391 97.2067C70.9997 97.5028 74.0505 97.0092 76.451 97.216C86.8343 98.1109 85.0757 94.0177 85.0549 85.2022L84.9948 68.8448C84.9844 66.0576 84.8272 63.1732 85.0115 60.3949C85.1028 59.0172 85.4037 57.2144 86.5224 56.2875C88.5117 54.6391 102.665 55.3063 105.847 55.5865C107.576 56.7452 108.337 57.2474 108.411 59.4858C108.512 62.5662 108.444 65.6469 108.435 68.7294L108.414 86.1666L108.427 142.371C108.494 145.611 109.138 147.739 106.236 149.825C105.491 149.945 104.728 150.003 103.975 150.042C100.802 150.207 88.0097 150.753 86.1853 149.016C85.5123 148.376 85.2636 147.387 85.1267 146.498C84.8102 144.445 84.9973 142.169 85.0049 140.091C85.023 135.335 85.1744 130.544 85.0363 125.791C84.9939 124.324 84.8371 122.455 83.6836 121.399C81.9478 119.81 71.8409 120.434 69.2276 120.521C67.7805 120.568 66.2324 120.462 65.1421 121.588C61.6485 125.196 66.1488 145.553 62.7168 149.054C62.1263 149.656 61.2798 149.876 60.4695 149.996C57.9061 150.373 55.1053 150.07 52.5108 150.035C50.3995 150.007 48.2924 150.12 46.182 150.143C43.878 150.167 42.35 149.703 40.6887 148.075C40.2278 144.737 40.4713 139.958 40.4702 136.507L40.4637 116.04L40.4603 79.5658C40.461 73.2211 40.4332 66.8389 40.4987 60.4954C40.5084 59.568 40.5061 57.6511 41.0996 57.0376C42.1946 55.9054 43.0629 55.564 44.5316 55.4346Z"/></g>
+    <g class="i-l"><path d="M126.092 55.4271C136.391 55.0521 148.989 55.4158 159.467 55.4088L174.124 55.3903C177.422 55.386 181.032 55.2817 184.281 55.5974C184.973 56.075 186.458 57.1035 186.579 58.0203C187.247 61.917 186.549 66.5023 186.839 70.3509C187.619 80.7037 183.225 78.8331 174.868 78.7952L156.722 78.7225C154.449 78.7164 151.671 78.4154 149.472 78.9408C148.34 79.2113 147.18 79.7194 146.561 80.7601C145.73 82.1581 145.944 86.9694 146.389 88.5238C146.631 89.3697 147.029 90.0699 147.836 90.4755C151.945 92.5409 169.636 89.5677 173.545 91.7682C174.289 92.1875 174.616 92.7617 174.839 93.5663C175.423 95.6724 175.493 111.058 174.591 112.596C174.13 113.383 173.323 113.915 172.451 114.144C170.734 114.595 168.725 114.405 166.959 114.39C163.176 114.359 151.665 113.801 148.694 114.584C147.832 114.811 147.26 115.171 146.815 115.954C145.604 118.081 145.905 122.626 146.54 124.935C146.884 125.602 147.305 126.242 148.066 126.44C150.532 127.08 154.129 126.892 156.696 126.887L173.708 126.848C176.851 126.841 186.716 125.681 186.75 130.048C186.792 135.367 186.898 140.933 186.797 146.281C186.752 148.704 185.351 149.77 183.075 149.944C180.266 150.191 177.355 150.092 174.502 150.085L158.976 150.052L138.156 150.082C134.431 150.094 130.636 150.17 126.939 150.047C124.746 149.812 122.252 149.611 122.106 146.879C121.894 142.899 121.981 138.97 121.982 135.021L121.989 111.787L121.978 77.2098C121.977 71.7328 121.981 66.2557 121.991 60.779C121.996 57.706 122.539 55.7247 126.092 55.4271Z"/></g>
+    <g class="i-l"><path d="M228.73 52.9374C232.148 52.6946 235.973 53.0681 239.348 53.6347C246.315 54.8044 254.24 59.1441 258.342 64.9474C261.566 69.5095 263.039 74.7352 263.676 80.2094C263.804 81.3267 264.062 82.6919 263.845 83.7898C263.646 84.8061 262.935 85.4542 262.085 85.9826C260.224 87.1407 245.565 90.3133 243.64 89.8409C240.181 88.9919 240.213 82.5058 238.521 79.87C237.297 77.9662 235.446 76.9099 233.264 76.4423C230.293 75.8053 226.412 75.9617 223.798 77.6725C221.643 79.0828 220.544 81.4676 220.03 83.9149C218.788 89.8308 219.43 96.6212 219.426 102.637C219.423 108.365 219.042 114.368 219.754 120.052C219.996 121.992 220.379 124.048 221.48 125.705C222.669 127.496 224.523 128.49 226.595 128.91C228.312 129.257 230.138 129.326 231.884 129.213C242.135 128.55 237.925 118.815 242.576 115.883C243.046 115.586 243.545 115.427 244.101 115.422C247.32 115.39 254.626 117.435 258.134 118.175C260.294 118.661 263.969 119.201 263.904 122.176C263.807 129.253 261.247 137.942 256.212 143.173C244.386 155.466 218.623 155.725 205.704 145.031C193.31 133.965 196.506 116.903 196.036 102.76C195.159 76.3885 195.646 54.5501 228.73 52.9374Z"/></g>
+    <g class="i-l"><path d="M278.52 55.4131C282.984 55.295 287.507 55.3982 291.968 55.4274C297.871 55.4657 296.52 62.9634 296.507 67.1591L296.459 84.2981C296.45 87.2168 296.337 90.2664 296.572 93.1705C296.816 96.1786 298.427 97.0184 301.199 97.1905C303.921 97.3594 306.722 97.209 309.456 97.2128C312.422 97.158 317.166 97.9901 317.498 93.8099C317.735 90.7977 317.638 87.7951 317.629 84.7901L317.572 68.7161C317.566 66.3665 317.082 57.5192 318.752 56.5977C322.219 54.6824 334.558 55.2302 338.455 55.5581C339.903 56.5311 340.753 57.0728 340.834 58.9332C340.974 62.0778 340.902 65.2294 340.893 68.3778L340.868 86.0302L340.881 143.444C340.945 146.621 341.401 148.022 338.561 149.898C335.326 150.27 324.076 150.437 321.099 149.84C320.118 149.644 318.72 149.247 318.16 148.366C316.088 145.101 319.276 125.633 316.664 121.901C316.095 121.086 315.345 120.777 314.392 120.612C312.325 120.255 302.421 120.278 300.492 120.574C299.593 120.712 298.754 120.98 298.007 121.517C297.243 122.067 296.904 122.808 296.692 123.707C296.294 125.396 296.452 127.373 296.459 129.107L296.52 140.215C296.534 142.223 296.672 144.597 296.403 146.563C296.145 148.452 295.583 148.863 294.148 149.872C290.556 150.293 286.443 150.027 282.785 150.112C280.156 150.173 275.981 150.346 273.826 148.769C272.732 146.949 273.098 132.58 273.098 129.561L273.1 98.8646L273.119 71.3973C273.121 67.9998 273.152 64.4883 273.055 61.098C272.922 56.565 274.155 55.5676 278.52 55.4131Z"/></g>
+    <g class="i-l"><path fill-rule="evenodd" d="M385.834 52.9383C385.947 52.932 386.06 52.9263 386.176 52.9218C406.216 52.122 421.205 63.1391 421.173 84.0336C421.162 91.0115 421.451 98.1953 421.254 105.173C421.024 113.322 422.036 122.847 419.994 130.737C418.76 135.613 416.307 140.096 412.864 143.765C407.264 149.785 396.99 152.387 388.977 152.674C367.209 152.957 352.834 142.428 353.18 119.331C353.372 106.435 352.721 92.9446 353.525 80.0455C354.144 74.1472 356.342 67.1174 360.499 62.8304C367.654 55.4524 376.069 53.431 385.834 52.9383ZM386.323 76.1866C393.389 75.4063 397.29 79.7133 397.649 86.4498C397.945 92.0021 397.966 97.4876 397.918 103.052C397.869 108.811 398.11 114.682 397.482 120.412C396.823 126.204 394.308 128.674 388.579 129.192C381.506 129.241 377.167 127.531 376.832 119.626C376.358 108.46 376.236 96.4955 376.925 85.3465C377.293 79.3811 380.634 76.76 386.323 76.1866Z"/></g>
+    <g class="i-s">
+      <path d="M430.489 40.7188C431.427 40.8617 432.92 41.5116 433.381 42.287C435.773 46.2969 429.692 52.0599 427.415 54.5381C425.02 57.1433 422.772 59.5154 420.245 61.376C419.61 60.7713 418.966 59.9753 418.39 59.3022C416.655 57.2787 414.827 55.4949 412.943 53.6195C418.787 49.5455 423.647 41.3996 430.489 40.7188Z"/>
+      <path d="M408.511 33.2319C417.443 32.5595 410.815 47.7653 409.891 52.0118C408.601 51.4701 407.115 50.9833 405.784 50.5156C403.679 49.8179 401.765 49.4972 399.581 48.6694C400.525 44.0361 404.061 35.2841 408.511 33.2319Z"/>
+      <path d="M433.433 61.9466C437.962 61.3329 439.008 62.4276 441.59 65.7235C438.453 70.5162 434.088 71.7365 428.94 73.355C427.239 73.9175 426.455 74.2413 424.855 75.0459C424.164 71.0267 423.218 69.0893 421.616 65.3436C424.677 63.3843 429.809 62.449 433.433 61.9466Z"/>
+      <path d="M425.998 78.3973C428.888 78.265 432.852 78.153 435.624 78.8645C438.577 79.6232 439.571 80.8873 441.017 83.3576C440.294 84.6955 439.499 85.4404 438.353 86.3913C434.94 88.3725 430.248 88.4159 426.258 88.7871C426.344 86.3055 425.404 79.7605 425.998 78.3973Z"/>
+      <path d="M391.098 34.118C397.64 33.7355 396.134 44.1973 396.696 48.384L392.149 48.12C390.174 48.1422 388.198 48.1139 386.223 48.0356C385.941 43.3919 386.514 36.4763 391.098 34.118Z"/>
+      <path d="M374.869 35.2355C380.598 34.3707 381.714 44.1345 382.889 48.1548L378.766 48.601C377.347 48.9431 374.234 49.8233 373.012 49.7558C371.729 48.9874 371.641 45.8283 371.627 44.4039C371.589 40.8714 371.25 37.0192 374.869 35.2355Z"/>
+    </g>
+  </svg>
+</div>
+<noscript><style>#intro { display: none; }</style></noscript>
 
 <div id="fallback">
   <main>
@@ -226,21 +267,31 @@ const SIDES = [
 
 let renderer;
 const stage = document.getElementById('stage');
-try { renderer = new THREE.WebGLRenderer({ canvas: stage, antialias: true }); }
+try { renderer = new THREE.WebGLRenderer({ canvas: stage, antialias: true, powerPreference: 'high-performance' }); }
 catch (e) { renderer = null; }
+
+// no WebGL → the fallback chooser must not sit hidden under the intro overlay
+if (!renderer) document.getElementById('intro').remove();
+
+// the browser can revoke the context under memory pressure (or too many
+// contexts) — without this the canvas just goes black and stays black
+stage.addEventListener('webglcontextlost', (e) => {
+  e.preventDefault();
+  location.reload();
+});
 
 if (renderer) {
   document.documentElement.classList.add('gl-ok');
 
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.8));
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.0;
 
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color('#faf3e7');
-  scene.fog = new THREE.Fog('#faf3e7', 10, 19);
+  scene.background = new THREE.Color('#f7e9d8');
+  scene.fog = new THREE.Fog('#f7e9d8', 10, 19);
 
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment()).texture;
@@ -267,26 +318,74 @@ if (renderer) {
   cursorLight.position.set(0, 2, 3.4);
   scene.add(cursorLight);
 
-  // ---------- set: floor + pedestal + ring ----------
+  // ---------- set: back wall + floor + pedestal + ring ----------
+  // Back wall: slow animated wash of brand white (#F7E9D8) → brand pink (#FFB4AB).
+  // Raw ShaderMaterial — no fog, no tone-map, so the brand hexes land exactly.
+  const wallMat = new THREE.ShaderMaterial({
+    uniforms: { uTime: { value: 8 } },
+    vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.); }',
+    fragmentShader: `
+      varying vec2 vUv;
+      uniform float uTime;
+      void main() {
+        vec3 white = vec3(.969, .914, .847);
+        vec3 pink  = vec3(1., .706, .671);
+        float t = uTime * .07;
+        vec2 uv = vUv;
+        float m = smoothstep(.22, .80, uv.y) * .45;
+        m += .50 * smoothstep(.42, .0, distance(uv, vec2(.30 + .10 * sin(t * 1.9), .44 + .07 * cos(t * 1.3))));
+        m += .42 * smoothstep(.46, .0, distance(uv, vec2(.72 + .09 * cos(t * 1.1 + 2.), .32 + .08 * sin(t * 1.6 + 1.))));
+        m += .38 * smoothstep(.42, .0, distance(uv, vec2(.52 + .12 * sin(t * .8 + 4.), .60 + .06 * sin(t * 1.2 + 2.5))));
+        gl_FragColor = vec4(mix(white, pink, clamp(m, 0., 1.)), 1.);
+      }`,
+  });
+  const wall = new THREE.Mesh(new THREE.PlaneGeometry(64, 20), wallMat);
+  wall.position.set(0, 6, -10);
+  scene.add(wall);
+
   const floor = new THREE.Mesh(
     new THREE.CircleGeometry(16, 48),
-    new THREE.MeshStandardMaterial({ color: '#f1e5d1', roughness: .96, metalness: 0 })
+    new THREE.MeshStandardMaterial({ color: '#f2e2cf', roughness: .96, metalness: 0 })
   );
   floor.rotation.x = -Math.PI / 2;
   floor.receiveShadow = true;
   scene.add(floor);
 
+  // Pedestal: lathed profile — straight skirt, chamfer, cove, top plateau —
+  // so light grades across it instead of reading as a flat disc.
+  const pedProfile = [
+    [0, 0], [2.05, 0], [2.05, .06], [1.99, .13], [1.91, .16], [1.85, .195], [1.8, .215], [1.76, .22], [0, .22],
+  ].map(([r, y]) => new THREE.Vector2(r, y));
   const pedestal = new THREE.Mesh(
-    new THREE.CylinderGeometry(1.85, 2.05, .22, 64),
-    new THREE.MeshStandardMaterial({ color: '#fbf4e8', roughness: .6, metalness: .05 })
+    new THREE.LatheGeometry(pedProfile, 96),
+    new THREE.MeshStandardMaterial({ color: '#fbf1e0', roughness: .5, metalness: .05 })
   );
-  pedestal.position.y = .11;
   pedestal.castShadow = pedestal.receiveShadow = true;
   scene.add(pedestal);
 
+  // Soft contact shadow grounding the pedestal on the floor
+  const shadowC = document.createElement('canvas');
+  shadowC.width = shadowC.height = 256;
+  {
+    const x = shadowC.getContext('2d');
+    const g = x.createRadialGradient(128, 128, 36, 128, 128, 128);
+    g.addColorStop(0, 'rgba(70, 40, 24, .38)');
+    g.addColorStop(.6, 'rgba(70, 40, 24, .14)');
+    g.addColorStop(1, 'rgba(70, 40, 24, 0)');
+    x.fillStyle = g;
+    x.fillRect(0, 0, 256, 256);
+  }
+  const contact = new THREE.Mesh(
+    new THREE.PlaneGeometry(6.6, 6.6),
+    new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(shadowC), transparent: true, depthWrite: false })
+  );
+  contact.rotation.x = -Math.PI / 2;
+  contact.position.y = .004;
+  scene.add(contact);
+
   const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(2.32, .016, 12, 96),
-    new THREE.MeshStandardMaterial({ color: '#b4532a', emissive: '#b4532a', emissiveIntensity: .55, roughness: .4 })
+    new THREE.TorusGeometry(2.32, .03, 16, 128),
+    new THREE.MeshStandardMaterial({ color: '#ffb4ab', emissive: '#ffb4ab', emissiveIntensity: .7, roughness: .35 })
   );
   ring.rotation.x = -Math.PI / 2;
   ring.position.y = .015;
@@ -300,6 +399,24 @@ if (renderer) {
   const PHONE = { w: 1.24, h: 2.66, d: .125, y: 1.55, r: 1.02 };
   const railMat = new THREE.MeshPhysicalMaterial({ color: '#4a443d', roughness: .32, metalness: .9, clearcoat: .6, clearcoatRoughness: .3 });
   const darkMat = new THREE.MeshPhysicalMaterial({ color: '#17120e', roughness: .35, metalness: .4, clearcoat: 1, clearcoatRoughness: .25 });
+
+  // Rounded plate: the corner radius lives in the w/h plane (so it can match the
+  // screen's rounded corners exactly — RoundedBoxGeometry caps it at d/2),
+  // while the bevel rounds the front/back rail edges.
+  function roundedPlateGeo(w, h, d, r, bevel) {
+    const hw = w / 2 - bevel, hh = h / 2 - bevel, rr = Math.max(r - bevel, .012);
+    const s = new THREE.Shape();
+    s.absarc(hw - rr, hh - rr, rr, 0, Math.PI / 2);
+    s.absarc(rr - hw, hh - rr, rr, Math.PI / 2, Math.PI);
+    s.absarc(rr - hw, rr - hh, rr, Math.PI, Math.PI * 1.5);
+    s.absarc(hw - rr, rr - hh, rr, Math.PI * 1.5, Math.PI * 2);
+    const g = new THREE.ExtrudeGeometry(s, {
+      depth: Math.max(d - bevel * 2, .002), bevelEnabled: bevel > 0, bevelThickness: bevel,
+      bevelSize: bevel, bevelSegments: 5, curveSegments: 20,
+    });
+    g.center();
+    return g;
+  }
 
   // Screen texture: black bezel + rounded screenshot + Dynamic Island.
   function makeScreenTexture(url) {
@@ -327,12 +444,12 @@ if (renderer) {
 
   function makePhone(shotUrl) {
     const g = new THREE.Group();
-    const body = new THREE.Mesh(new RoundedBoxGeometry(PHONE.w, PHONE.h, PHONE.d, 5, .105), railMat);
+    const body = new THREE.Mesh(roundedPlateGeo(PHONE.w, PHONE.h, PHONE.d, .175, .042), railMat);
     body.castShadow = true;
     g.add(body);
 
     // front glass face (dark) so the bezel reads even at angles
-    const face = new THREE.Mesh(new RoundedBoxGeometry(PHONE.w - .035, PHONE.h - .035, .012, 3, .085), darkMat);
+    const face = new THREE.Mesh(roundedPlateGeo(PHONE.w - .035, PHONE.h - .035, .012, .158, .004), darkMat);
     face.position.z = PHONE.d / 2 - .002;
     g.add(face);
 
@@ -356,7 +473,7 @@ if (renderer) {
     btn(.035, .24, -PHONE.w / 2 - .005, .2);             // vol down
 
     // back camera plateau — three lenses + flash
-    const island = new THREE.Mesh(new RoundedBoxGeometry(.5, .5, .04, 3, .12), darkMat);
+    const island = new THREE.Mesh(roundedPlateGeo(.5, .5, .04, .14, .012), darkMat);
     island.position.set(-.27, PHONE.h / 2 - .42, -PHONE.d / 2 - .015);
     g.add(island);
     const lensMat = new THREE.MeshPhysicalMaterial({ color: '#0a0806', roughness: .12, metalness: .3, clearcoat: 1 });
@@ -425,7 +542,7 @@ if (renderer) {
     const d = RM || !animate ? 0 : .7;
     phones.forEach((p) => {
       const front = p.side === side;
-      gsap.to(p.group.position, { y: front ? PHONE.y + .1 : PHONE.y - .04, duration: d, ease: 'power2.out', overwrite: 'auto' });
+      gsap.to(p.group.position, { y: front ? PHONE.y + .06 : PHONE.y - .04, duration: d, ease: 'power2.out', overwrite: 'auto' });
       gsap.to(p.group.scale, { x: front ? 1 : .94, y: front ? 1 : .94, z: front ? 1 : .94, duration: d, ease: 'power2.out', overwrite: 'auto' });
       gsap.to(p.screenMat.color, { r: front ? 1 : .55, g: front ? 1 : .53, b: front ? 1 : .5, duration: d, overwrite: 'auto' });
     });
@@ -565,7 +682,7 @@ if (renderer) {
   addEventListener('resize', () => { if (!leaving) layout(); });
   layout();
 
-  // ---------- intro ----------
+  // ---------- intro: letters rise → sparkles pop → pink ring blooms → curtain reveal + camera dolly ----------
   setCaption(0, false);
   armSide(0, false);
   if (RM) {
@@ -573,13 +690,23 @@ if (renderer) {
   } else {
     rot.y = -1.1;
     gsap.set([ui, turnWrap], { opacity: 0 });
+    const letters = intro.querySelectorAll('.i-l');
+    const sparks = intro.querySelectorAll('.i-s path');
+    gsap.set(intro, { clipPath: 'inset(0% 0% 0% 0%)' });
+    gsap.set(letters, { yPercent: 40, opacity: 0 });
+    gsap.set(sparks, { scale: 0, opacity: 0, transformOrigin: '50% 50%' });
     const it = gsap.timeline();
-    it.to('#intro svg', { opacity: 1, duration: .5, ease: 'power1.out' });
-    it.to('#intro svg', { opacity: 0, scale: .94, duration: .5, ease: 'power2.in' }, '+=.3');
-    it.to(intro, { opacity: 0, duration: .55, ease: 'power2.inOut', onComplete: () => intro.remove() }, '-=.2');
-    it.to(rot, { y: 0, duration: 1.7, ease: 'power3.out' }, '-=.6');
-    it.to([ui, turnWrap], { opacity: 1, duration: .8, ease: 'power2.out' }, '-=1.0');
-    it.from('.panel > *', { y: 16, opacity: 0, duration: .6, stagger: .07, ease: 'power3.out', clearProps: 'transform' }, '-=1.0');
+    it.to(letters, { yPercent: 0, opacity: 1, duration: .7, stagger: .085, ease: 'back.out(1.6)' }, .15);
+    it.to(sparks, { scale: 1, opacity: 1, duration: .5, stagger: .055, ease: 'back.out(3)' }, '-=.4');
+    it.fromTo('#introRing', { scale: .55, opacity: 0 }, { scale: 1.45, opacity: .9, duration: .8, ease: 'power2.out' }, '<-.05');
+    it.to('#introRing', { scale: 2.3, opacity: 0, duration: .7, ease: 'power2.in' }, '>-.3');
+    it.to('#introMark', { scale: 1.04, duration: .45, ease: 'power1.inOut' }, '-=.55');
+    it.to('#introMark', { yPercent: -30, opacity: 0, duration: .7, ease: 'power3.in' }, '+=.15');
+    it.to(intro, { clipPath: 'inset(0% 0% 100% 0%)', duration: .85, ease: 'power4.inOut', onComplete: () => intro.remove() }, '<+.05');
+    it.to(rot, { y: 0, duration: 1.9, ease: 'power3.out' }, '<-.1');
+    it.from(camera.position, { z: '+=1.3', duration: 2, ease: 'power3.out' }, '<');
+    it.to([ui, turnWrap], { opacity: 1, duration: .8, ease: 'power2.out' }, '<+.5');
+    it.from('.panel > *', { y: 16, opacity: 0, duration: .6, stagger: .07, ease: 'power3.out', clearProps: 'transform' }, '<+.1');
   }
 
   // ---------- loop ----------
@@ -588,8 +715,10 @@ if (renderer) {
     const t = clock.getElapsedTime();
     turntable.rotation.y = rot.y;
     if (!RM && !leaving) {
-      phones[armed].group.position.y += Math.sin(t * 1.3) * .0009;
-      ring.material.emissiveIntensity = .45 + Math.sin(t * 1.1) * .15;
+      // absolute bob, never accumulates — `+=` here drifts upward at high refresh rates
+      turntable.position.y = .22 + Math.sin(t * 1.1) * .018;
+      ring.material.emissiveIntensity = .7 + Math.sin(t * 1.2) * .2;
+      wallMat.uniforms.uTime.value = t;
     }
     const lx = look.x + par.x * .14, ly = look.y - par.y * .09;
     camera.lookAt(lx, ly, look.z);
