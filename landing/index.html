@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hecho · Prototypes</title>
+<meta name="description" content="Hecho Trading Co. wholesale showroom app — two prototype builds: the Flagship full prototype and the simplified MVP." />
+<style>
+  :root { --cream: #faf3e7; --ink: #2b1d16; --terra: #b4532a; --line: #e7d9c5; }
+  * { box-sizing: border-box; margin: 0; }
+  body { min-height: 100vh; display: grid; place-items: center; background: var(--cream); color: var(--ink);
+    font: 16px/1.5 Avenir, 'Avenir Next', Futura, 'Century Gothic', sans-serif; padding: 24px; }
+  main { width: min(640px, 100%); }
+  h1 { font-size: 40px; letter-spacing: .06em; color: var(--terra); }
+  p.sub { margin: 8px 0 28px; opacity: .75; }
+  a.card { display: block; border: 1px solid var(--line); border-radius: 16px; padding: 20px 24px; margin: 12px 0;
+    background: #fffdf8; color: inherit; text-decoration: none; transition: transform .15s ease, box-shadow .15s ease; }
+  a.card:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(43, 29, 22, .08); }
+  a.card b { font-size: 19px; color: var(--terra); }
+  a.card span { display: block; margin-top: 4px; opacity: .75; font-size: 14.5px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>HECHO</h1>
+  <p class="sub">Wholesale showroom app — two prototype builds.</p>
+  <a class="card" href="flagship/"><b>Flagship →</b><span>The full prototype: 83 screens, 14 flows, admin/staff/rep roles, rep mode, and the live control panel.</span></a>
+  <a class="card" href="mvp/"><b>MVP →</b><span>The simplified cut: 51 screens, 7 flows, guest shopping, and the love list.</span></a>
+</main>
+</body>
+</html>

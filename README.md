@@ -16,8 +16,8 @@ npx serve .
 
 Then visit **http://localhost:8080**.
 
-Live build: deployed to **GitHub Pages** on every push to `main` (see `.github/workflows/deploy.yml`):
-**https://sebzmunoz.github.io/hecho-trading-app/** (old `…/app/` links redirect here).
+Live build: deployed to **GitHub Pages** on every push (see `.github/workflows/deploy.yml`):
+**https://sebzmunoz.github.io/hecho-trading-app/flagship/** — the simplified MVP lives at **…/mvp/**.
 
 ## The control panel (side console)
 
