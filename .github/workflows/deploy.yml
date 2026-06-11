@@ -39,7 +39,7 @@ jobs:
           mkdir -p site
           rsync -a --exclude='.git' --exclude='.github' flagship/ site/flagship/
           rsync -a --exclude='.git' --exclude='.github' mvp/ site/mvp/
-          cp flagship/landing/index.html site/index.html
+          rsync -a flagship/landing/ site/
           cp -r flagship/app site/app
           touch site/.nojekyll
       - name: Configure Pages
