@@ -24,6 +24,7 @@ export const rep = {
     const approved = D.repRetailers.filter((r) => r.status !== 'pending');
     const body = `
       <button class="card" style="max-width:none" data-go="S601"><div class="row-between"><span><span class="muted" style="font-size:var(--fs-nano)">CO-SHOPPING</span><br/><b>${cur.name}</b></span>${icon('swap', 20)}</div></button>
+      ${C.listRow({ thumbIcon: 'map', pri: 'Coverage map', sec: 'Where every retailer sits — and who is too close', trail: '<span class="badge">1</span>', go: 'S607' })}
       ${C.sectionLabel("Today's appointments")}
       <div class="stack tight">${D.repAppointments.map((a) => C.listRow({ thumbIcon: 'clock', pri: a.retailer, sec: `${a.kind} · ${a.when}` , go: '', attrs: `data-action="pick-retailer-name" data-n="${a.retailer}"` })).join('')}</div>
       ${C.sectionLabel('Live carts')}
@@ -75,6 +76,30 @@ export const rep = {
       <div class="input-group"><label>Note</label><textarea class="textarea" placeholder="What happened on this visit?"></textarea></div>
       ${C.switchRow('Internal only', true, { sub: 'Off shares with the retailer in chat' })}
       <button class="btn full" data-go="S603">Save memo</button>` });
+  },
+
+  // S607 Retailer coverage map — exclusivity guardrail. Reps see where every
+  // store sits so a new application inside another store's radius is caught
+  // before it's approved, not after the competition starts.
+  S607() {
+    const pros = D.repProspect;
+    const near = retById[pros.distanceTo];
+    const pin = (r) => `<div class="rpin ${r.status === 'pending' ? 'is-pending' : ''}" style="left:${r.mx}%;top:${r.my}%">
+      <span class="rp-dot"></span><span class="rp-lbl">${C.esc(r.name)}</span></div>`;
+    return base('Coverage map', { back: true, body: `
+      <p class="muted">Every stocking retailer, pinned. Applications that land inside another store's exclusivity radius get flagged before approval.</p>
+      <div class="rmap" role="img" aria-label="Map of retailer locations across the Southwest">
+        <span class="rmap-tag">Southwest territory</span>
+        <div class="rmap-radius" style="left:${near.mx}%;top:${near.my}%" aria-hidden="true"></div>
+        ${D.repRetailers.map(pin).join('')}
+        <div class="rpin is-prospect" style="left:${pros.mx}%;top:${pros.my}%"><span class="rp-dot">!</span><span class="rp-lbl">${C.esc(pros.name)}</span></div>
+      </div>
+      ${C.banner(`<b>Exclusivity conflict.</b> ${pros.name} (applying) is ${pros.distance} from ${near.name} — inside its ${pros.radius} radius.`, { kind: 'caution', ic: 'warning' })}
+      ${C.sectionLabel('On the map')}
+      <div class="stack tight">
+        ${D.repRetailers.map((r) => C.listRow({ thumb: `<span class="avatar sm">${initials(r.name)}</span>`, pri: r.name, sec: `${r.city} · ${r.tier} tier`, trail: r.status === 'pending' ? C.statusPill('pending', 'Applying') : C.statusPill('current', 'Stocking'), go: '', attrs: `data-action="pick-retailer" data-r="${r.id}" data-then="S603"` })).join('')}
+        ${C.listRow({ thumbIcon: 'warning', pri: pros.name, sec: `${pros.city} · ${pros.distance} from ${near.name}`, trail: `<button class="btn sm" data-action="flag-conflict">Flag</button>` })}
+      </div>` });
   },
 
   // S606 Rep chat with retailer

@@ -70,8 +70,8 @@ export const onboarding = {
     return base('Choose account', { noTabbar: true, body: `
       <p class="muted">You belong to more than one account. Pick where to work.</p>
       <div class="stack tight">
-        ${C.listRow({ thumb: '<span class="avatar dark">SM</span>', pri: 'Marfa Studio', sec: 'Owner', go: 'S507' })}
-        ${C.listRow({ thumb: '<span class="avatar">OG</span>', pri: 'Ojai General', sec: 'Manager', go: 'S507' })}
+        ${C.listRow({ thumb: '<span class="avatar dark">SM</span>', pri: 'Marfa Studio', sec: 'Admin', go: 'S507' })}
+        ${C.listRow({ thumb: '<span class="avatar">OG</span>', pri: 'Ojai General', sec: 'Staff', go: 'S507' })}
         ${C.listRow({ thumb: '<span class="avatar">HR</span>', pri: 'Hecho field rep', sec: 'Rep · 4 retailers', go: '', attrs: 'data-action="pick-rep"' })}
       </div>` });
   },

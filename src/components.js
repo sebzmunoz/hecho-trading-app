@@ -247,7 +247,7 @@ export function resumeCard(c) {
   </button>`;
 }
 
-// Drop tile — "New on the floor" rail. Visual-first: product art on top,
+// Drop tile — "New launches" rail. Visual-first: product art on top,
 // brand + status underneath.
 export function dropCard(b) {
   const locked = !D.canSee(b, state.get('tier'));

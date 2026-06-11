@@ -91,7 +91,7 @@ function goStep() {
 }
 function navStep(screen) {
   // role auto-switch for rep screens
-  if (/^S60[0-6]/.test(screen) && state.get('role') !== 'rep') state.set({ role: 'rep' });
+  if (/^S60[0-7]/.test(screen) && state.get('role') !== 'rep') state.set({ role: 'rep' });
   const [base, q] = screen.split('?_=');
   if (q !== undefined) { nav.go(base); state.setEphemeral('_state', q); nav.refresh(); }
   else { state.setEphemeral('_state', null); nav.go(screen); }
@@ -128,7 +128,7 @@ function renderVars() {
   const curState = s._state || 'default';
   return `
     <div class="var-group"><span class="gl">Persona & role</span>
-      ${row('Role', '§02b capabilities', seg('role', [{ v: 'owner', l: 'Owner' }, { v: 'manager', l: 'Manager' }, { v: 'member', l: 'Member' }, { v: 'rep', l: 'Rep' }], s.role))}
+      ${row('Role', '§02b capabilities', seg('role', [{ v: 'admin', l: 'Admin' }, { v: 'staff', l: 'Staff' }, { v: 'rep', l: 'Rep' }], s.role))}
     </div>
     <div class="var-group"><span class="gl">Privacy on the floor</span>
       ${row('Privacy', 'masked by default', seg('privacyOn', [{ v: true, l: 'On' }, { v: false, l: 'Off' }], s.privacyOn))}

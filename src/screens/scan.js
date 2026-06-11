@@ -39,7 +39,7 @@ export const scan = {
     const st = D.stockState(p, state.get('pos'));
     const stockVal = st.kind === 'out' ? 'Out' : (st.kind === 'unknown' ? String(st.value) : String(st.value));
     const card = `<div class="scan-result" style="position:absolute;left:var(--s-3);right:var(--s-3);bottom:var(--s-3);z-index:6;width:auto;max-width:none">
-      <div class="top"><div class="info"><span class="brand">${b.name}</span><span class="nm">${p.name}</span><span class="muted" style="font-size:var(--fs-nano)">${p.variant}</span></div>${p.map ? `<span class="pill">${icon('info', 12)} MAP</span>` : ''}</div>
+      <div class="top"><div class="info"><span class="brand">${b.name}</span><span class="nm">${p.name}</span><span class="muted" style="font-size:var(--fs-nano)">${p.variant}</span></div></div>
       <div class="grid-info">
         <div class="col"><span class="l">Your price</span><span class="v">${C.pricePair(p, { compact: true })}</span></div>
         <div class="col"><span class="l">Your stock</span><span class="v">${C.maskField(stockVal, 'stock')}</span></div>

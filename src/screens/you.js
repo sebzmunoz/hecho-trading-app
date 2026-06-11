@@ -4,7 +4,7 @@ import { state } from '../state.js';
 import { icon } from '../icons.js';
 import { base } from './shop.js';
 
-const roleLabel = { owner: 'Owner', manager: 'Manager', member: 'Member', rep: 'Hecho Rep' };
+const roleLabel = { admin: 'Admin', staff: 'Staff', rep: 'Hecho Rep' };
 
 export const you = {
   // S401 You overview
@@ -67,7 +67,7 @@ export const you = {
     return base('Company users', { back: true, headerRight: C.hActions([{ icon: 'plus', go: 'S406', label: 'Invite' }]), body: `
       <div class="stack tight">${D.companyUsers.map((u) => C.listRow({ thumb: `<span class="avatar">${u.initials}</span>`, pri: u.name + (u.self ? ' (you)' : ''), sec: u.activity, trail: `<span class="pill">${u.role}</span>`, go: u.self ? '' : 'S407?user=' + encodeURIComponent(u.name) })).join('')}</div>
       <button class="btn full" data-go="S406">Invite new user</button>
-      <p class="muted">The only Owner can't be removed, and you can't demote yourself while sole Owner.</p>` });
+      <p class="muted">The only Admin can't be removed, and you can't demote yourself while sole Admin.</p>` });
   },
 
   // S406 Invite user
@@ -75,8 +75,8 @@ export const you = {
     return base('Invite user', { back: true, body: `
       <div class="input-group"><label>Email</label><input class="input" placeholder="name@store.com" inputmode="email" /></div>
       ${C.sectionLabel('Role')}
-      <div class="chip-row"><button class="chip is-selected">Manager</button><button class="chip">Member</button></div>
-      <p class="muted">Managers build and share drafts but can't submit. The Owner role can't be granted by invite.</p>
+      <div class="chip-row"><button class="chip is-selected">Staff</button></div>
+      <p class="muted">Staff build and share drafts but can't submit. The Admin role can't be granted by invite.</p>
       <button class="btn full" data-action="send-invite">Send invite</button>
       <button class="btn ghost full" data-action="copy">Copy invite link</button>` });
   },
@@ -91,7 +91,7 @@ export const you = {
       ['User management', [['Invite, change role, remove', false]]],
     ];
     return base('Roles & permissions', { back: true, body: `
-      <div class="card" style="max-width:none"><div class="row-between"><b>${params.user || 'Priya Nair'}</b><span class="pill">Manager</span></div></div>
+      <div class="card" style="max-width:none"><div class="row-between"><b>${params.user || 'Priya Nair'}</b><span class="pill">Staff</span></div></div>
       ${groups.map(([g, rows]) => `${C.sectionLabel(g)}<div class="stack tight">${rows.map(([l, on]) => C.switchRow(l, on)).join('')}</div>`).join('')}
       ${C.sectionLabel('Rep access')}
       ${C.switchRow('Let ' + D.account.rep + ' submit on your behalf', false, { sub: 'Off by default · per-account grant' })}

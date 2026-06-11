@@ -23,7 +23,7 @@ export const carts = {
     const mine = D.carts.filter((c) => c.section === 'mine');
     const shared = D.carts.filter((c) => c.section === 'shared');
     const pending = D.carts.filter((c) => c.section === 'pending');
-    const isOwner = state.get('role') === 'owner';
+    const isOwner = state.get('role') === 'admin';
     const body = `
       ${state.get('network') !== 'online' ? '' : ''}
       ${C.sectionLabel('Mine')}
@@ -56,14 +56,14 @@ export const carts = {
           <div class="row-between"><b>${b.name}</b><span class="moq ${met ? '' : 'unmet'}" data-moq="${bid}" data-min="${b.moq}">${met ? icon('check', 12) + 'MOQ met' : icon('warning', 12) + '$' + b.moq + ' · $' + (b.moq - sub) + ' to go'}</span></div>
           ${lines.map(([p, q]) => `<div class="line-row" data-line data-price="${p.wholesale}" data-brand="${bid}">
             <span class="thumb thumb-illo" style="width:40px;height:40px;flex:0 0 auto">${C.illo(p.illo, 22)}</span>
-            <span class="body" style="flex:1;min-width:0"><span class="pri">${p.name}</span><span class="sec">${p.variant}${p.map ? ' · MAP' : ''}</span></span>
+            <span class="body" style="flex:1;min-width:0"><span class="pri">${p.name}</span><span class="sec">${p.variant}</span></span>
             <span class="line-trail">${C.stepper(q, { id: p.id })}<span data-linetotal class="muted" style="font-size:var(--fs-caption)">${C.maskField(C.money(p.wholesale * q), 'spend')}</span></span></div>`).join('')}
         </div>`;
       }).join('')}
       <div class="card" style="max-width:none"><div class="row-between"><b>Cart total</b>${C.maskField(`<span class="price compact"><span class="v" data-carttotal>${D.usd(total)}</span><span class="currency">USD</span></span>`, 'spend')}</div></div>
       <div class="sticky-actions">
         <button class="btn ghost" data-action="share-cart" data-cart="${c.id}">${icon('share', 16)} Share</button>
-        ${role === 'owner'
+        ${role === 'admin'
           ? `<button class="btn" data-action="submit-cart" data-cart="${c.id}">Submit</button>`
           : (role === 'rep'
             ? `<button class="btn" data-action="add-line">Add a line</button>`
@@ -77,7 +77,7 @@ export const carts = {
     return base('New cart', { back: true, body: newCartBody() });
   },
 
-  // S204 Cart submit
+  // S204 Cart submit — per-brand shipping control + free-shipping note live here.
   S204(params) {
     const c = D.cartById[params.cart] || D.carts[0];
     const tax = state.get('taxId');
@@ -87,11 +87,35 @@ export const carts = {
     const taxRow = tax === 'expired'
       ? C.banner('<b>Tax ID expired.</b> Resolve to submit.', { kind: 'caution', ic: 'warning', action: { label: 'Resolve', go: 'S409' } })
       : (tax === 'renews' ? C.banner('Tax ID renews soon — this won\'t block your order.', { ic: 'clock' }) : '');
+
+    // Shipping: brands ready at different times. 'split' ships each brand as
+    // it's ready (multiple deliveries); 'together' holds for the slowest one.
+    const ship = params.ship === 'together' ? 'together' : 'split';
+    const cartBrands = [...new Set(c.lines.map(([pid]) => D.productById[pid]?.brand))].filter(Boolean).map((bid) => D.brandById[bid]);
+    const weeks = (d) => `~${Math.max(1, Math.round(d / 7))} wk`;
+    const slowest = cartBrands.reduce((a, b) => (b.lead > a.lead ? b : a), cartBrands[0]);
+    const shipChip = (v, l) => `<button class="chip ${ship === v ? 'is-selected' : ''}" data-go="S204?cart=${c.id}&ship=${v}">${l}</button>`;
+    const shipCard = `
+      <div class="card" style="max-width:none;gap:var(--s-2)">
+        <div class="row-between"><b>Shipping</b><span class="muted" style="font-size:var(--fs-nano)">${cartBrands.length} brands · ${cartBrands.length > 1 ? (ship === 'split' ? cartBrands.length + ' deliveries' : 'one delivery') : 'one delivery'}</span></div>
+        <div class="chip-row">${shipChip('split', 'As each brand is ready')}${shipChip('together', 'Everything together')}</div>
+        ${ship === 'split'
+          ? cartBrands.map((b) => `<div class="row-between"><span class="muted">${C.esc(b.name)}</span><span>${icon('truck', 14)} ${weeks(b.lead)}</span></div>`).join('')
+          : `<div class="row-between"><span class="muted">One delivery, when everything is ready</span><span>${icon('truck', 14)} ${weeks(slowest.lead)}</span></div>
+             <p class="muted" style="font-size:var(--fs-nano)">Waits for ${C.esc(slowest.name)} — the slowest brand in this order.</p>`}
+      </div>`;
+
+    // Free-shipping note: applied over $500, otherwise show the path to it.
+    const freeShip = total >= 500
+      ? C.banner(`<b>Free shipping applied.</b> This order clears the $500 minimum.`, { ic: 'truck' })
+      : C.banner(`<b>Free shipping</b> kicks in on orders over $500 — ${C.money(500 - total)} to go. It's also free on every order after your second.`, { ic: 'truck' });
+
     const body = `
       <div class="card" style="max-width:none">
         <div class="row-between"><span class="muted">Ship to</span><button class="chip" data-go="S403">Edit</button></div>
         <b>${D.addresses[0].name}</b><span class="muted">${D.addresses[0].line1}, ${D.addresses[0].city} ${D.addresses[0].region}</span>
       </div>
+      ${shipCard}
       <div class="card" style="max-width:none">
         <div class="row-between"><span class="muted">Terms</span><span class="pill">${D.account.terms}</span></div>
         <div class="row-between"><span class="muted">Payment</span><span>Net-30 · override at pay</span></div>
@@ -99,6 +123,7 @@ export const carts = {
       </div>
       <div class="card" style="max-width:none"><div class="row-between"><span class="muted">Tax-ID status</span>${C.statusPill(tax === 'current' ? 'current' : tax)}</div></div>
       ${taxRow}
+      ${freeShip}
       <div class="card" style="max-width:none"><div class="row-between"><b>Order total</b><span class="price"><span class="v">${D.usd(total)}</span><span class="currency">USD</span></span></div></div>
       ${offline ? C.banner('You\'re offline — Submit needs a connection.', { kind: 'caution', ic: 'wifi_off' }) : ''}
       <div class="sticky-actions"><button class="btn ghost" data-back>Edit lines</button>
@@ -189,12 +214,12 @@ function shareRecipient(initials, name, role, canGrant, dark) {
     <span class="body" style="display:flex;flex-direction:column"><span class="pri">${C.esc(name)}</span><span class="sec">${C.esc(role)}</span></span>
     <select class="select share-perm" aria-label="Permission for ${C.esc(name)}">
       <option value="edit">Can edit</option>
-      <option value="approve" ${canGrant ? '' : 'disabled'}>Approve to submit${canGrant ? '' : ' (owners)'}</option>
+      <option value="approve" ${canGrant ? '' : 'disabled'}>Approve to submit${canGrant ? '' : ' (admins)'}</option>
     </select>
   </div>`;
 }
 export function shareBody() {
-  const canGrant = state.get('role') === 'owner';
+  const canGrant = state.get('role') === 'admin';
   return `
     ${C.sectionLabel('Send to — pick one or more')}
     <div class="stack tight">

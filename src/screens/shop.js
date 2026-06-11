@@ -16,7 +16,7 @@ export const shop = {
     const posOn = state.get('pos') === 'connected';
     const role = state.get('role');
     const hero = D.styleGuides[0];
-    // New on the floor: launching first, then gated tiers, then the freshest
+    // New launches: launching first, then gated tiers, then the freshest
     // general-release brands — six drop tiles, not two.
     const vb = visibleBrands();
     const drops = [...vb.filter((b) => b.launching), ...vb.filter((b) => !b.launching && b.tier !== 'standard'), ...vb.filter((b) => !b.launching && b.tier === 'standard').slice(-4)].slice(0, 6);
@@ -50,25 +50,26 @@ export const shop = {
 
     // 2 · Waiting on you (role-aware)
     const waiting = [];
-    if (role === 'owner' && pendingApprovals.length) {
+    if (role === 'admin' && pendingApprovals.length) {
       waiting.push(C.listRow({ thumbIcon: 'check', pri: `${pendingApprovals.length} draft${pendingApprovals.length > 1 ? 's' : ''} awaiting your approval`, sec: pendingApprovals.map((c) => c.name).join(' · '), trail: `<span class="badge">${pendingApprovals.length}</span>`, go: 'S208' }));
     }
     const pastDue = D.orders.find((o) => o.pastDue);
-    if (role === 'owner' && pastDue) {
+    if (role === 'admin' && pastDue) {
       waiting.push(C.listRow({ thumbIcon: 'card', pri: 'An invoice is past due', sec: `#${pastDue.id} · ${pastDue.due}`, trail: C.statusPill('pastdue'), go: `S304?order=${pastDue.id}` }));
     }
     const waitingBlock = waiting.length ? `<div class="stack tight">${C.sectionLabel('Waiting on you')}${waiting.join('')}</div>` : '';
 
+    // Discovery order: New launches lead, then resume, then the featured guide.
     const body = `
       <div class="search" data-go="S005"><span>${icon('search', 20)}</span><span class="muted" style="flex:1">Search name, SKU, or barcode</span></div>
       ${lowRail}
       ${waitingBlock}
+      ${rail('New launches', drops.map((b) => C.dropCard(b)).join(''))}
+      ${openDrafts.length ? rail('Pick up where you left off', openDrafts.map((c) => C.resumeCard(c)).join('')) : ''}
       <div class="stack tight">
         <div class="row-between">${C.sectionLabel('Featured guide')}<span class="scene-hint"><i></i> Shoppable</span></div>
         ${C.styleTile(hero, { wide: true })}
       </div>
-      ${openDrafts.length ? rail('Pick up where you left off', openDrafts.map((c) => C.resumeCard(c)).join('')) : ''}
-      ${rail('New on the floor', drops.map((b) => C.dropCard(b)).join(''))}
       ${rail('For your shop', D.products.slice(0, 6).map((p) => C.productCard(p)).join(''))}
       ${C.sectionLabel('Brands')}
       <div class="brand-grid">${D.brands.map((b) => C.brandTile(b)).join('')}</div>
@@ -106,6 +107,11 @@ export const shop = {
       <h3>${b.name}</h3>
       ${b.launching ? C.banner(`<b>First-look open now.</b> New collection pinned below.`, { kind: '', ic: 'sparkle', action: { label: 'The drop', go: `S009?brand=${b.id}` } }) : ''}
       <p class="muted">${b.story}</p>
+      ${b.founder && state.get('role') !== 'rep' ? `${C.sectionLabel('From the founder')}
+      <div class="card" style="max-width:none;flex-direction:row;gap:var(--s-3);align-items:flex-start">
+        <span class="avatar dark" style="flex:0 0 auto">${C.esc(b.founder.split(' ').map((w) => w[0]).slice(0, 2).join(''))}</span>
+        <span style="min-width:0"><b>${C.esc(b.founder)}</b><p class="muted" style="margin-top:2px;font-size:var(--fs-caption)">${C.esc(b.founderStory)}</p></span>
+      </div>` : ''}
       <div class="row-between"><span class="moq">${icon('cart', 12)}MOQ $${b.moq}</span>
         <button class="chip ${saved ? 'is-selected' : ''}" data-action="save-brand" data-brand="${b.id}" aria-pressed="${saved}">${icon('star', 13)} ${saved ? 'Saved' : 'Save brand'}</button></div>
       ${C.sectionLabel('Catalog')}
@@ -137,8 +143,7 @@ export const shop = {
       ${C.sectionLabel('Variant')}
       <div class="chip-row" data-chipgroup>${variantChips}</div>
       <div class="card" style="max-width:none">
-        <div class="row-between"><span class="muted">Your price</span>${p.map ? `<span class="pill">${icon('info', 12)} MAP $${p.msrp}</span>` : ''}</div>
-        <div class="row-between"><span></span>${C.pricePair(p)}</div>
+        <div class="row-between"><span class="muted">Your price</span>${C.pricePair(p)}</div>
         ${C.stockRow(p)}
         <div class="hairline"></div>
         <div class="row-between"><span class="muted">Margin at MSRP</span>${C.maskField(`${Math.round((1 - p.wholesale / p.msrp) * 100)}%`, 'spend')}</div>

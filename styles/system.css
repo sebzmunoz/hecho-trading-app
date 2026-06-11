@@ -1022,3 +1022,17 @@ footer .marquee span{display:inline-flex;align-items:flex-start;gap:.05em;animat
   *{animation-duration:0.001ms !important;animation-iteration-count:1 !important;transition-duration:0.001ms !important;scroll-behavior:auto !important}
   .viewfinder .scan-line,.dur-row .bar-wrap i,footer .marquee span,.sync-tag .spin-dot,.btn.is-loading::after,.skeleton .s-bar,.scroll-cue::after{animation:none !important}
 }
+
+/* ============================================================
+   Retailer coverage map (S607, Rep mode) — abstract territory
+   canvas with pins; a dashed ring marks an exclusivity radius.
+   ============================================================ */
+.rmap{position:relative;aspect-ratio:4/3;border-radius:var(--r-4);border:var(--bw-1) solid var(--line);overflow:hidden;background:linear-gradient(150deg,var(--surface-2),var(--surface-dim));background-image:radial-gradient(color-mix(in srgb,var(--fg-mute) 28%,transparent) 1px,transparent 1px);background-size:18px 18px}
+.rmap-tag{position:absolute;top:var(--s-2);inset-inline-start:var(--s-3);font-size:var(--fs-nano);font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--fg-mute)}
+.rmap-radius{position:absolute;width:38%;aspect-ratio:1;transform:translate(-50%,-50%);border:2px dashed color-mix(in srgb,var(--accent) 55%,transparent);border-radius:50%;background:color-mix(in srgb,var(--accent) 7%,transparent)}
+.rpin{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:2px}
+.rpin .rp-dot{width:14px;height:14px;border-radius:50%;background:var(--accent);border:2.5px solid var(--surface);box-shadow:0 1px 4px rgba(0,0,0,.25);display:grid;place-items:center;font-size:9px;font-weight:800;color:var(--on-action);line-height:1}
+.rpin .rp-lbl{font-size:var(--fs-nano);font-weight:700;color:var(--fg);background:color-mix(in srgb,var(--surface) 85%,transparent);padding:1px 6px;border-radius:var(--r-pill);white-space:nowrap}
+.rpin.is-pending .rp-dot{background:var(--surface);border-color:var(--accent-text)}
+.rpin.is-prospect .rp-dot{background:var(--caution-fill,#B7791F);width:16px;height:16px}
+.rpin.is-prospect .rp-lbl{color:var(--accent-text)}

@@ -99,6 +99,7 @@ const META = {
   S604: { name: 'Rep cart co-shop', group: 'Rep mode', tab: 'retailers', states: S('default', 'conflict') },
   S605: { name: 'Rep visit memo', group: 'Rep mode', tab: 'retailers', states: S('default') },
   S606: { name: 'Rep chat with retailer', group: 'Rep mode', tab: 'retailers', states: S('default') },
+  S607: { name: 'Retailer coverage map', group: 'Rep mode', tab: 'retailers', states: S('default') },
   // ---- System & cross-cutting ----
   S701: { name: 'Notifications center', group: 'System', tab: null, states: S('default', 'empty', 'offline') },
   S702: { name: 'Notification settings', group: 'System', tab: null, states: S('default') },

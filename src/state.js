@@ -8,7 +8,7 @@ const KEY = 'hecho-proto-state-v1';
 const ALL_MASK_FIELDS = ['wholesale', 'stock', 'spend', 'credit', 'recommended'];
 
 const DEFAULTS = {
-  role: 'owner',        // owner | manager | member | rep   (§02b)
+  role: 'admin',        // admin | staff | rep   (§02b)
   privacyOn: true,      // Privacy on the floor — ON by default (§07-D)
   gesture: 'hold',      // hold | tap | off  (double-tap removed)
   maskFields: ALL_MASK_FIELDS.slice(), // which sensitive fields are masked (checklist)
@@ -27,10 +27,9 @@ export { ALL_MASK_FIELDS };
 
 // Capabilities per role (§02b roles & capabilities matrix)
 const CAPS = {
-  owner:   { submit: true,  approve: true,  grantApprove: true, compliance: true, pay: true, users: true },
-  manager: { submit: false, approve: false, grantApprove: false, compliance: 'view', pay: false, users: false },
-  member:  { submit: false, approve: false, grantApprove: false, compliance: 'view', pay: false, users: false },
-  rep:     { submit: 'grant', approve: false, grantApprove: false, compliance: 'view', pay: false, users: false },
+  admin: { submit: true,  approve: true,  grantApprove: true, compliance: true, pay: true, users: true },
+  staff: { submit: false, approve: false, grantApprove: false, compliance: 'view', pay: false, users: false },
+  rep:   { submit: 'grant', approve: false, grantApprove: false, compliance: 'view', pay: false, users: false },
 };
 
 function load() {
@@ -38,6 +37,9 @@ function load() {
     const saved = JSON.parse(localStorage.getItem(KEY) || '{}');
     // migration: the double-tap reveal mode was removed from settings
     if (saved.gesture === 'double') saved.gesture = 'hold';
+    // migration: owner→admin, manager/member→staff
+    if (saved.role === 'owner') saved.role = 'admin';
+    if (saved.role === 'manager' || saved.role === 'member') saved.role = 'staff';
     return { ...DEFAULTS, ...saved, stateOverride: null };
   } catch { return { ...DEFAULTS }; }
 }
@@ -55,7 +57,7 @@ function persist() {
 
 export const state = {
   get: (k) => (k ? data[k] : { ...data }),
-  caps: () => CAPS[data.role] || CAPS.owner,
+  caps: () => CAPS[data.role] || CAPS.admin,
 
   set(patch, opts = {}) {
     let changed = false;

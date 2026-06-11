@@ -20,58 +20,77 @@ export const account = {
 
 // ---- The 9 brands Marfa Studio manages through Hecho ----
 // tier = lowest exclusivity level that can see it (§TM). steward = the brand-side
-// user who keeps stock current ("brands set it themselves").
+// user who keeps stock current ("brands set it themselves"). founder/founderStory
+// carry the storytelling block on the brand page (hidden in Rep mode).
 export const brands = [
   { id: 'etta', name: 'Etta & East', tier: 'standard', cats: ['Home', 'Textiles'], lead: 21, moq: 500, steward: 'Nadia R.',
-    story: 'Washed linens and slow home textiles, woven in small runs. Earthen palette, nothing loud.' },
+    story: 'Washed linens and slow home textiles, woven in small runs. Earthen palette, nothing loud.',
+    founder: 'June Etta Calloway',
+    founderStory: 'June wove her first table runners on her grandmother\'s loom in Abilene. Forty years on, she still won\'t ship a weave she hasn\'t slept under at least one season.' },
   { id: 'lavender', name: 'Lavender Thorne', tier: 'standard', cats: ['Beauty', 'Body'], lead: 14, moq: 250, steward: 'June P.',
-    story: 'Tallow-based skincare, unscented or wild-harvested. Made in cast-iron batches, labeled by hand.' },
+    story: 'Tallow-based skincare, unscented or wild-harvested. Made in cast-iron batches, labeled by hand.',
+    founder: 'Maribel Thorne',
+    founderStory: 'A nurse for twelve years, Maribel started rendering tallow on her kitchen stove when nothing on the shelf helped her daughter\'s skin. The cast-iron pots never left.' },
   { id: 'arroyo', name: 'El Arroyo', tier: 'standard', cats: ['Gifts', 'Stationery'], lead: 12, moq: 200, steward: 'Marco T.',
-    story: 'The Austin sign you have seen. Witty cards, napkins, and gifts with a one-liner on every one.' },
+    story: 'The Austin sign you have seen. Witty cards, napkins, and gifts with a one-liner on every one.',
+    founder: 'The Vasquez family',
+    founderStory: 'The sign started outside the family\'s Austin taqueria in 1975 — one line, changed daily. The one-liners outgrew the menu and became the brand.' },
   { id: 'frida', name: 'Frida Vida', tier: 'standard', cats: ['Home', 'Gifts'], lead: 18, moq: 300, steward: 'Lupita G.',
-    story: 'Color-first home and gifts with a Mexican folk-art lean. Talavera glaze, marigold everything.' },
+    story: 'Color-first home and gifts with a Mexican folk-art lean. Talavera glaze, marigold everything.',
+    founder: 'Lupita Reyes',
+    founderStory: 'Lupita grew up between Puebla and El Paso, glazing talavera in her tío\'s workshop after school. Every collection starts with a color she remembers from home.' },
   { id: 'beljoy', name: 'Beljoy', tier: 'standard', cats: ['Jewelry', 'Accessories'], lead: 20, moq: 350, steward: 'Camille D.',
-    story: 'Hand-beaded jewelry made by artisan co-ops. Each stack is strung one bead at a time.' },
+    story: 'Hand-beaded jewelry made by artisan co-ops. Each stack is strung one bead at a time.',
+    founder: 'Camille Bertrand',
+    founderStory: 'Camille met her first beading co-op outside Port-au-Prince in 2014 and never really left. Today sixty artisans string every stack by hand, and she knows their names.' },
   { id: 'pompom', name: 'Pom Pom London', tier: 'mid', cats: ['Jewelry'], lead: 28, moq: 700, launching: true, steward: 'Saskia W.',
-    story: 'Birthstones and charms in recycled gold vermeil. Pom Pom opens to mid-tier and above this season.' },
+    story: 'Birthstones and charms in recycled gold vermeil. Pom Pom opens to mid-tier and above this season.',
+    founder: 'Saskia Pommeroy',
+    founderStory: 'A Hatton Garden apprentice turned designer, Saskia recasts vintage charm molds in recycled vermeil from a two-room studio in East London.' },
   { id: 'ellie', name: 'Ellie Rose', tier: 'standard', cats: ['Bags', 'Accessories'], lead: 16, moq: 400, steward: 'Bea M.',
-    story: 'Everyday canvas and quilted bags, cut and sewn in small batches. Built to be over-used.' },
+    story: 'Everyday canvas and quilted bags, cut and sewn in small batches. Built to be over-used.',
+    founder: 'Ellie Rose Tanaka',
+    founderStory: 'Ellie sewed her first market tote from her dad\'s retired sailcloth. The bags are still cut the same way — to be over-used, never babied.' },
   { id: 'popkle', name: 'Popkle', tier: 'standard', cats: ['Gifts', 'Novelty'], lead: 18, moq: 300, steward: 'Kit N.',
-    story: 'Loud little objects that make a counter fun. Boba keychains, jelly pens, the occasional plush.' },
+    story: 'Loud little objects that make a counter fun. Boba keychains, jelly pens, the occasional plush.',
+    founder: 'Kit Nakamura',
+    founderStory: 'Kit spent six years designing claw-machine prizes in Osaka. Popkle is the counter-top joy they always wanted to make — small, loud, impossible not to pick up.' },
   { id: 'savant', name: 'The New Savant', tier: 'top', cats: ['Home', 'Candles'], lead: 30, moq: 900, steward: 'Ana M.',
-    story: 'Chicago candles and incense, poured in reserve runs. We show The New Savant to top-tier buyers first.' },
+    story: 'Chicago candles and incense, poured in reserve runs. We show The New Savant to top-tier buyers first.',
+    founder: 'Ana Maldonado',
+    founderStory: 'Ana poured her first reserve run in a Chicago walk-up, naming each scent after a block she\'s lived on. She still approves every batch nose-first.' },
 ];
 export const brandById = Object.fromEntries(brands.map((b) => [b.id, b]));
 
 // ---- Products ----  restock set only where on_hand hits 0.
 export const products = [
   // Etta & East
-  { id: 'p-linen', brand: 'etta', name: 'Washed Linen Napkins', variant: 'Set of 4 · Flax', wholesale: 16, msrp: 38, map: true, pack: 6, velocity: 0.7, onHand: 9, lastOrderQty: 12, lastOrder: 'one month ago', cat: 'Textiles', illo: 'scarf', season: 'in' },
-  { id: 'p-throw', brand: 'etta', name: 'Wool Throw', variant: 'Oat', wholesale: 34, msrp: 78, map: true, pack: 4, velocity: 0.5, onHand: 3, lastOrderQty: 8, lastOrder: 'two weeks ago', cat: 'Textiles', illo: 'throw', season: 'in' },
+  { id: 'p-linen', brand: 'etta', name: 'Washed Linen Napkins', variant: 'Set of 4 · Flax', wholesale: 16, msrp: 38, pack: 6, velocity: 0.7, onHand: 9, lastOrderQty: 12, lastOrder: 'one month ago', cat: 'Textiles', illo: 'scarf', season: 'in' },
+  { id: 'p-throw', brand: 'etta', name: 'Wool Throw', variant: 'Oat', wholesale: 34, msrp: 78, pack: 4, velocity: 0.5, onHand: 3, lastOrderQty: 8, lastOrder: 'two weeks ago', cat: 'Textiles', illo: 'throw', season: 'in' },
   // Lavender Thorne
-  { id: 'p-tallow', brand: 'lavender', name: 'Tallow Moisturizer', variant: '2 oz', wholesale: 18, msrp: 38, map: true, pack: 12, velocity: 1.4, onHand: 4, lastOrderQty: 24, lastOrder: 'two weeks ago', cat: 'Body', illo: 'jar', season: null },
-  { id: 'p-balm', brand: 'lavender', name: 'Wild Lip Balm', variant: 'Mint', wholesale: 4, msrp: 9, map: false, pack: 24, velocity: 2.1, onHand: 0, restock: 'back in about two weeks', lastOrderQty: 48, lastOrder: 'three weeks ago', cat: 'Body', illo: 'tube', season: null },
+  { id: 'p-tallow', brand: 'lavender', name: 'Tallow Moisturizer', variant: '2 oz', wholesale: 18, msrp: 38, pack: 12, velocity: 1.4, onHand: 4, lastOrderQty: 24, lastOrder: 'two weeks ago', cat: 'Body', illo: 'jar', season: null },
+  { id: 'p-balm', brand: 'lavender', name: 'Wild Lip Balm', variant: 'Mint', wholesale: 4, msrp: 9, pack: 24, velocity: 2.1, onHand: 0, restock: 'back in about two weeks', lastOrderQty: 48, lastOrder: 'three weeks ago', cat: 'Body', illo: 'tube', season: null },
   // El Arroyo
-  { id: 'p-cards', brand: 'arroyo', name: 'A-Frame Card Pack', variant: 'Assorted 10', wholesale: 9, msrp: 20, map: false, pack: 10, velocity: 1.0, onHand: 14, lastOrderQty: 20, lastOrder: 'one month ago', cat: 'Stationery', illo: 'pen', season: null },
-  { id: 'p-napkins', brand: 'arroyo', name: 'Cocktail Napkins', variant: 'Box of 20', wholesale: 6, msrp: 14, map: false, pack: 12, velocity: 1.3, onHand: 5, lastOrderQty: 24, lastOrder: 'two weeks ago', cat: 'Gifts', illo: 'bar', season: 'in' },
+  { id: 'p-cards', brand: 'arroyo', name: 'A-Frame Card Pack', variant: 'Assorted 10', wholesale: 9, msrp: 20, pack: 10, velocity: 1.0, onHand: 14, lastOrderQty: 20, lastOrder: 'one month ago', cat: 'Stationery', illo: 'pen', season: null },
+  { id: 'p-napkins', brand: 'arroyo', name: 'Cocktail Napkins', variant: 'Box of 20', wholesale: 6, msrp: 14, pack: 12, velocity: 1.3, onHand: 5, lastOrderQty: 24, lastOrder: 'two weeks ago', cat: 'Gifts', illo: 'bar', season: 'in' },
   // Frida Vida
-  { id: 'p-tumbler', brand: 'frida', name: 'Talavera Tumbler', variant: 'Cobalt', wholesale: 11, msrp: 26, map: false, pack: 8, velocity: 0.9, onHand: 3, lastOrderQty: 16, lastOrder: 'three weeks ago', cat: 'Home', illo: 'mug', season: null },
-  { id: 'p-towel', brand: 'frida', name: 'Marigold Tea Towel', variant: 'Set of 2', wholesale: 7, msrp: 16, map: false, pack: 10, velocity: 0.6, onHand: 12, lastOrderQty: 10, lastOrder: 'two months ago', cat: 'Home', illo: 'scarf', season: 'off' },
+  { id: 'p-tumbler', brand: 'frida', name: 'Talavera Tumbler', variant: 'Cobalt', wholesale: 11, msrp: 26, pack: 8, velocity: 0.9, onHand: 3, lastOrderQty: 16, lastOrder: 'three weeks ago', cat: 'Home', illo: 'mug', season: null },
+  { id: 'p-towel', brand: 'frida', name: 'Marigold Tea Towel', variant: 'Set of 2', wholesale: 7, msrp: 16, pack: 10, velocity: 0.6, onHand: 12, lastOrderQty: 10, lastOrder: 'two months ago', cat: 'Home', illo: 'scarf', season: 'off' },
   // Beljoy
-  { id: 'p-bracelet', brand: 'beljoy', name: 'Beaded Bracelet Stack', variant: 'Sunset', wholesale: 12, msrp: 28, map: true, pack: 6, velocity: 0.8, onHand: 7, lastOrderQty: 12, lastOrder: 'one month ago', cat: 'Jewelry', illo: 'charm', season: null },
-  { id: 'p-hoops', brand: 'beljoy', name: 'Confetti Hoops', variant: 'Multi', wholesale: 9, msrp: 22, map: false, pack: 8, velocity: 1.1, onHand: 0, restock: 'back in about a week', lastOrderQty: 16, lastOrder: 'two weeks ago', cat: 'Jewelry', illo: 'charm', season: 'in' },
+  { id: 'p-bracelet', brand: 'beljoy', name: 'Beaded Bracelet Stack', variant: 'Sunset', wholesale: 12, msrp: 28, pack: 6, velocity: 0.8, onHand: 7, lastOrderQty: 12, lastOrder: 'one month ago', cat: 'Jewelry', illo: 'charm', season: null },
+  { id: 'p-hoops', brand: 'beljoy', name: 'Confetti Hoops', variant: 'Multi', wholesale: 9, msrp: 22, pack: 8, velocity: 1.1, onHand: 0, restock: 'back in about a week', lastOrderQty: 16, lastOrder: 'two weeks ago', cat: 'Jewelry', illo: 'charm', season: 'in' },
   // Pom Pom London (mid, launching)
-  { id: 'p-necklace', brand: 'pompom', name: 'Birthstone Necklace', variant: 'Gold · June', wholesale: 24, msrp: 58, map: true, pack: 6, velocity: 0.5, onHand: 5, lastOrderQty: 6, lastOrder: 'two months ago', cat: 'Jewelry', illo: 'charm', season: 'in' },
-  { id: 'p-charmb', brand: 'pompom', name: 'Charm Bracelet', variant: 'Gold', wholesale: 22, msrp: 52, map: true, pack: 6, velocity: 0.4, onHand: 8, lastOrderQty: 6, lastOrder: 'one month ago', cat: 'Jewelry', illo: 'charm', season: 'in' },
+  { id: 'p-necklace', brand: 'pompom', name: 'Birthstone Necklace', variant: 'Gold · June', wholesale: 24, msrp: 58, pack: 6, velocity: 0.5, onHand: 5, lastOrderQty: 6, lastOrder: 'two months ago', cat: 'Jewelry', illo: 'charm', season: 'in' },
+  { id: 'p-charmb', brand: 'pompom', name: 'Charm Bracelet', variant: 'Gold', wholesale: 22, msrp: 52, pack: 6, velocity: 0.4, onHand: 8, lastOrderQty: 6, lastOrder: 'one month ago', cat: 'Jewelry', illo: 'charm', season: 'in' },
   // Ellie Rose
-  { id: 'p-tote', brand: 'ellie', name: 'Canvas Market Tote', variant: 'Sand', wholesale: 19, msrp: 46, map: false, pack: 8, velocity: 0.9, onHand: 6, lastOrderQty: 8, lastOrder: 'one month ago', cat: 'Bags', illo: 'tote', season: 'in' },
-  { id: 'p-cross', brand: 'ellie', name: 'Quilted Crossbody', variant: 'Clay', wholesale: 28, msrp: 64, map: true, pack: 6, velocity: 0.4, onHand: 2, lastOrderQty: 6, lastOrder: 'two months ago', cat: 'Bags', illo: 'bag', season: 'in' },
+  { id: 'p-tote', brand: 'ellie', name: 'Canvas Market Tote', variant: 'Sand', wholesale: 19, msrp: 46, pack: 8, velocity: 0.9, onHand: 6, lastOrderQty: 8, lastOrder: 'one month ago', cat: 'Bags', illo: 'tote', season: 'in' },
+  { id: 'p-cross', brand: 'ellie', name: 'Quilted Crossbody', variant: 'Clay', wholesale: 28, msrp: 64, pack: 6, velocity: 0.4, onHand: 2, lastOrderQty: 6, lastOrder: 'two months ago', cat: 'Bags', illo: 'bag', season: 'in' },
   // Popkle
-  { id: 'p-boba', brand: 'popkle', name: 'Pop Lift Boba', variant: 'Pink', wholesale: 6, msrp: 14, map: false, pack: 12, velocity: 1.6, onHand: 4, lastOrderQty: 24, lastOrder: 'two weeks ago', cat: 'Novelty', illo: 'charm', season: null },
-  { id: 'p-pen', brand: 'popkle', name: 'Jelly Gel Pen', variant: 'Set of 5', wholesale: 7, msrp: 16, map: false, pack: 10, velocity: 0.8, onHand: 14, lastOrderQty: 10, lastOrder: 'two months ago', cat: 'Novelty', illo: 'pen', season: null },
+  { id: 'p-boba', brand: 'popkle', name: 'Pop Lift Boba', variant: 'Pink', wholesale: 6, msrp: 14, pack: 12, velocity: 1.6, onHand: 4, lastOrderQty: 24, lastOrder: 'two weeks ago', cat: 'Novelty', illo: 'charm', season: null },
+  { id: 'p-pen', brand: 'popkle', name: 'Jelly Gel Pen', variant: 'Set of 5', wholesale: 7, msrp: 16, pack: 10, velocity: 0.8, onHand: 14, lastOrderQty: 10, lastOrder: 'two months ago', cat: 'Novelty', illo: 'pen', season: null },
   // The New Savant (top)
-  { id: 'p-candle', brand: 'savant', name: 'Vanguard Candle', variant: '9 oz', wholesale: 16, msrp: 36, map: true, pack: 6, velocity: 1.0, onHand: 5, lastOrderQty: 12, lastOrder: 'three weeks ago', cat: 'Candles', illo: 'candle', season: 'in' },
-  { id: 'p-incense', brand: 'savant', name: 'Cedar Incense', variant: 'Box of 30', wholesale: 6, msrp: 15, map: false, pack: 12, velocity: 0.7, onHand: 8, lastOrderQty: 12, lastOrder: 'one month ago', cat: 'Home', illo: 'incense', season: 'off' },
+  { id: 'p-candle', brand: 'savant', name: 'Vanguard Candle', variant: '9 oz', wholesale: 16, msrp: 36, pack: 6, velocity: 1.0, onHand: 5, lastOrderQty: 12, lastOrder: 'three weeks ago', cat: 'Candles', illo: 'candle', season: 'in' },
+  { id: 'p-incense', brand: 'savant', name: 'Cedar Incense', variant: 'Box of 30', wholesale: 6, msrp: 15, pack: 12, velocity: 0.7, onHand: 8, lastOrderQty: 12, lastOrder: 'one month ago', cat: 'Home', illo: 'incense', season: 'off' },
 ];
 export const productById = Object.fromEntries(products.map((p) => [p.id, p]));
 export const productsByBrand = (bid) => products.filter((p) => p.brand === bid);
@@ -164,9 +183,9 @@ export const carts = [
     lines: [['p-throw', 8], ['p-tallow', 24], ['p-candle', 12], ['p-boba', 24]], sync: 'synced', scanSourced: true },
   { id: 'c-holiday', name: 'Holiday 2026', section: 'mine', author: 'You', lastEdited: 'two days ago',
     lines: [['p-candle', 24], ['p-incense', 12], ['p-tumbler', 16], ['p-cards', 20], ['p-napkins', 12]], sync: 'pending' },
-  { id: 'c-mday', name: "Mother's Day", section: 'shared', author: 'Priya N. (Manager)', lastEdited: 'yesterday',
+  { id: 'c-mday', name: "Mother's Day", section: 'shared', author: 'Priya N. (Staff)', lastEdited: 'yesterday',
     lines: [['p-tallow', 12], ['p-necklace', 6], ['p-bracelet', 12]], sync: 'synced', sharedWith: 'You · Approve to submit' },
-  { id: 'c-spring', name: 'Spring counter', section: 'pending', author: 'Priya N. (Manager)', lastEdited: 'three hours ago',
+  { id: 'c-spring', name: 'Spring counter', section: 'pending', author: 'Priya N. (Staff)', lastEdited: 'three hours ago',
     lines: [['p-boba', 24], ['p-pen', 10], ['p-tumbler', 16]], sync: 'synced', awaiting: true },
 ];
 export const cartById = Object.fromEntries(carts.map((c) => [c.id, c]));
@@ -213,9 +232,9 @@ export const claims = [
 
 // ---- Company users (§02b roles) ----
 export const companyUsers = [
-  { name: 'Sebastián Muñoz', role: 'Owner', initials: 'SM', activity: 'active now', self: true },
-  { name: 'Priya Nair', role: 'Manager', initials: 'PN', activity: 'active yesterday' },
-  { name: 'Theo Vance', role: 'Member', initials: 'TV', activity: 'active three days ago' },
+  { name: 'Sebastián Muñoz', role: 'Admin', initials: 'SM', activity: 'active now', self: true },
+  { name: 'Priya Nair', role: 'Staff', initials: 'PN', activity: 'active yesterday' },
+  { name: 'Theo Vance', role: 'Staff', initials: 'TV', activity: 'active three days ago' },
 ];
 
 // ---- Notification categories (§07-B) + copy deck (§13) ----
@@ -241,12 +260,17 @@ export const notifications = [
 ];
 
 // ---- Rep mode (P3) — retailers, with registration/approval status ----
+// mx/my position each store on the coverage map (S607), in % of the map canvas.
 export const repRetailers = [
-  { id: 'r-marfa', name: 'Marfa Studio', tier: 'top', city: 'Marfa, TX', status: 'approved', liveCart: 'Back wall refresh', taxId: 'Current', credit: 'Headroom $16.3k', note: 'Owner approves every cart personally.' },
-  { id: 'r-ojai', name: 'Ojai General', tier: 'standard', city: 'Ojai, CA', status: 'approved', liveCart: null, taxId: 'Renews soon', credit: 'Headroom $9.1k', note: 'Manager builds, owner is hands-off.' },
-  { id: 'r-taos', name: 'Taos Mercantile', tier: 'top', city: 'Taos, NM', status: 'approved', liveCart: 'Reserve preview', taxId: 'Current', credit: 'Headroom $40k', note: 'Top-tier. First-look on every drop.' },
-  { id: 'r-bisbee', name: 'Bisbee Co.', tier: 'standard', city: 'Bisbee, AZ', status: 'pending', liveCart: null, taxId: 'Pending', credit: 'Awaiting approval', note: 'New application — review the resale cert to approve.' },
+  { id: 'r-marfa', name: 'Marfa Studio', tier: 'top', city: 'Marfa, TX', mx: 56, my: 62, status: 'approved', liveCart: 'Back wall refresh', taxId: 'Current', credit: 'Headroom $16.3k', note: 'Admin approves every cart personally.' },
+  { id: 'r-ojai', name: 'Ojai General', tier: 'standard', city: 'Ojai, CA', mx: 12, my: 38, status: 'approved', liveCart: null, taxId: 'Renews soon', credit: 'Headroom $9.1k', note: 'Staff builds, the admin is hands-off.' },
+  { id: 'r-taos', name: 'Taos Mercantile', tier: 'top', city: 'Taos, NM', mx: 44, my: 22, status: 'approved', liveCart: 'Reserve preview', taxId: 'Current', credit: 'Headroom $40k', note: 'Top-tier. First-look on every drop.' },
+  { id: 'r-bisbee', name: 'Bisbee Co.', tier: 'standard', city: 'Bisbee, AZ', mx: 26, my: 68, status: 'pending', liveCart: null, taxId: 'Pending', credit: 'Awaiting approval', note: 'New application — review the resale cert to approve.' },
 ];
+
+// A prospect mid-application, used by the coverage map to demo the
+// proximity check: Alpine sits 26 mi from Marfa Studio's door.
+export const repProspect = { name: 'Alpine Provisions', city: 'Alpine, TX', mx: 63, my: 56, distanceTo: 'r-marfa', distance: '26 mi', radius: '50 mi' };
 
 export const repAppointments = [
   { retailer: 'Marfa Studio', when: 'in 30 minutes', kind: 'Showroom walk' },
@@ -271,8 +295,7 @@ export const complianceItems = [
   { id: 'taxid', label: 'Tax ID / Resale cert', status: 'renews', note: 'Renews soon' },
   { id: 'w9', label: 'W-9', status: 'current', note: 'On file' },
   { id: 'coi', label: 'Certificate of insurance', status: 'current', note: 'On file' },
-  { id: 'map', label: 'MAP policy', status: 'current', note: 'Signed' },
-  { id: 'terms', label: 'Signed terms', status: 'current', note: 'Net-30 accepted' },
+  { id: 'terms', label: 'Financial terms', status: 'current', note: 'Net-30 accepted' },
 ];
 
 // ---- Addresses ----

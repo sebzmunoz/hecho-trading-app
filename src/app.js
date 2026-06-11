@@ -214,6 +214,7 @@ function handleAction(action, el) {
     case 'register': C.openSheet({ title: 'Apply to become a retailer', html: registrationBody() }); break;
     case 'submit-registration': C.closeAllOverlays(); C.openModal({ title: 'Application sent', html: '<p>Hecho reviews every new retailer. I\'ll email you the moment your store is approved, then you can place your first order.</p>', actions: [{ label: 'Got it', action: 'close-overlay' }] }); break;
     case 'approve-retailer': { const r = D.repRetailers.find((x) => x.id === (el.dataset.r || state.get('repAccount'))); if (r) { r.status = 'approved'; r.taxId = 'Current'; r.credit = 'Headroom $12k'; } C.closeAllOverlays(); nav.refresh(); C.toast('Retailer approved', { positive: true }); break; }
+    case 'flag-conflict': C.toast('Conflict flagged — application on hold for territory review', { positive: true }); break;
 
     // ---- live stock ----
     case 'refresh-stock': C.toast('Stock refreshed', { positive: true }); break;
@@ -235,7 +236,7 @@ function handleAction(action, el) {
     // ---- rep ----
     case 'role-switch': {
       const toRep = state.get('role') !== 'rep';
-      state.set({ role: toRep ? 'rep' : 'owner' });
+      state.set({ role: toRep ? 'rep' : 'admin' });
       nav.go(toRep ? 'S602' : 'S401', { resetStack: true });
       break;
     }

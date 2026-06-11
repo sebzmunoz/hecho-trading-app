@@ -38,11 +38,11 @@ export const flows = [
     { screen: 'S202', text: 'Edit lines, change quantity, save.', branch: { label: 'Branch · MOQ not met', screen: 'S207' } },
   ] },
   { id: 'F5', name: 'Sharing a draft for approval', persona: 'P1·P2', phase: 'P1', steps: [
-    { screen: 'S202', text: 'Manager finishes a draft. Tap Share.' },
+    { screen: 'S202', text: 'A staff member finishes a draft. Tap Share.' },
     { screen: 'S205', text: 'Pick a recipient and permission level.' },
-    { screen: 'S206', text: 'Share confirmation. Owner gets a push.' },
-    { screen: 'S208', text: 'Owner opens the approval inbox.' },
-    { screen: 'S209', text: 'Owner reviews — approve, edit, or send back.', branch: { label: 'Branch · concurrent edit', screen: 'S807' } },
+    { screen: 'S206', text: 'Share confirmation. The admin gets a push.' },
+    { screen: 'S208', text: 'The admin opens the approval inbox.' },
+    { screen: 'S209', text: 'The admin reviews — approve, edit, or send back.', branch: { label: 'Branch · concurrent edit', screen: 'S807' } },
     { screen: 'S204', text: 'Approve → cart submit.' },
   ] },
   { id: 'F6', name: 'Smart reorder from past orders', persona: 'P1·P2', phase: 'P1', steps: [
@@ -80,6 +80,7 @@ export const flows = [
     { screen: 'S602', text: 'Switch to Rep mode — the dashboard.', branch: { label: 'From the You tab', screen: 'S401' } },
     { screen: 'S601', text: 'Pick a retailer to co-shop with.' },
     { screen: 'S603', text: 'Retailer profile: context, credit, tax-ID.' },
+    { screen: 'S607', text: 'Coverage map: every retailer pinned; a nearby applicant is flagged before approval.' },
     { screen: 'S604', text: 'Co-shop live in the retailer\'s draft.' },
     { screen: 'S606', text: 'Send a memo via chat. Switch back any time.' },
   ] },
