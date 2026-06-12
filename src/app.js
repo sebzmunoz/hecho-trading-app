@@ -7,7 +7,8 @@ import { registry } from './registry.js';
 import { initPanel, onRouteChange } from './panel.js';
 import { icon } from './icons.js';
 import * as C from './components.js';
-import { newCartBody, shareBody, addToCartBody, shopLookBody } from './screens/carts.js';
+import { newCartBody, shareBody, addToCartBody, shopLookBody, addAddressBody } from './screens/carts.js';
+import { loveToCartBody } from './screens/love.js';
 import { bookApptBody, apptWhenLabel } from './screens/you.js';
 import { filtersBody } from './screens/shop.js';
 import { paymentBody, addMethodBody, addCardBody } from './screens/orders.js';
@@ -29,7 +30,7 @@ window.HECHO = { nav, state };
 // initRouter renders the first route synchronously.)
 const SELF_STATES = {
   S001: ['empty'], S003: ['launching'], S004: ['oos'], S006: ['empty'],
-  S009: ['closed', 'requested'], S101: ['perm', 'lowlight', 'identifying'],
+  S009: ['closed', 'requested'], S010: ['empty', 'loading'], S101: ['perm', 'lowlight', 'identifying'],
   S106: ['error'], S201: ['empty'], S202: ['conflict'], S208: ['empty'],
   S301: ['empty'], S308: ['error'], S310: ['empty'], S412: ['empty'], S602: ['empty'],
   S604: ['conflict'], S701: ['empty'], S708: ['low', 'out'],
@@ -119,7 +120,10 @@ function tabbar(active) {
 // ---------- global delegation ----------
 screenFrame.addEventListener('click', (e) => {
   const goEl = e.target.closest('[data-go]');
-  if (goEl && goEl.getAttribute('data-go')) { e.preventDefault(); C.closeAllOverlays(); state.setEphemeral('_state', null); nav.go(goEl.dataset.go); return; }
+  // Nearest attribute wins when nested — e.g. a love heart inside a product card.
+  const nestedAct = e.target.closest('[data-action]');
+  const actWins = nestedAct && goEl && goEl !== nestedAct && goEl.contains(nestedAct);
+  if (goEl && goEl.getAttribute('data-go') && !actWins) { e.preventDefault(); C.closeAllOverlays(); state.setEphemeral('_state', null); nav.go(goEl.dataset.go, { replace: goEl.hasAttribute('data-replace') }); return; }
   const tabEl = e.target.closest('[data-tab]');
   if (tabEl) { e.preventDefault(); C.closeAllOverlays(); state.setEphemeral('_state', null); nav.tab(tabEl.dataset.tab); return; }
   const backEl = e.target.closest('[data-back]');
@@ -135,6 +139,14 @@ screenFrame.addEventListener('click', (e) => {
   }
   const actEl = e.target.closest('[data-action]');
   if (actEl) { e.preventDefault(); handleAction(actEl.dataset.action, actEl, e); }
+});
+
+// span[role=button] actions (e.g. love hearts inside card buttons) need
+// explicit keyboard activation — they aren't native buttons.
+screenFrame.addEventListener('keydown', (e) => {
+  if (e.key !== 'Enter' && e.key !== ' ') return;
+  const el = e.target.closest('span[role="button"][data-action]');
+  if (el) { e.preventDefault(); handleAction(el.dataset.action, el, e); }
 });
 
 // Ship-date pickers (S204): commit the exact date to state as it changes.
@@ -178,7 +190,14 @@ function handleAction(action, el) {
 
     // ---- add to cart / look ----
     case 'add-to-cart': C.openSheet({ title: 'Add to cart', html: addToCartBody(el.dataset.p), onMount: (r) => { C.wirePrivacy(r); C.wireSteppers(r); } }); break;
-    case 'confirm-add': C.closeAllOverlays(); T('scan.result.added_to_cart', curSource(), el.dataset.p); C.toast('Added to Back wall refresh', { positive: true, action: { label: 'View', fn: () => nav.go('S202?cart=c-back') } }); break;
+    case 'confirm-add': {
+      // read the quantity from the sheet's stepper before it closes
+      const qty = parseInt(el.closest('.sheet')?.querySelector('[data-stepper] input')?.value, 10) || 0;
+      C.closeAllOverlays();
+      T('scan.result.added_to_cart', curSource(), el.dataset.p);
+      nav.go(`S213?p=${el.dataset.p || 'p-throw'}${qty ? '&qty=' + qty : ''}&cart=c-back`);
+      break;
+    }
     case 'shop-the-look': C.openSheet({ title: 'Shop the look', html: shopLookBody(el.dataset.guide) }); break;
     case 'confirm-look': C.closeAllOverlays(); T('scan.result.added_to_cart', 'manual', el.dataset.guide); C.toast('Added the look', { positive: true, action: { label: 'View cart', fn: () => nav.go('S202?cart=c-back') } }); break;
     case 'add-line': C.toast('Added to the retailer\'s draft', { positive: true }); break;
@@ -191,28 +210,48 @@ function handleAction(action, el) {
       if (state.get('taxId') === 'expired') { nav.go('S410'); }
       else nav.go('S204?cart=' + (el.dataset.cart || 'c-back'));
       break;
-    case 'confirm-submit':
-      if (state.get('network') !== 'online') { C.toast('You\'re offline — reconnect to submit'); break; }
-      T('cart.submitted', 'cart', el.dataset.cart || 'c-back'); nav.go('S301'); C.toast('Order submitted', { positive: true });
+    case 'confirm-submit': {
+      if (state.get('network') !== 'online') { C.toast('You\'re offline — reconnect to place the order'); break; }
+      const cart = D.cartById[el.dataset.cart] || D.carts[0];
+      const r = nav.current();
+      const o = D.placeOrder(cart, { ship: r.params.ship || 'together', note: state.get('shipNote') || '' });
+      state.setEphemeral('shipNote', '');
+      T('cart.submitted', 'shipping', cart.id);
+      // land directly on the new order; seed Orders underneath so Back goes to the index
+      nav.go('S301', { resetStack: true });
+      nav.go('S302?order=' + o.id);
+      C.toast(`Order #${o.id} placed`, { positive: true });
       break;
+    }
     case 'approve-submit': T('cart.approved', 'cart', el.dataset.cart); nav.go('S204?cart=' + (el.dataset.cart || 'c-spring')); break;
     case 'send-back': nav.go('S208'); C.toast('Sent back with notes'); break;
-    case 'split-submit':
+    case 'split-submit': {
       // Over-budget staff submit: the in-budget part goes through NOW; only
       // the overage queues for approval. The on-the-spot sale never waits.
-      if (state.get('network') !== 'online') { C.toast('You\'re offline — reconnect to submit'); break; }
-      T('cart.submitted', 'cart', el.dataset.cart || 'c-back');
-      T('cart.shared', 'cart', el.dataset.cart || 'c-back');
-      nav.go('S301');
-      C.toast(`${el.dataset.now} submitted — ${el.dataset.over} overage sent for approval`, { positive: true });
+      if (state.get('network') !== 'online') { C.toast('You\'re offline — reconnect to place the order'); break; }
+      const cart = D.cartById[el.dataset.cart] || D.carts[0];
+      const o = D.placeOrder(cart, { ship: nav.current().params.ship || 'together', note: state.get('shipNote') || '' });
+      state.setEphemeral('shipNote', '');
+      T('cart.submitted', 'cart', cart.id);
+      T('cart.shared', 'cart', cart.id);
+      nav.go('S301', { resetStack: true });
+      nav.go('S302?order=' + o.id);
+      C.toast(`${el.dataset.now} placed as #${o.id} — ${el.dataset.over} overage sent for approval`, { positive: true });
       break;
+    }
 
-    // ---- ship timing (S204) ----
-    case 'ship-mode': {
-      const sd = JSON.parse(JSON.stringify(state.get('shipDates') || {}));
-      sd.mode = el.dataset.mode === 'per' ? 'per' : 'all';
-      sd.all ||= { when: 'asap', date: '' }; sd.brands ||= {};
-      state.set({ shipDates: sd }); nav.refresh(); break;
+    // ---- shipping (S204) ----
+    case 'add-address': C.openSheet({ title: 'Add a ship-to address', html: addAddressBody() }); break;
+    case 'save-address': {
+      const sheet = el.closest('.sheet');
+      const get = (n) => sheet?.querySelector(`[data-f="${n}"]`)?.value?.trim();
+      const a = D.addAddress({ name: get('name') || 'New address', line1: get('line1') || '—', city: get('city') || 'Marfa', region: get('region') || 'TX', postal: get('postal') || '' });
+      C.closeAllOverlays();
+      const r = nav.current();
+      if (r.id === 'S204') nav.go(`S204?cart=${r.params.cart || 'c-back'}&addr=${a.id}&ship=${r.params.ship || 'together'}`, { replace: true });
+      else nav.refresh();
+      C.toast('Address added', { positive: true });
+      break;
     }
     case 'ship-when': {
       const sd = JSON.parse(JSON.stringify(state.get('shipDates') || { mode: 'all', all: { when: 'asap', date: '' }, brands: {} }));
@@ -271,9 +310,34 @@ function handleAction(action, el) {
     case 'flash': C.toast('Flash toggled'); break;
     case 'library': C.toast('Opening photo library…'); break;
 
+    // ---- love list ----
+    case 'love-toggle': {
+      const pid = el.dataset.p, src = el.dataset.src || 'browse';
+      const nowLoved = state.toggleLove(pid, src);
+      T(nowLoved ? 'love.added' : 'love.removed', src, pid);
+      if (el.closest('.overlay-host')) {
+        // inside a sheet a full re-render would dismiss it — swap in place
+        el.classList.toggle('is-loved', nowLoved);
+        el.setAttribute('aria-pressed', String(nowLoved));
+        el.setAttribute('aria-label', nowLoved ? 'Remove from your love list' : 'Add to your love list');
+        el.innerHTML = icon(nowLoved ? 'heart-fill' : 'heart', 16);
+      } else nav.refresh();
+      if (nowLoved) C.toast('On your love list', { positive: true, action: { label: 'Open', fn: () => nav.go('S010') } });
+      else C.toast('Removed from your love list', { action: { label: 'Undo', fn: () => { state.toggleLove(pid, src); nav.refresh(); } } });
+      break;
+    }
+    case 'love-to-cart': C.openSheet({ title: 'Start a cart', html: loveToCartBody() }); break;
+    case 'love-to-cart-confirm': {
+      const n = (el.closest('.sheet') || screenBody).querySelectorAll('[data-love-pick]:checked').length;
+      if (!n) { C.toast('Nothing picked — tick at least one'); break; }
+      T('love.to_cart', 'list', String(n));
+      C.closeAllOverlays();
+      C.toast(`Added ${n} to Back wall refresh`, { positive: true, action: { label: 'View cart', fn: () => nav.go('S202?cart=c-back') } });
+      break;
+    }
+
     // ---- brand ----
     case 'request-access': T('brand.requested_access', 'brand', 'savant'); state.setEphemeral('_state', 'requested'); nav.refresh(); C.toast('Request sent — your rep will follow up', { positive: true }); break;
-    case 'save-brand': { const saved = state.toggleSavedBrand(el.dataset.brand); T('brand.saved', 'brand', el.dataset.brand); nav.refresh(); C.toast(saved ? 'Brand saved' : 'Removed from saved'); break; }
     case 'save-template': C.toast('Saved as a personal template', { positive: true }); break;
     case 'remind': C.toast('I\'ll remind you'); break;
 
@@ -357,7 +421,25 @@ function handleAction(action, el) {
     case 'sign-out': nav.go('S417'); break;
     case 'capture-rma': nav.go('S308'); break;
     case 'capture-doc': C.toast('Document added', { positive: true }); break;
-    case 'cart-menu': case 'order-menu': C.openSheet({ title: 'Options', html: `<div class="opts"><button class="opt">${icon('share', 20)} Share</button><button class="opt">${icon('copy', 20)} Duplicate</button><button class="opt">${icon('trash', 20)} Archive</button></div>` }); break;
+    case 'cart-menu': C.openSheet({ title: 'Options', html: `<div class="opts"><button class="opt" data-action="rename-cart">${icon('draft', 20)} Rename</button><button class="opt">${icon('share', 20)} Share</button><button class="opt">${icon('copy', 20)} Duplicate</button><button class="opt">${icon('trash', 20)} Archive</button></div>` }); break;
+    case 'order-menu': C.openSheet({ title: 'Options', html: `<div class="opts"><button class="opt">${icon('share', 20)} Share</button><button class="opt">${icon('copy', 20)} Duplicate</button><button class="opt">${icon('trash', 20)} Archive</button></div>` }); break;
+    // The cart name lives in the header only (no duplicate field on the
+    // screen) — renaming happens here, off the ⋯ menu.
+    case 'rename-cart': {
+      const c = D.cartById[nav.current().params.cart] || D.carts[0];
+      C.closeAllOverlays();
+      C.openSheet({ title: 'Rename cart', html: `
+        <div class="input-group"><label>Name</label><input class="input" data-f="cart-name" value="${C.esc(c.name)}" aria-label="Cart name" /></div>
+        <button class="btn full" data-action="rename-cart-save" data-cart="${c.id}">Save</button>` });
+      break;
+    }
+    case 'rename-cart-save': {
+      const c = D.cartById[el.dataset.cart] || D.carts[0];
+      const v = el.closest('.sheet')?.querySelector('[data-f="cart-name"]')?.value?.trim();
+      if (v) c.name = v;
+      C.closeAllOverlays(); nav.refresh(); C.toast('Renamed', { positive: true });
+      break;
+    }
 
     default: C.toast('Done'); break;
   }
@@ -391,8 +473,12 @@ function wireChrome() {
 function toggleConsole() {
   const shell = $('#appShell');
   if (window.matchMedia('(max-width:1040px)').matches) {
+    // drop any stale desktop-collapse state so the drawer can actually show
+    shell.classList.remove('console-collapsed');
+    $('#fabConsole').hidden = true;
     shell.classList.toggle('console-open');
   } else {
+    shell.classList.remove('console-open');
     shell.classList.toggle('console-collapsed');
     $('#fabConsole').hidden = !shell.classList.contains('console-collapsed');
   }

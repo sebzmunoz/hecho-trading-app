@@ -94,7 +94,6 @@ export const shop = {
   S003(params) {
     const b = D.brandById[params.brand] || D.brands[0];
     const prods = D.productsByBrand(b.id);
-    const saved = state.isBrandSaved(b.id);
     const launching = b.launching || state.get('_state') === 'launching';
     const body = `
       <div class="thumb-illo" style="border-radius:var(--r-4);padding:var(--s-6)">${C.illo(prods[0]?.illo || 'jar', 96)}</div>
@@ -107,7 +106,7 @@ export const shop = {
         <span style="min-width:0"><b>${C.esc(b.founder)}</b><p class="muted" style="margin-top:2px;font-size:var(--fs-caption)">${C.esc(b.founderStory)}</p></span>
       </div>` : ''}
       <div class="row-between"><span class="moq">${icon('cart', 12)}MOQ $${b.moq}</span>
-        <button class="chip ${saved ? 'is-selected' : ''}" data-action="save-brand" data-brand="${b.id}" aria-pressed="${saved}">${icon('star', 13)} ${saved ? 'Saved' : 'Save brand'}</button></div>
+        <span class="muted" style="font-size:var(--fs-caption)">${icon('truck', 13)} Ships in ~${b.lead} days</span></div>
       ${C.sectionLabel('Catalog')}
       <div class="grid-2">${prods.map((p) => C.productCard(p)).join('')}</div>`;
     return base(b.name, { back: true, headerRight: C.hActions([{ icon: 'search', go: 'S005' }, { icon: 'share', action: 'share' }]), body });
@@ -142,7 +141,7 @@ export const shop = {
         <div class="row-between"><span class="muted">Margin at MSRP</span>${C.maskField(`${Math.round((1 - p.wholesale / p.msrp) * 100)}%`, 'spend')}</div>
         <p class="muted" style="font-size:var(--fs-nano)">${rec ? `Behavior model: ${C.esc(D.whyString(p))}` : `First order — start with a pack of ${p.pack}.`}</p>
       </div>
-      <div class="sticky-actions"><button class="btn ghost" data-action="save-template">Save</button><button class="btn" data-action="add-to-cart" data-p="${p.id}">Add to cart${rec ? ` · ${C.maskField(String(rec), 'recommended')}` : ''}</button></div>`;
+      <div class="sticky-actions"><button class="btn ghost" data-action="love-toggle" data-p="${p.id}" data-src="browse" aria-pressed="${state.isLoved(p.id)}">${icon(state.isLoved(p.id) ? 'heart-fill' : 'heart', 16)} ${state.isLoved(p.id) ? 'Loved' : 'Love'}</button><button class="btn" data-action="add-to-cart" data-p="${p.id}">Add to cart${rec ? ` · ${C.maskField(String(rec), 'recommended')}` : ''}</button></div>`;
     return base(p.name, { back: true, headerRight: C.hActions([{ icon: 'share', action: 'share' }]), body });
   },
 

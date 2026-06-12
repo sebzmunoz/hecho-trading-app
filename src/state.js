@@ -3,6 +3,8 @@
 // screens subscribe and re-render so you can watch them react.
 // ============================================================
 
+import { lovedSeeds } from './data.js';
+
 const KEY = 'hecho-proto-state-v1';
 
 const DEFAULTS = {
@@ -13,7 +15,7 @@ const DEFAULTS = {
   theme: 'light',       // light | dark
   reducedMotion: false,
   repAccount: 'r-marfa',// current retailer in Rep mode
-  savedBrands: [],      // brand ids the buyer saved
+  loved: lovedSeeds.map((x) => ({ ...x })), // love list — {p, src}
   cards: [],            // payment cards added in-session
   budgets: {},          // admin-set member budgets: name → $/month (overrides data.js defaults)
   shipDates: { mode: 'all', all: { when: 'asap', date: '' }, brands: {} }, // ship timing on submit
@@ -90,13 +92,17 @@ export const state = {
   subscribeTelemetry(fn) { telSubs.add(fn); return () => telSubs.delete(fn); },
   clearTelemetry() { telemetryLog.length = 0; telSubs.forEach((fn) => fn(telemetryLog)); },
 
-  // ---- saved brands ----
-  isBrandSaved(id) { return data.savedBrands.includes(id); },
-  toggleSavedBrand(id) {
-    const i = data.savedBrands.indexOf(id);
-    if (i >= 0) data.savedBrands.splice(i, 1); else data.savedBrands.push(id);
+  // ---- love list ----
+  // Capture is one tap with zero decisions; newest first on the list screen.
+  isLoved(pid) { return data.loved.some((x) => x.p === pid); },
+  lovedItems() { return data.loved.slice().reverse(); },
+  lovedCount() { return data.loved.length; },
+  toggleLove(pid, src = 'browse') {
+    const i = data.loved.findIndex((x) => x.p === pid);
+    if (i >= 0) data.loved.splice(i, 1);
+    else data.loved.push({ p: pid, src });
     persist();
-    return this.isBrandSaved(id);
+    return i < 0;
   },
 
   // ---- payment cards ----

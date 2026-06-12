@@ -19,6 +19,15 @@ function fmtShipDate(iso) {
   return new Date(iso + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
+// Brand lead times (days) → the relative-time phrases the copy deck mandates.
+function leadPhrase(days) {
+  if (days <= 7) return 'about a week';
+  if (days <= 14) return 'about two weeks';
+  if (days <= 21) return 'about three weeks';
+  if (days <= 31) return 'about a month';
+  return `about ${Math.round(days / 7)} weeks`;
+}
+
 export const carts = {
   // S201 Carts index
   S201() {
@@ -69,7 +78,7 @@ export const carts = {
         <button class="btn ghost" data-action="share-cart" data-cart="${c.id}">${icon('share', 16)} Share</button>
         ${role === 'rep'
           ? `<button class="btn" data-action="add-line">Add a line</button>`
-          : `<button class="btn" data-action="submit-cart" data-cart="${c.id}">Submit</button>`}
+          : `<button class="btn" data-action="submit-cart" data-cart="${c.id}">Continue</button>`}
       </div>`;
     return base(c.name, { back: true, headerRight: C.hActions([{ icon: 'dots', action: 'cart-menu' }]), body });
   },
@@ -79,7 +88,10 @@ export const carts = {
     return base('New cart', { back: true, body: newCartBody() });
   },
 
-  // S204 Cart submit — per-brand shipping control + free-shipping note live here.
+  // S204 Shipping — the one step between cart and order. Everything on a
+  // single screen: where it goes, how it ships, when, what it costs, what
+  // happens next. "Place order" lands directly on the new order's detail.
+  // Role extras stay: tax-ID, staff budgets, rep grants.
   S204(params) {
     const c = D.cartById[params.cart] || D.carts[0];
     const tax = state.get('taxId');
@@ -88,60 +100,52 @@ export const carts = {
     const total = D.cartTotal(c);
     const overLimit = D.account.outstanding + total > D.account.creditLimit;
     const taxRow = tax === 'expired'
-      ? C.banner('<b>Tax ID expired.</b> Resolve to submit.', { kind: 'caution', ic: 'warning', action: { label: 'Resolve', go: 'S409' } })
+      ? C.banner('<b>Tax ID expired.</b> Resolve to place the order.', { kind: 'caution', ic: 'warning', action: { label: 'Resolve', go: 'S409' } })
       : (tax === 'renews' ? C.banner('Tax ID renews soon — this won\'t block your order.', { ic: 'clock' }) : '');
 
-    // Shipping: brands ready at different times. 'split' ships each brand as
-    // it's ready (multiple deliveries); 'together' holds for the slowest one.
-    const ship = params.ship === 'together' ? 'together' : 'split';
+    // Ship to — selectable; selection re-renders via replace so Back still
+    // returns to the cart in one tap.
+    const shipTos = D.addresses.filter((a) => a.kind === 'Ship-to');
+    const addrId = shipTos.some((a) => a.id === params.addr) ? params.addr : (shipTos.find((a) => a.def) || shipTos[0]).id;
     const cartBrands = [...new Set(c.lines.map(([pid]) => D.productById[pid]?.brand))].filter(Boolean).map((bid) => D.brandById[bid]);
-    const weeks = (d) => `~${Math.max(1, Math.round(d / 7))} wk`;
-    const slowest = cartBrands.reduce((a, b) => (b.lead > a.lead ? b : a), cartBrands[0]);
-    const shipChip = (v, l) => `<button class="chip ${ship === v ? 'is-selected' : ''}" data-go="S204?cart=${c.id}&ship=${v}">${l}</button>`;
-    const shipCard = `
-      <div class="card" style="max-width:none;gap:var(--s-2)">
-        <div class="row-between"><b>Shipping</b><span class="muted" style="font-size:var(--fs-nano)">${cartBrands.length} brands · ${cartBrands.length > 1 ? (ship === 'split' ? cartBrands.length + ' deliveries' : 'one delivery') : 'one delivery'}</span></div>
-        <div class="chip-row">${shipChip('split', 'As each brand is ready')}${shipChip('together', 'Everything together')}</div>
-        ${ship === 'split'
-          ? cartBrands.map((b) => `<div class="row-between"><span class="muted">${C.esc(b.name)}</span><span>${icon('truck', 14)} ${weeks(b.lead)}</span></div>`).join('')
-          : `<div class="row-between"><span class="muted">One delivery, when everything is ready</span><span>${icon('truck', 14)} ${weeks(slowest.lead)}</span></div>
-             <p class="muted" style="font-size:var(--fs-nano)">Waits for ${C.esc(slowest.name)} — the slowest brand in this order.</p>`}
-      </div>`;
+    const multi = cartBrands.length > 1;
+    const ship = multi && params.ship === 'split' ? 'split' : 'together';
+    const q = (over) => { const p = { addr: addrId, ship, ...over }; return `S204?cart=${c.id}&addr=${p.addr}&ship=${p.ship}`; };
 
-    // Ship date: ASAP or an exact future date — one date for the whole
-    // order, or each brand on its own. Persisted in state.shipDates.
-    const sd = state.get('shipDates') || { mode: 'all', all: { when: 'asap', date: '' }, brands: {} };
-    const sdMode = sd.mode === 'per' ? 'per' : 'all';
+    const addrRows = shipTos.map((a) => C.listRow({
+      thumbIcon: 'pin', pri: C.esc(a.name), sec: `${C.esc(a.line1)} · ${C.esc(a.city)}, ${C.esc(a.region)} ${C.esc(a.postal)}`,
+      trail: a.id === addrId ? icon('check', 18) : '', current: a.id === addrId,
+      go: q({ addr: a.id }), attrs: 'data-replace',
+    })).join('');
+
+    // First delivery decision: everything together, or split by brand.
+    const slowest = cartBrands.reduce((a, b) => (b.lead > a.lead ? b : a), cartBrands[0]);
+    const fastest = cartBrands.reduce((a, b) => (b.lead < a.lead ? b : a), cartBrands[0]);
+    const delivery = multi ? `
+      ${C.listRow({ thumbIcon: 'pkg', pri: 'Everything together', sec: `One delivery · lands in ${leadPhrase(slowest.lead)}`,
+        trail: ship === 'together' ? icon('check', 18) : '', current: ship === 'together', go: q({ ship: 'together' }), attrs: 'data-replace' })}
+      ${C.listRow({ thumbIcon: 'truck', pri: 'As each brand is ready', sec: `${cartBrands.length} deliveries · first lands in ${leadPhrase(fastest.lead)}`,
+        trail: ship === 'split' ? icon('check', 18) : '', current: ship === 'split', go: q({ ship: 'split' }), attrs: 'data-replace' })}`
+      : C.listRow({ thumbIcon: 'pkg', pri: 'One delivery', sec: `${C.esc(cartBrands[0]?.name || 'Your brand')} ships in ${leadPhrase(cartBrands[0]?.lead || 14)}`, trail: icon('check', 18), current: true });
+
+    // Second decision, per delivery: ASAP or an exact date. Together = one
+    // decision for the whole order; split = one per brand. state.shipDates.
+    const sd = state.get('shipDates') || { all: { when: 'asap', date: '' }, brands: {} };
     const todayISO = new Date().toISOString().slice(0, 10);
-    const whenChips = (scope, sel) => `
-      <div class="chip-row">
-        <button class="chip ${sel.when !== 'date' ? 'is-selected' : ''}" data-action="ship-when" data-scope="${scope}" data-when="asap">ASAP</button>
-        <button class="chip ${sel.when === 'date' ? 'is-selected' : ''}" data-action="ship-when" data-scope="${scope}" data-when="date">${sel.when === 'date' && sel.date ? icon('clock', 12) + ' ' + fmtShipDate(sel.date) : 'Pick a date'}</button>
-      </div>
+    const whenChips = (scope, sel, label) => `
+      <div class="row-between"><span style="font-weight:600">${C.esc(label)}</span>
+        <span class="chip-row" style="padding-bottom:0">
+          <button class="chip ${sel.when !== 'date' ? 'is-selected' : ''}" data-action="ship-when" data-scope="${scope}" data-when="asap">ASAP</button>
+          <button class="chip ${sel.when === 'date' ? 'is-selected' : ''}" data-action="ship-when" data-scope="${scope}" data-when="date">${sel.when === 'date' && sel.date ? icon('clock', 12) + ' ' + fmtShipDate(sel.date) : 'Pick a date'}</button>
+        </span></div>
       ${sel.when === 'date' ? `<input class="input" type="date" data-shipdate="${scope}" value="${sel.date || ''}" min="${todayISO}" aria-label="Ship date${scope === 'all' ? '' : ' for ' + C.esc(D.brandById[scope]?.name || scope)}" />` : ''}`;
-    let sdSummary;
-    if (sdMode === 'all') sdSummary = sd.all?.when === 'date' && sd.all.date ? 'ships ' + fmtShipDate(sd.all.date) : 'ships ASAP';
-    else {
-      const dated = cartBrands.filter((b) => sd.brands?.[b.id]?.when === 'date' && sd.brands[b.id].date).length;
-      sdSummary = dated ? `${dated} of ${cartBrands.length} scheduled` : 'all ASAP';
-    }
-    const shipDateCard = `
-      <div class="card" style="max-width:none;gap:var(--s-2)">
-        <div class="row-between"><b>Ship date</b><span class="muted" style="font-size:var(--fs-nano)">${sdSummary}</span></div>
-        <div class="chip-row">
-          <button class="chip ${sdMode === 'all' ? 'is-selected' : ''}" data-action="ship-mode" data-mode="all">All brands at once</button>
-          <button class="chip ${sdMode === 'per' ? 'is-selected' : ''}" data-action="ship-mode" data-mode="per">Per brand</button>
-        </div>
-        ${sdMode === 'all'
-          ? whenChips('all', sd.all || { when: 'asap', date: '' })
-          : cartBrands.map((b) => {
-              const sel = (sd.brands && sd.brands[b.id]) || { when: 'asap', date: '' };
-              return `<div class="hairline"></div>
-                <div class="row-between"><b style="font-size:var(--fs-caption)">${C.esc(b.name)}</b><span class="muted" style="font-size:var(--fs-nano)">${weeks(b.lead)} lead</span></div>
-                ${whenChips(b.id, sel)}`;
-            }).join('')}
-        <p class="muted" style="font-size:var(--fs-nano)">${sdMode === 'all' ? 'One ship date for the whole order — ASAP, or exactly when you pick.' : 'Each brand ships ASAP or on its own exact date.'}</p>
-      </div>`;
+    const timing = ship === 'together' || !multi
+      ? `<div class="card" style="max-width:none;gap:var(--s-2)">${whenChips('all', sd.all || { when: 'asap', date: '' }, 'Whole order')}</div>`
+      : `<div class="card" style="max-width:none;gap:var(--s-3)">${cartBrands.map((b) => whenChips(b.id, (sd.brands && sd.brands[b.id]) || { when: 'asap', date: '' }, b.name)).join('')}</div>`;
+    const sdAll = sd.all || { when: 'asap', date: '' };
+    const timingSummary = ship === 'together' || !multi
+      ? (sdAll.when === 'date' && sdAll.date ? 'ships ' + fmtShipDate(sdAll.date) : 'ships ASAP')
+      : 'dates above';
 
     // Free-shipping note: applied over $500, otherwise show the path to it.
     const freeShip = total >= 500
@@ -175,36 +179,42 @@ export const carts = {
     }
 
     const body = `
-      <div class="card" style="max-width:none">
-        <div class="row-between"><span class="muted">Ship to</span><button class="chip" data-go="S403">Edit</button></div>
-        <b>${D.addresses[0].name}</b><span class="muted">${D.addresses[0].line1}, ${D.addresses[0].city} ${D.addresses[0].region}</span>
-      </div>
-      ${shipCard}
-      ${shipDateCard}
-      <div class="card" style="max-width:none">
-        <div class="row-between"><span class="muted">Terms</span><span class="pill">${D.account.terms}</span></div>
-        <div class="row-between"><span class="muted">Payment</span><span>Net-30 · override at pay</span></div>
-        ${overLimit ? `<div class="row-between"><span class="critical" style="color:var(--critical);font-weight:600">${icon('warning', 14)} Over credit limit</span><span class="muted">won't block</span></div>` : ''}
-      </div>
-      <div class="card" style="max-width:none"><div class="row-between"><span class="muted">Tax-ID status</span>${C.statusPill(tax === 'current' ? 'current' : tax)}</div></div>
-      ${taxRow}
+      ${offline ? C.banner('You\'re offline — placing an order needs a connection.', { kind: 'caution', ic: 'wifi_off' }) : ''}
+      ${C.sectionLabel('Ship to')}
+      <div class="stack tight">${addrRows}</div>
+      <button class="btn ghost sm full" data-action="add-address">${icon('plus', 16)} Add an address</button>
+      ${C.sectionLabel('Delivery')}
+      <div class="stack tight">${delivery}</div>
+      ${C.sectionLabel('When')}
+      ${timing}
       ${freeShip}
+      <div class="input-group"><label>Delivery note · optional</label><input class="input" data-shipnote value="${C.esc(state.get('shipNote') || '')}" placeholder="Gate code, dock hours, who signs…" aria-label="Delivery note" /></div>
+      ${taxRow}
       ${budgetCard}
-      <div class="card" style="max-width:none"><div class="row-between"><b>Order total</b><span class="price"><span class="v">${D.usd(total)}</span><span class="currency">USD</span></span></div></div>
-      ${offline ? C.banner('You\'re offline — Submit needs a connection.', { kind: 'caution', ic: 'wifi_off' }) : ''}
+      <div class="card" style="max-width:none;gap:var(--s-2)">
+        <div class="row-between"><b>Order summary</b><span class="muted">${c.lines.length} lines · ${cartBrands.length} ${cartBrands.length === 1 ? 'brand' : 'brands'}</span></div>
+        <div class="row-between"><span class="muted">Goods total</span>${C.maskField(`<span class="price compact"><span class="v">${D.usd(total)}</span><span class="currency">USD</span></span>`, 'spend')}</div>
+        <div class="row-between"><span class="muted">Delivery</span><span>${ship === 'together' || !multi ? `One delivery · ${timingSummary}` : `${cartBrands.length} deliveries · ${timingSummary}`}</span></div>
+        <div class="row-between"><span class="muted">Shipping</span><span>${total >= 500 ? 'Free' : 'On the invoice'}</span></div>
+        <div class="row-between"><span class="muted">Terms</span><span class="pill">${D.account.terms}</span></div>
+        <div class="row-between"><span class="muted">Tax-ID status</span>${C.statusPill(tax === 'current' ? 'current' : tax)}</div>
+        ${overLimit ? `<div class="row-between"><span style="color:var(--critical);font-weight:600">${icon('warning', 14)} Over credit limit</span><span class="muted">won't block</span></div>` : ''}
+        <p class="muted" style="font-size:var(--fs-nano)">Nothing is charged today — I invoice on your ${D.account.terms} terms once the brands confirm.</p>
+      </div>
       ${caps.submit === 'grant' ? C.banner('<b>Rep view.</b> Submitting on the retailer\'s behalf needs their per-account grant (§02b).', { ic: 'user' }) : ''}
       ${caps.submit === 'budget' && budgetLeft === 0 ? C.banner('<b>Your budget is used up this month.</b> Send this for approval and the admin takes it from here.', { ic: 'user' }) : ''}
-      <div class="sticky-actions"><button class="btn ghost" data-back>Edit lines</button>
+      <div class="sticky-actions"><button class="btn ghost" data-back>Back to cart</button>
         ${caps.submit === true
-          ? `<button class="btn" data-action="confirm-submit" data-cart="${c.id}" ${offline ? 'aria-disabled="true"' : ''}>Submit order</button>`
+          ? `<button class="btn" data-action="confirm-submit" data-cart="${c.id}" ${offline ? 'aria-disabled="true"' : ''}>Place order</button>`
           : caps.submit === 'grant'
             ? `<button class="btn" aria-disabled="true">Needs retailer grant</button>`
             : budgetLeft === 0
               ? `<button class="btn" data-action="share-cart" data-cart="${c.id}">Request approval</button>`
               : withinBudget
-                ? `<button class="btn" data-action="confirm-submit" data-cart="${c.id}" ${offline ? 'aria-disabled="true"' : ''}>Submit order</button>`
-                : `<button class="btn" data-action="split-submit" data-cart="${c.id}" data-now="${C.money(inBudgetNow)}" data-over="${C.money(overage)}" ${offline ? 'aria-disabled="true"' : ''}>Submit ${C.money(inBudgetNow)} now</button>`}</div>`;
-    return base('Review & submit', { back: true, noTabbar: true, body });
+                ? `<button class="btn" data-action="confirm-submit" data-cart="${c.id}" ${offline ? 'aria-disabled="true"' : ''}>Place order</button>`
+                : `<button class="btn" data-action="split-submit" data-cart="${c.id}" data-now="${C.money(inBudgetNow)}" data-over="${C.money(overage)}" ${offline ? 'aria-disabled="true"' : ''}>Place ${C.money(inBudgetNow)} now</button>`}</div>`;
+    return base('Shipping', { back: true, noTabbar: true, eyebrow: c.name, body,
+      onMount(root) { root.querySelector('[data-shipnote]')?.addEventListener('input', (e) => state.setEphemeral('shipNote', e.target.value)); } });
   },
 
   // S205 Cart share sheet
@@ -269,6 +279,31 @@ export const carts = {
 
   // S212 Shop the look (sheet, also screen)
   S212(params) { return base('Shop the look', { back: true, body: shopLookBody(params.guide || 'sg-table') }); },
+
+  // S213 Added to cart — the fork after every add: back to the shelf with
+  // the scanner, or into the draft. No dead-end toast, no decision debt.
+  S213(params) {
+    const p = D.productById[params.p] || D.products[0];
+    const qty = parseInt(params.qty, 10) || p.pack;
+    const c = D.cartById[params.cart] || D.carts[0];
+    const b = D.brandById[p.brand];
+    const body = `
+      <div class="center-col pad-block">${C.successMark()}<h3>Added to ${C.esc(c.name)}</h3>
+        <p class="muted">It's in the draft — nothing is ordered yet.</p></div>
+      <div class="card" style="max-width:none;gap:var(--s-2)">
+        <div class="list-row dense" style="border:0;padding-inline:0">
+          <span class="thumb thumb-illo" style="width:40px;height:40px">${C.illo(p.illo, 22)}</span>
+          <span class="body"><span class="pri">${C.esc(p.name)} ×${qty}</span><span class="sec">${C.esc(b.name)} · ${C.esc(p.variant)}</span></span>
+          <span class="trail">${C.maskField(C.money(p.wholesale * qty), 'spend')}</span>
+        </div>
+        <div class="row-between"><span class="muted">Cart total</span>${C.maskField(`<b>${C.money(D.cartTotal(c))}</b>`, 'spend')}</div>
+      </div>
+      <div class="sticky-actions">
+        <button class="btn ghost" data-go="S101">${icon('scan', 16)} Scan another</button>
+        <button class="btn" data-go="S202?cart=${c.id}">Go to cart</button>
+      </div>`;
+    return base('Added to cart', { back: true, tab: 'carts', body });
+  },
 };
 
 // ---- shared bodies (used by screens AND by sheets) ----
@@ -284,6 +319,17 @@ export function newCartBody() {
       <button class="list-row" data-action="create-cart" data-tpl="repeat"><span class="thumb">${icon('refresh', 22)}</span><span class="body"><span class="pri">Repeat last order</span><span class="sec">Order #4790 lines</span></span><span class="trail">${icon('chevron-right', 16)}</span></button>
       <button class="list-row" data-action="smart-reorder"><span class="thumb">${icon('sparkle', 22)}</span><span class="body"><span class="pri">Smart reorder</span><span class="sec">Behavior-ranked picks</span></span><span class="trail">${icon('chevron-right', 16)}</span></button>
     </div>`;
+}
+export function addAddressBody() {
+  return `
+    <div class="input-group"><label>Label</label><input class="input" data-f="name" placeholder="Marfa Studio · Pop-up" aria-label="Address label" /></div>
+    <div class="input-group"><label>Street</label><input class="input" data-f="line1" placeholder="Street address" aria-label="Street address" /></div>
+    <div class="grid-2">
+      <div class="input-group"><label>City</label><input class="input" data-f="city" placeholder="Marfa" /></div>
+      <div class="input-group"><label>State</label><input class="input" data-f="region" placeholder="TX" /></div>
+    </div>
+    <div class="input-group"><label>ZIP</label><input class="input" data-f="postal" inputmode="numeric" placeholder="79843" /></div>
+    <button class="btn full" data-action="save-address">Save address</button>`;
 }
 function shareRecipient(initials, name, role, canGrant, dark) {
   return `<div class="share-rec">

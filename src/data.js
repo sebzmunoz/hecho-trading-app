@@ -296,6 +296,43 @@ export const complianceItems = [
 export const addresses = [
   { id: 'a-1', name: 'Marfa Studio · Floor', line1: '207 W San Antonio St', city: 'Marfa', region: 'TX', postal: '79843', kind: 'Ship-to', def: true },
   { id: 'a-2', name: 'Marfa Studio · Billing', line1: 'PO Box 1120', city: 'Marfa', region: 'TX', postal: '79843', kind: 'Bill-to', def: false },
+  { id: 'a-3', name: 'Marfa Studio · Stockroom', line1: '114 E El Paso St', city: 'Marfa', region: 'TX', postal: '79843', kind: 'Ship-to', def: false },
+];
+export function addAddress(a) {
+  const addr = { id: 'a-' + (addresses.length + 1), kind: 'Ship-to', def: false, ...a };
+  addresses.push(addr);
+  return addr;
+}
+
+// ---- Order placement ----
+// Placing an order turns the draft into a real order at the top of the
+// index, so the post-shipping CTA can land on the actual order detail.
+let nextOrderId = 4847;
+export function placeOrder(cart, { ship = 'together', note = '' } = {}) {
+  const brandIds = [...new Set(cart.lines.map(([pid]) => productById[pid]?.brand).filter(Boolean))];
+  const id = String(nextOrderId++);
+  const o = {
+    id, status: 'open', total: cartTotal(cart),
+    brands: brandIds.map((b) => brandById[b].name),
+    eta: 'awaiting confirmation', placed: 'just now',
+    lines: cart.lines.map((l) => l.slice()),
+    invoice: 'INV-' + id, due: 'Net-30 on confirmation', paid: false,
+    ship, note,
+  };
+  orders.unshift(o);
+  orderById[id] = o;
+  return o;
+}
+
+// ---- Love list seeds ----
+// Pre-loved items so the prototype demos with a lived-in list. src is where
+// the heart was tapped: 'scan' (showroom floor) or 'browse' — telemetry only.
+export const lovedSeeds = [
+  { p: 'p-candle', src: 'scan' },
+  { p: 'p-linen', src: 'browse' },
+  { p: 'p-necklace', src: 'browse' },
+  { p: 'p-boba', src: 'scan' },
+  { p: 'p-cross', src: 'browse' },
 ];
 
 // ---- Saved payment methods ----

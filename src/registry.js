@@ -4,6 +4,7 @@
 // per-screen state switcher so every documented state has a frame.
 // ============================================================
 import { shop } from './screens/shop.js';
+import { love } from './screens/love.js';
 import { scan } from './screens/scan.js';
 import { carts } from './screens/carts.js';
 import { orders } from './screens/orders.js';
@@ -13,7 +14,7 @@ import { rep } from './screens/rep.js';
 import { system } from './screens/system.js';
 import { edge } from './screens/edge.js';
 
-const modules = { ...shop, ...scan, ...carts, ...orders, ...you, ...onboarding, ...rep, ...system, ...edge };
+const modules = { ...shop, ...love, ...scan, ...carts, ...orders, ...you, ...onboarding, ...rep, ...system, ...edge };
 
 // Common state sets
 const S = (...x) => x;
@@ -31,6 +32,8 @@ const META = {
   S007: { name: 'Category index', group: 'Shop', tab: 'shop', states: S('default', 'loading', 'offline') },
   S008: { name: 'Filters sheet', group: 'Shop', tab: 'shop', states: S('default') },
   S009: { name: 'Brand launch detail', group: 'Shop', tab: 'shop', states: S('default', 'closed', 'requested') },
+  S010: { name: 'Love list', group: 'Shop', tab: 'shop', states: S('default', 'empty', 'loading', 'offline') },
+  S011: { name: 'Love list → cart', group: 'Shop', tab: 'shop', states: S('default') },
   // ---- Scan ----
   S101: { name: 'Scanner viewfinder', group: 'Scan', tab: 'scan', states: S('default', 'identifying', 'lowlight', 'perm', 'offline') },
   S102: { name: 'Scan result', group: 'Scan', tab: 'scan', states: S('default') },
@@ -40,7 +43,7 @@ const META = {
   S201: { name: 'Carts index', group: 'Carts', tab: 'carts', states: S('default', 'empty', 'loading', 'offline') },
   S202: { name: 'Cart detail', group: 'Carts', tab: 'carts', states: S('default', 'conflict', 'offline') },
   S203: { name: 'New cart sheet', group: 'Carts', tab: 'carts', states: S('default') },
-  S204: { name: 'Cart submit', group: 'Carts', tab: 'carts', states: S('default', 'offline', 'error') },
+  S204: { name: 'Shipping', group: 'Carts', tab: 'carts', states: S('default', 'offline', 'error') },
   S205: { name: 'Cart share sheet', group: 'Carts', tab: 'carts', states: S('default') },
   S206: { name: 'Share / approval confirmation', group: 'Carts', tab: 'carts', states: S('default') },
   S207: { name: 'MOQ-not-met state', group: 'Carts', tab: 'carts', states: S('default') },
@@ -48,6 +51,7 @@ const META = {
   S209: { name: 'Approval review', group: 'Carts', tab: 'carts', states: S('default') },
   S211: { name: 'Add to cart sheet', group: 'Carts', tab: 'carts', states: S('default') },
   S212: { name: 'Shop the look sheet', group: 'Carts', tab: 'carts', states: S('default') },
+  S213: { name: 'Added to cart', group: 'Carts', tab: 'carts', states: S('default') },
   // ---- Orders ----
   S301: { name: 'Orders index', group: 'Orders', tab: 'orders', states: S('default', 'empty', 'loading', 'offline') },
   S302: { name: 'Order detail', group: 'Orders', tab: 'orders', states: S('default', 'offline', 'error') },

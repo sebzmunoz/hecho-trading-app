@@ -1,6 +1,6 @@
 # Hecho · Wholesale showroom app
 
-Functional prototype of the **Hecho Trading Co.** wholesale showroom companion app, built to the **Design Brief v1.1** and **Design System v3.0** in [`/reference`](./reference): a clickable, mocked-data build of **all 84 screens**, **all 14 user flows** (end-to-end with branches), and **every documented state** — wrapped in a phone frame with a live **control panel** for driving the app and testing how each screen reacts to different variables.
+Functional prototype of the **Hecho Trading Co.** wholesale showroom companion app, built to the **Design Brief v1.1** and **Design System v3.0** in [`/reference`](./reference): a clickable, mocked-data build of **all 87 screens**, **all 15 user flows** (end-to-end with branches), and **every documented state** — wrapped in a phone frame with a live **control panel** for driving the app and testing how each screen reacts to different variables.
 
 > No build step. Pure HTML/CSS/JS. The styling is the canonical Design System CSS, used verbatim.
 
@@ -24,7 +24,7 @@ Live build: deployed to **GitHub Pages** on every push (see `.github/workflows/d
 Drive the prototype and watch screens react in real time:
 
 - **Flows** — run any of F1–F14 as a step-by-step player (with the inline branches), or play the 2-minute stakeholder **walkthrough** (F1 → F2 → F6 → F7 → F12).
-- **Screens** — jump to any of the 84 screens, grouped exactly like §04 of the brief, with search.
+- **Screens** — jump to any of the 87 screens, grouped exactly like §04 of the brief, with search.
 - **Variables** — flip the things that change screen behavior, applied live:
   | Variable | Effect |
   |---|---|
@@ -41,8 +41,8 @@ The console collapses (device chrome button, top-left) so you can also view the 
 
 ## How it maps to the brief
 
-- **84 screens** — `src/registry.js` has one entry per ID; the Screens panel mirrors §04. State-alias frames (S702→S411, S805→S410) reuse the parent layout.
-- **14 flows** — `src/flows.js`; the Flow Player walks each one and exposes the branches.
+- **87 screens** — `src/registry.js` has one entry per ID; the Screens panel mirrors §04. State-alias frames (S702→S411, S805→S410) reuse the parent layout.
+- **15 flows** — `src/flows.js`; the Flow Player walks each one and exposes the branches. F15 is the love-list flow: love now, decide later.
 - **Design System parity** — `styles/system.css` is copied verbatim from `reference/design-system.html`; screens compose only documented components/tokens (`styles/app.css` is prototype chrome only — phone frame, console, transitions).
 - **Data contracts (§07-H)** — reorder qty (H1) and stock state (H3) are implemented in `src/data.js`. Scanning is barcode-only; each brand keeps its own stock counts current.
 - **Accessibility (§07-E / §SR)** — semantic markup, focus trap in overlays, the canonical masked-chip aria string, status = icon + label + color, 44px targets, reduced-motion honored, rem-based type.
@@ -60,8 +60,8 @@ src/
   router.js             hash routing · back stack · deep-link & QR scheme (§07-C)
   state.js              reactive store · role capabilities · telemetry
   panel.js              the control panel (Flows / Screens / Variables / Telemetry)
-  registry.js           84 screens → render fn + group + states
-  flows.js              the 14 flows (+ walkthrough)
+  registry.js           87 screens → render fn + group + states
+  flows.js              the 15 flows (+ walkthrough)
   data.js               the mocked world + §07-H contracts
   components.js         render helpers · privacy mask · overlays · toasts
   icons.js              line-icon set + HECHO mark

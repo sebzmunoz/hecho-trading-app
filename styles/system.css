@@ -1036,3 +1036,18 @@ footer .marquee span{display:inline-flex;align-items:flex-start;gap:.05em;animat
 .rpin.is-pending .rp-dot{background:var(--surface);border-color:var(--accent-text)}
 .rpin.is-prospect .rp-dot{background:var(--caution-fill,#B7791F);width:16px;height:16px}
 .rpin.is-prospect .rp-lbl{color:var(--accent-text)}
+
+/* ============================================================
+   Love list (S010) — zero-commitment capture. The heart is the
+   anti-cart: one tap, no sheet, no quantity. Terracotta when loved.
+   ============================================================ */
+.love-btn{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:var(--r-pill);border:var(--bw-1) solid var(--line);background:var(--surface);color:var(--fg-soft);cursor:pointer;flex:0 0 auto;transition:color var(--d-fast),border-color var(--d-fast),background var(--d-fast)}
+.love-btn:hover{color:var(--accent-text);border-color:var(--accent-text)}
+.love-btn:focus-visible{outline:var(--focus-w) solid var(--focus);outline-offset:var(--focus-offset)}
+.love-btn.is-loved{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 40%,transparent);background:color-mix(in srgb,var(--accent) 10%,transparent)}
+.love-btn.is-loved svg{animation:love-pop .35s var(--e-out-expo)}
+@keyframes love-pop{0%{transform:scale(.5)}55%{transform:scale(1.25)}100%{transform:scale(1)}}
+[data-reduced] .love-btn.is-loved svg{animation:none}
+/* overlay variant — floats on a product-card image */
+.card.product .img{position:relative}
+.love-btn.overlay{position:absolute;top:var(--s-2);inset-inline-end:var(--s-2);width:28px;height:28px;background:color-mix(in srgb,var(--surface) 84%,transparent);backdrop-filter:blur(4px);z-index:2}

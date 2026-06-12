@@ -20,7 +20,8 @@ export const flows = [
     { screen: 'S101', text: 'Open Scan — barcode mode by default.' },
     { screen: 'S102', text: 'Point at a barcode. The result half-sheet appears over the camera.' },
     { screen: 'S211', text: 'Add to cart — pick a draft, set quantity.' },
-    { screen: 'S101', text: 'Sheet collapses, viewfinder live again with a confirmation chip.', branch: { label: 'Branch · camera denied', screen: 'S105' } },
+    { screen: 'S213', text: 'Every add forks: keep scanning the shelf, or open the draft.' },
+    { screen: 'S101', text: 'Back to the viewfinder for the next shelf.', branch: { label: 'Branch · camera denied', screen: 'S105' } },
   ] },
   { id: 'F3', name: 'Looking up a product by hand', persona: 'P1·P2', phase: 'P1', steps: [
     { screen: 'S101', text: 'Open the scanner.' },
@@ -50,10 +51,10 @@ export const flows = [
     { screen: 'S204', text: 'Continue to submit.' },
   ] },
   { id: 'F7', name: 'Submitting an order & its lifecycle', persona: 'P1', phase: 'P0', steps: [
-    { screen: 'S202', text: 'Tap Submit.' },
-    { screen: 'S204', text: 'Review ship-to, terms, MOQ, Tax-ID. Confirm.', branch: { label: 'Branch · tax-ID expired', screen: 'S410' } },
-    { screen: 'S301', text: 'Order lands at the top of the index.' },
-    { screen: 'S302', text: 'Lifecycle updates Open → Settled; each change fires a push.' },
+    { screen: 'S202', text: 'Tap Continue — the draft is done when you say it is.' },
+    { screen: 'S204', text: 'One shipping screen: where it goes, how it ships, when, what it costs. Place the order.', branch: { label: 'Branch · tax-ID expired', screen: 'S410' } },
+    { screen: 'S302', text: 'You land directly on the new order — no detour through a list.' },
+    { screen: 'S301', text: 'It also sits at the top of the index. Lifecycle updates Open → Settled; each change fires a push.' },
   ] },
   { id: 'F8', name: 'Paying an invoice in-app', persona: 'P1', phase: 'P0', steps: [
     { screen: 'S301', text: 'Net-terms wallet shows balance and oldest due.' },
@@ -98,13 +99,19 @@ export const flows = [
     { screen: 'S009', text: 'First-look detail — Open the drop.', branch: { label: 'Branch · first-look closed', screen: 'S009?_=closed' } },
     { screen: 'S003', text: 'Land on the brand page with the new collection.' },
   ] },
+  { id: 'F15', name: 'Love now, decide later', persona: 'P1·P2', phase: 'P0', steps: [
+    { screen: 'S001', text: 'Every product surface carries a heart — one tap, nothing else asked.' },
+    { screen: 'S004', text: 'On the floor: love it and keep walking, no quantity needed.' },
+    { screen: 'S010', text: 'Your loves as a visual wall — tap a card to open the product.', branch: { label: 'Branch · empty list', screen: 'S010?_=empty' } },
+    { screen: 'S011', text: 'When you\'re ready — and only then — pick lines and start a cart. Quantities and MOQs live there, not before.' },
+  ] },
 ];
 
 export const flowById = Object.fromEntries(flows.map((f) => [f.id, f]));
 
-// Stakeholder walkthrough (acceptance criteria): F1 → F2 → F6 → F7 → F12
+// Stakeholder walkthrough (acceptance criteria): F1 → F2 → F15 → F6 → F7 → F12
 export const walkthrough = {
   name: '2-minute walkthrough',
-  line: 'Set up, scan a real shelf, reorder smart, submit and track, then protect it on the floor.',
-  flows: ['F1', 'F2', 'F6', 'F7', 'F12'],
+  line: 'Set up, scan a real shelf, love it for later, reorder smart, submit and track, then protect it on the floor.',
+  flows: ['F1', 'F2', 'F15', 'F6', 'F7', 'F12'],
 };

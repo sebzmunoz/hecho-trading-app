@@ -21,10 +21,16 @@ body.proto {
 .app-shell {
   display: grid;
   grid-template-columns: 372px 1fr;
+  /* dvh tracks the real visible viewport on phones — with plain 100vh the
+     shell is taller than the screen and a strip of page background shows
+     above the centered device */
   height: 100vh;
+  height: 100dvh;
   width: 100%;
 }
-.app-shell.console-collapsed { grid-template-columns: 0 1fr; }
+/* collapsed: the console is display:none, so the stage is the only grid
+   child — a single 1fr track (a 0-track would swallow the stage). */
+.app-shell.console-collapsed { grid-template-columns: 1fr; }
 
 .stage {
   position: relative;
@@ -141,6 +147,10 @@ body.proto {
 .rail::-webkit-scrollbar { display: none; }
 .rail > * { flex: 0 0 auto; scroll-snap-align: start; }
 .rail.tiles > * { width: 158px; }
+/* picker rows lead with a checkbox before the thumb — four cells, so the
+   default auto 1fr auto template would stretch the thumb, not the body */
+.list-row.pick { grid-template-columns: auto auto 1fr; }
+
 .chip-row { display: flex; gap: var(--s-2); overflow-x: auto; padding-bottom: var(--s-1); scrollbar-width: none; }
 .chip-row::-webkit-scrollbar { display: none; }
 .sticky-actions { position: sticky; bottom: 0; margin: var(--s-3) calc(-1 * var(--s-4)) calc(-1 * var(--s-7));
@@ -258,10 +268,18 @@ body.proto {
 .proto-fab[hidden] { display: none; }
 
 .device-tools { position: absolute; top: var(--s-3); right: calc(100% + var(--s-4)); display: flex; flex-direction: column; gap: var(--s-2); }
-.device-tools button, .device-tools a { width: 40px; height: 40px; border-radius: 50%; background: var(--surface); border: var(--bw-1) solid var(--line); color: var(--fg-soft); display: grid; place-items: center; box-shadow: var(--shadow-sm); cursor: pointer; }
-.device-tools button:hover, .device-tools a:hover { color: var(--accent-text); border-color: var(--accent); }
+.device-tools button { width: 40px; height: 40px; border-radius: 50%; background: var(--surface); border: var(--bw-1) solid var(--line); color: var(--fg-soft); display: grid; place-items: center; box-shadow: var(--shadow-sm); cursor: pointer; }
+.device-tools button:hover { color: var(--accent-text); border-color: var(--accent); }
 .device-tools button[aria-pressed="true"] { background: var(--action-sm); color: var(--on-action); border-color: var(--action-sm); }
-.device-tools button svg, .device-tools a svg { width: 18px; height: 18px; }
+.device-tools button svg { width: 18px; height: 18px; }
+
+/* prototype switcher — lives in the console head */
+.proto-swap { display: flex; align-items: center; justify-content: center; gap: var(--s-2); margin-top: var(--s-3);
+  padding: var(--s-2) var(--s-3); border: var(--bw-1) solid var(--line); border-radius: var(--r-pill);
+  background: var(--surface); color: var(--accent-text); font-size: var(--fs-micro); font-weight: 700;
+  letter-spacing: .08em; text-transform: uppercase; text-decoration: none; }
+.proto-swap:hover { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 6%, transparent); }
+.proto-swap svg { width: 15px; height: 15px; flex: 0 0 auto; }
 .device-wrap { position: relative; display: flex; }
 
 /* ---- Responsive: console becomes a slide-over drawer ---- */
