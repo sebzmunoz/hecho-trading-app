@@ -13,7 +13,6 @@ const DEFAULTS = {
   network: 'online',    // online | offline | slow (§07-A)
   theme: 'light',       // light | dark
   reducedMotion: false,
-  savedBrands: [],      // brand ids the buyer saved
   loved: lovedSeeds.map((x) => ({ ...x })), // love list — {p, src, when, note}
   cards: [],            // payment cards added in-session
   stateOverride: null,  // per-screen state forced from the panel
@@ -84,15 +83,6 @@ export const state = {
     else data.loved.push({ p: pid, src });
     persist();
     return i < 0;
-  },
-
-  // ---- saved brands ----
-  isBrandSaved(id) { return data.savedBrands.includes(id); },
-  toggleSavedBrand(id) {
-    const i = data.savedBrands.indexOf(id);
-    if (i >= 0) data.savedBrands.splice(i, 1); else data.savedBrands.push(id);
-    persist();
-    return this.isBrandSaved(id);
   },
 
   // ---- payment cards ----

@@ -18,6 +18,7 @@ export const flows = [
     { screen: 'S101', text: 'Open Scan — barcode only, no modes.' },
     { screen: 'S004', text: 'The scan resolves straight to the product page.', branch: { label: 'Branch · camera denied', screen: 'S105' } },
     { screen: 'S004', text: 'Set the quantity right here — no pop-up — and add it.' },
+    { screen: 'S205', text: 'Every add forks: keep scanning the shelf, or open the draft.' },
     { screen: 'S101', text: 'Back to the viewfinder for the next shelf.' },
   ] },
   { id: 'F4', name: 'Building a named draft cart', persona: 'P1·P2', phase: 'P0', steps: [

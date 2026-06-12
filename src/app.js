@@ -136,7 +136,8 @@ function handleAction(action, el) {
       const inline = el.closest('.sticky-actions') ? screenBody.querySelector('[data-stepper] input') : null;
       const qty = inline ? (parseInt(inline.value, 10) || p.pack) : (parseInt(el.dataset.qty, 10) || p.pack);
       T('cart.line_added', nav.current().id === 'S004' ? 'detail' : 'list', el.dataset.p);
-      C.toast(`Added ×${qty} to Back wall refresh`, { positive: true, action: { label: 'View', fn: () => nav.go('S202?cart=c-back') } });
+      C.closeAllOverlays();
+      nav.go(`S205?p=${p.id}&qty=${qty}&cart=c-back`);
       break;
     }
 
@@ -161,6 +162,13 @@ function handleAction(action, el) {
     }
 
     // ---- shipping ----
+    case 'ship-when': {
+      const w = { ...(state.get('shipWhen') || {}) };
+      w[el.dataset.scope] = { when: el.dataset.when, date: w[el.dataset.scope]?.date || '' };
+      state.setEphemeral('shipWhen', w);
+      nav.refresh();
+      break;
+    }
     case 'add-address': C.openSheet({ title: 'Add a ship-to address', html: addAddressBody() }); break;
     case 'save-address': {
       const sheet = el.closest('.sheet');
@@ -214,7 +222,6 @@ function handleAction(action, el) {
 
     // ---- tier / brand ----
     case 'request-access': T('brand.requested_access', 'brand', 'savant'); state.setEphemeral('_state', 'requested'); nav.refresh(); C.toast('Request sent — your rep will follow up', { positive: true }); break;
-    case 'save-brand': { const saved = state.toggleSavedBrand(el.dataset.brand); T('brand.saved', 'brand', el.dataset.brand); nav.refresh(); C.toast(saved ? 'Brand saved' : 'Removed from saved'); break; }
     case 'remind': C.toast('I\'ll remind you'); break;
 
     // ---- payment methods ----
@@ -320,8 +327,12 @@ function wireChrome() {
 function toggleConsole() {
   const shell = $('#appShell');
   if (window.matchMedia('(max-width:1040px)').matches) {
+    // drop any stale desktop-collapse state so the drawer can actually show
+    shell.classList.remove('console-collapsed');
+    $('#fabConsole').hidden = true;
     shell.classList.toggle('console-open');
   } else {
+    shell.classList.remove('console-open');
     shell.classList.toggle('console-collapsed');
     $('#fabConsole').hidden = !shell.classList.contains('console-collapsed');
   }

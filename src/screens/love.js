@@ -50,7 +50,7 @@ export function loveToCartBody() {
   return `
     <p class="muted">Pick what's ready. Quantities come next — I'll suggest pack-size amounts in the cart.</p>
     <div class="stack tight">${items.map(({ it, p }) => `
-      <label class="list-row dense" style="cursor:pointer"><span class="choice" style="margin:0"><input type="checkbox" checked data-love-pick data-p="${p.id}" /><span class="box"></span></span>
+      <label class="list-row dense pick" style="cursor:pointer"><span class="choice" style="margin:0"><input type="checkbox" checked data-love-pick data-p="${p.id}" /><span class="box"></span></span>
         <span class="thumb thumb-illo" style="width:40px;height:40px">${C.illo(p.illo, 22)}</span>
         <span class="body"><span class="pri">${C.esc(p.name)}</span><span class="sec">${C.esc(D.brandById[p.brand].name)} · $${p.wholesale}</span></span>
       </label>`).join('')}</div>

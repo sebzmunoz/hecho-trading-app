@@ -42,7 +42,6 @@ export const shop = {
     const b = D.brandById[params.brand] || D.brands[0];
     if (!D.canSee(b, state.get('tier')) || state.get('_state') === 'locked') return shop.S804({ brand: b.id });
     const prods = D.productsByBrand(b.id);
-    const saved = state.isBrandSaved(b.id);
     const launching = b.launching || state.get('_state') === 'launching';
 
     // category view: the products themselves
@@ -73,7 +72,7 @@ export const shop = {
         <span style="min-width:0"><b>${C.esc(b.founder)}</b><p class="muted" style="margin-top:2px;font-size:var(--fs-caption)">${C.esc(b.founderStory)}</p></span>
       </div>` : ''}
       <div class="row-between"><span class="moq">${icon('cart', 12)}MOQ $${b.moq}</span>
-        <button class="chip ${saved ? 'is-selected' : ''}" data-action="save-brand" data-brand="${b.id}" aria-pressed="${saved}">${icon('star', 13)} ${saved ? 'Saved' : 'Save brand'}</button></div>
+        <span class="muted" style="font-size:var(--fs-caption)">${icon('truck', 13)} Ships in ~${b.lead} days</span></div>
       ${C.sectionLabel('Shop by category')}
       <div class="grid-2">${catCards}
         <button class="card cat-card" data-go="S003?brand=${b.id}&cat=all">

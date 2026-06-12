@@ -40,6 +40,7 @@ const META = {
   S202: { name: 'Cart detail', group: 'Carts', tab: 'carts', states: S('default', 'conflict', 'offline') },
   S203: { name: 'New cart sheet', group: 'Carts', tab: 'carts', states: S('default') },
   S204: { name: 'Shipping', group: 'Carts', tab: 'carts', states: S('default', 'offline', 'error') },
+  S205: { name: 'Added to cart', group: 'Carts', tab: 'carts', states: S('default') },
   S207: { name: 'MOQ-not-met state', group: 'Carts', tab: 'carts', states: S('default') },
   // ---- Orders ----
   S301: { name: 'Orders index', group: 'Orders', tab: 'orders', states: S('default', 'empty', 'loading', 'offline') },

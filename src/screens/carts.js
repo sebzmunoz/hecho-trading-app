@@ -1,6 +1,7 @@
 import * as C from '../components.js';
 import * as D from '../data.js';
 import { state } from '../state.js';
+import { nav } from '../router.js';
 import { icon } from '../icons.js';
 import { base } from './shop.js';
 
@@ -20,6 +21,29 @@ function leadPhrase(days) {
   if (days <= 21) return 'about three weeks';
   if (days <= 31) return 'about a month';
   return `about ${Math.round(days / 7)} weeks`;
+}
+
+// ---- Ship timing (the second delivery decision: ASAP or an exact date) ----
+function fmtShipDate(iso) {
+  return new Date(iso + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+}
+function shipWhen(scope) {
+  return (state.get('shipWhen') || {})[scope] || { when: 'asap', date: '' };
+}
+function timingChips(scope, label) {
+  const sel = shipWhen(scope);
+  const todayISO = new Date().toISOString().slice(0, 10);
+  return `
+    <div class="row-between"><span class="${label ? '' : 'muted'}" style="font-weight:600">${C.esc(label || 'Ship date')}</span>
+      <span class="chip-row" style="padding-bottom:0">
+        <button class="chip ${sel.when === 'asap' ? 'is-selected' : ''}" data-action="ship-when" data-scope="${scope}" data-when="asap">ASAP</button>
+        <button class="chip ${sel.when === 'date' ? 'is-selected' : ''}" data-action="ship-when" data-scope="${scope}" data-when="date">${sel.when === 'date' && sel.date ? icon('clock', 12) + ' ' + fmtShipDate(sel.date) : 'Pick a date'}</button>
+      </span></div>
+    ${sel.when === 'date' ? `<input class="input" type="date" data-shipdate="${scope}" value="${sel.date || ''}" min="${todayISO}" aria-label="Ship date${label ? ' for ' + C.esc(label) : ''}" />` : ''}`;
+}
+function timingSummary(scope) {
+  const sel = shipWhen(scope);
+  return sel.when === 'date' && sel.date ? `ships ${fmtShipDate(sel.date)}` : 'ships ASAP';
 }
 
 export const carts = {
@@ -102,6 +126,12 @@ export const carts = {
       ? C.banner('<b>Free shipping.</b> This order clears the $500 minimum.', { ic: 'truck' })
       : C.banner(`<b>Free shipping</b> kicks in over $500 — ${C.money(500 - total)} to go.`, { ic: 'truck' });
 
+    // second decision, per delivery: ASAP or an exact date. Together = one
+    // decision for the whole order; split = one per brand.
+    const timing = ship === 'together' || !multi
+      ? `<div class="card" style="max-width:none;gap:var(--s-2)">${timingChips('all', 'Whole order')}</div>`
+      : `<div class="card" style="max-width:none;gap:var(--s-3)">${cartBrandIds.map((bid) => timingChips(bid, D.brandById[bid]?.name || bid)).join('')}</div>`;
+
     const body = `
       ${offline ? C.banner('You\'re offline — placing an order needs a connection.', { kind: 'caution', ic: 'wifi_off' }) : ''}
       ${C.sectionLabel('Ship to')}
@@ -109,11 +139,14 @@ export const carts = {
       <button class="btn ghost sm full" data-action="add-address">${icon('plus', 16)} Add an address</button>
       ${C.sectionLabel('Delivery')}
       <div class="stack tight">${delivery}</div>
+      ${C.sectionLabel('When')}
+      ${timing}
       ${freeShip}
       <div class="input-group"><label>Delivery note · optional</label><input class="input" data-shipnote value="${C.esc(state.get('shipNote') || '')}" placeholder="Gate code, dock hours, who signs…" aria-label="Delivery note" /></div>
       <div class="card" style="max-width:none;gap:var(--s-2)">
         <div class="row-between"><b>Order summary</b><span class="muted">${c.lines.length} lines · ${cartBrandIds.length} ${cartBrandIds.length === 1 ? 'brand' : 'brands'}</span></div>
         <div class="row-between"><span class="muted">Goods total</span><span class="price compact"><span class="v">${D.usd(total)}</span><span class="currency">USD</span></span></div>
+        <div class="row-between"><span class="muted">Delivery</span><span>${ship === 'together' || !multi ? `One delivery · ${timingSummary('all')}` : `${cartBrandIds.length} deliveries · dates above`}</span></div>
         <div class="row-between"><span class="muted">Shipping</span><span>${total >= 500 ? 'Free' : 'On the invoice'}</span></div>
         <div class="row-between"><span class="muted">Terms</span><span class="pill">${D.account.terms}</span></div>
         ${overLimit ? `<div class="row-between"><span style="color:var(--critical);font-weight:600">${icon('warning', 14)} Over credit limit</span><span class="muted">won't block</span></div>` : ''}
@@ -122,7 +155,40 @@ export const carts = {
       <div class="sticky-actions"><button class="btn ghost" data-back>Back to cart</button>
         <button class="btn" data-action="confirm-submit" data-cart="${c.id}" ${offline ? 'aria-disabled="true"' : ''}>Place order</button></div>`;
     return base('Shipping', { back: true, noTabbar: true, eyebrow: c.name, body,
-      onMount(root) { root.querySelector('[data-shipnote]')?.addEventListener('input', (e) => state.setEphemeral('shipNote', e.target.value)); } });
+      onMount(root) {
+        root.querySelector('[data-shipnote]')?.addEventListener('input', (e) => state.setEphemeral('shipNote', e.target.value));
+        root.querySelectorAll('[data-shipdate]').forEach((inp) => inp.addEventListener('change', (e) => {
+          const w = { ...(state.get('shipWhen') || {}) };
+          w[inp.dataset.shipdate] = { when: 'date', date: e.target.value };
+          state.setEphemeral('shipWhen', w);
+          nav.refresh();
+        }));
+      } });
+  },
+
+  // S205 Added to cart — the fork after every add: back to the shelf with
+  // the scanner, or into the draft. No dead-end toast, no decision debt.
+  S205(params) {
+    const p = D.productById[params.p] || D.products[0];
+    const qty = parseInt(params.qty, 10) || p.pack;
+    const c = D.cartById[params.cart] || D.carts[0];
+    const b = D.brandById[p.brand];
+    const body = `
+      <div class="center-col pad-block">${C.successMark()}<h3>Added to ${C.esc(c.name)}</h3>
+        <p class="muted">It's in the draft — nothing is ordered yet.</p></div>
+      <div class="card" style="max-width:none;gap:var(--s-2)">
+        <div class="list-row dense" style="border:0;padding-inline:0">
+          <span class="thumb thumb-illo" style="width:40px;height:40px">${C.illo(p.illo, 22)}</span>
+          <span class="body"><span class="pri">${C.esc(p.name)} ×${qty}</span><span class="sec">${C.esc(b.name)} · ${C.esc(p.variant)}</span></span>
+          <span class="trail">${C.money(p.wholesale * qty)}</span>
+        </div>
+        <div class="row-between"><span class="muted">Cart total</span><b>${C.money(D.cartTotal(c))}</b></div>
+      </div>
+      <div class="sticky-actions">
+        <button class="btn ghost" data-go="S101">${icon('scan', 16)} Scan another</button>
+        <button class="btn" data-go="S202?cart=${c.id}">Go to cart</button>
+      </div>`;
+    return base('Added to cart', { back: true, body });
   },
 
   // S207 MOQ-not-met
