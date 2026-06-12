@@ -13,6 +13,15 @@ function brandGroups(cart) {
   return groups;
 }
 
+// Brand lead times (days) → the relative-time phrases the copy deck mandates.
+function leadPhrase(days) {
+  if (days <= 7) return 'about a week';
+  if (days <= 14) return 'about two weeks';
+  if (days <= 21) return 'about three weeks';
+  if (days <= 31) return 'about a month';
+  return `about ${Math.round(days / 7)} weeks`;
+}
+
 export const carts = {
   // S201 Carts index
   S201() {
@@ -36,9 +45,8 @@ export const carts = {
     const conflict = state.get('_state') === 'conflict';
     let total = D.cartTotal(c);
     const body = `
-      ${conflict ? C.banner('<b>This draft changed on another device.</b> Resolve before you submit.', { kind: 'caution', ic: 'warning', action: { label: 'Resolve', go: 'S807?cart=' + c.id } }) : ''}
+      ${conflict ? C.banner('<b>This draft changed on another device.</b> Resolve before you continue.', { kind: 'caution', ic: 'warning', action: { label: 'Resolve', go: 'S807?cart=' + c.id } }) : ''}
       ${c.sync === 'pending' && state.get('network') !== 'online' ? `<div class="row-between"><span class="sync-tag"><span class="spin-dot"></span>Sync pending</span></div>` : ''}
-      <div class="input-group"><label>Cart name</label><input class="input" value="${C.esc(c.name)}" aria-label="Cart name" /></div>
       ${Object.entries(groups).map(([bid, lines]) => {
         const b = D.brandById[bid];
         const sub = lines.reduce((s, [p, q]) => s + p.wholesale * q, 0);
@@ -52,7 +60,7 @@ export const carts = {
         </div>`;
       }).join('')}
       <div class="card" style="max-width:none"><div class="row-between"><b>Cart total</b><span class="price compact"><span class="v" data-carttotal>${D.usd(total)}</span><span class="currency">USD</span></span></div></div>
-      <div class="sticky-actions"><button class="btn full" data-action="submit-cart" data-cart="${c.id}">Submit order</button></div>`;
+      <div class="sticky-actions"><button class="btn full" data-action="submit-cart" data-cart="${c.id}">Continue</button></div>`;
     return base(c.name, { back: true, headerRight: C.hActions([{ icon: 'dots', action: 'cart-menu' }]), body });
   },
 
@@ -61,27 +69,60 @@ export const carts = {
     return base('New cart', { back: true, body: newCartBody() });
   },
 
-  // S204 Cart submit
+  // S204 Shipping — the one step between cart and order. Everything on a
+  // single screen: where it goes, how it ships, what it costs, what happens
+  // next. "Place order" lands directly on the new order's detail.
   S204(params) {
     const c = D.cartById[params.cart] || D.carts[0];
     const offline = state.get('network') !== 'online';
     const total = D.cartTotal(c);
     const overLimit = D.account.outstanding + total > D.account.creditLimit;
+    const addrId = D.addresses.some((a) => a.id === params.addr) ? params.addr : (D.addresses.find((a) => a.def) || D.addresses[0]).id;
+    const cartBrandIds = [...new Set(c.lines.map(([pid]) => D.productById[pid]?.brand).filter(Boolean))];
+    const leads = cartBrandIds.map((bid) => D.brandById[bid]?.lead ?? 14);
+    const multi = cartBrandIds.length > 1;
+    const ship = multi && params.ship === 'split' ? 'split' : 'together';
+    // selection re-renders replace the route so Back still returns to the cart in one tap
+    const q = (over) => { const p = { addr: addrId, ship, ...over }; return `S204?cart=${c.id}&addr=${p.addr}&ship=${p.ship}`; };
+
+    const addrRows = D.addresses.map((a) => C.listRow({
+      thumbIcon: 'pin', pri: C.esc(a.name), sec: `${C.esc(a.line1)} · ${C.esc(a.city)}, ${C.esc(a.region)} ${C.esc(a.postal)}`,
+      trail: a.id === addrId ? icon('check', 18) : '', current: a.id === addrId,
+      go: q({ addr: a.id }), attrs: 'data-replace',
+    })).join('');
+
+    const delivery = multi ? `
+      ${C.listRow({ thumbIcon: 'pkg', pri: 'Everything together', sec: `One delivery · lands in ${leadPhrase(Math.max(...leads))}`,
+        trail: ship === 'together' ? icon('check', 18) : '', current: ship === 'together', go: q({ ship: 'together' }), attrs: 'data-replace' })}
+      ${C.listRow({ thumbIcon: 'truck', pri: 'As each brand is ready', sec: `${cartBrandIds.length} deliveries · first lands in ${leadPhrase(Math.min(...leads))}`,
+        trail: ship === 'split' ? icon('check', 18) : '', current: ship === 'split', go: q({ ship: 'split' }), attrs: 'data-replace' })}`
+      : C.listRow({ thumbIcon: 'pkg', pri: 'One delivery', sec: `${C.esc(D.brandById[cartBrandIds[0]]?.name || 'Your brand')} ships in ${leadPhrase(leads[0] || 14)}`, trail: icon('check', 18), current: true });
+
+    const freeShip = total >= 500
+      ? C.banner('<b>Free shipping.</b> This order clears the $500 minimum.', { ic: 'truck' })
+      : C.banner(`<b>Free shipping</b> kicks in over $500 — ${C.money(500 - total)} to go.`, { ic: 'truck' });
+
     const body = `
-      <div class="card" style="max-width:none">
-        <div class="row-between"><span class="muted">Ship to</span></div>
-        <b>${D.addresses[0].name}</b><span class="muted">${D.addresses[0].line1}, ${D.addresses[0].city} ${D.addresses[0].region}</span>
-      </div>
-      <div class="card" style="max-width:none">
+      ${offline ? C.banner('You\'re offline — placing an order needs a connection.', { kind: 'caution', ic: 'wifi_off' }) : ''}
+      ${C.sectionLabel('Ship to')}
+      <div class="stack tight">${addrRows}</div>
+      <button class="btn ghost sm full" data-action="add-address">${icon('plus', 16)} Add an address</button>
+      ${C.sectionLabel('Delivery')}
+      <div class="stack tight">${delivery}</div>
+      ${freeShip}
+      <div class="input-group"><label>Delivery note · optional</label><input class="input" data-shipnote value="${C.esc(state.get('shipNote') || '')}" placeholder="Gate code, dock hours, who signs…" aria-label="Delivery note" /></div>
+      <div class="card" style="max-width:none;gap:var(--s-2)">
+        <div class="row-between"><b>Order summary</b><span class="muted">${c.lines.length} lines · ${cartBrandIds.length} ${cartBrandIds.length === 1 ? 'brand' : 'brands'}</span></div>
+        <div class="row-between"><span class="muted">Goods total</span><span class="price compact"><span class="v">${D.usd(total)}</span><span class="currency">USD</span></span></div>
+        <div class="row-between"><span class="muted">Shipping</span><span>${total >= 500 ? 'Free' : 'On the invoice'}</span></div>
         <div class="row-between"><span class="muted">Terms</span><span class="pill">${D.account.terms}</span></div>
-        <div class="row-between"><span class="muted">Payment</span><span>Net-30 · override at pay</span></div>
-        ${overLimit ? `<div class="row-between"><span class="critical" style="color:var(--critical);font-weight:600">${icon('warning', 14)} Over credit limit</span><span class="muted">won't block</span></div>` : ''}
+        ${overLimit ? `<div class="row-between"><span style="color:var(--critical);font-weight:600">${icon('warning', 14)} Over credit limit</span><span class="muted">won't block</span></div>` : ''}
+        <p class="muted" style="font-size:var(--fs-nano)">Nothing is charged today — I invoice on your ${D.account.terms} terms once the brands confirm.</p>
       </div>
-      <div class="card" style="max-width:none"><div class="row-between"><b>Order total</b><span class="price"><span class="v">${D.usd(total)}</span><span class="currency">USD</span></span></div></div>
-      ${offline ? C.banner('You\'re offline — Submit needs a connection.', { kind: 'caution', ic: 'wifi_off' }) : ''}
-      <div class="sticky-actions"><button class="btn ghost" data-back>Edit lines</button>
-        <button class="btn" data-action="confirm-submit" data-cart="${c.id}" ${offline ? 'aria-disabled="true"' : ''}>Submit order</button></div>`;
-    return base('Review & submit', { back: true, noTabbar: true, body });
+      <div class="sticky-actions"><button class="btn ghost" data-back>Back to cart</button>
+        <button class="btn" data-action="confirm-submit" data-cart="${c.id}" ${offline ? 'aria-disabled="true"' : ''}>Place order</button></div>`;
+    return base('Shipping', { back: true, noTabbar: true, eyebrow: c.name, body,
+      onMount(root) { root.querySelector('[data-shipnote]')?.addEventListener('input', (e) => state.setEphemeral('shipNote', e.target.value)); } });
   },
 
   // S207 MOQ-not-met
@@ -102,6 +143,17 @@ export const carts = {
 // ---- shared bodies (used by screens AND by sheets) ----
 export function newCartActions() {
   return C.hActions([{ icon: 'plus', action: 'new-cart', label: 'New cart' }]);
+}
+export function addAddressBody() {
+  return `
+    <div class="input-group"><label>Label</label><input class="input" data-f="name" placeholder="Marfa Studio · Pop-up" aria-label="Address label" /></div>
+    <div class="input-group"><label>Street</label><input class="input" data-f="line1" placeholder="Street address" aria-label="Street address" /></div>
+    <div class="grid-2">
+      <div class="input-group"><label>City</label><input class="input" data-f="city" placeholder="Marfa" /></div>
+      <div class="input-group"><label>State</label><input class="input" data-f="region" placeholder="TX" /></div>
+    </div>
+    <div class="input-group"><label>ZIP</label><input class="input" data-f="postal" inputmode="numeric" placeholder="79843" /></div>
+    <button class="btn full" data-action="save-address">Save address</button>`;
 }
 export function newCartBody() {
   return `

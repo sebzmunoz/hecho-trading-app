@@ -200,10 +200,36 @@ export const lovedSeeds = [
 export const recentSearches = ['Wool Throw', 'candle', 'Talavera', 'SKU 4821-OAT'];
 export const trendingChips = ['Jewelry', 'Under MOQ', 'New drops', 'In stock'];
 
-// ---- Ship-to (shown at review & submit) ----
+// ---- Ship-to (chosen on the shipping screen) ----
 export const addresses = [
   { id: 'a-1', name: 'Marfa Studio · Floor', line1: '207 W San Antonio St', city: 'Marfa', region: 'TX', postal: '79843', kind: 'Ship-to', def: true },
+  { id: 'a-2', name: 'Marfa Studio · Stockroom', line1: '114 E El Paso St', city: 'Marfa', region: 'TX', postal: '79843', kind: 'Ship-to', def: false },
 ];
+export function addAddress(a) {
+  const addr = { id: 'a-' + (addresses.length + 1), kind: 'Ship-to', def: false, ...a };
+  addresses.push(addr);
+  return addr;
+}
+
+// ---- Order placement ----
+// Placing an order turns the draft into a real order at the top of the
+// index, so the post-shipping CTA can land on the actual order detail.
+let nextOrderId = 4847;
+export function placeOrder(cart, { ship = 'together', note = '' } = {}) {
+  const brandIds = [...new Set(cart.lines.map(([pid]) => productById[pid]?.brand).filter(Boolean))];
+  const id = String(nextOrderId++);
+  const o = {
+    id, status: 'open', total: cartTotal(cart),
+    brands: brandIds.map((b) => brandById[b].name),
+    eta: 'awaiting confirmation', placed: 'just now',
+    lines: cart.lines.map((l) => l.slice()),
+    invoice: 'INV-' + id, due: 'Net-30 on confirmation', paid: false,
+    ship, note,
+  };
+  orders.unshift(o);
+  orderById[id] = o;
+  return o;
+}
 
 // ---- Saved payment methods ----
 export const paymentMethods = [

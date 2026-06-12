@@ -258,10 +258,10 @@ body.proto {
 .proto-fab[hidden] { display: none; }
 
 .device-tools { position: absolute; top: var(--s-3); right: calc(100% + var(--s-4)); display: flex; flex-direction: column; gap: var(--s-2); }
-.device-tools button { width: 40px; height: 40px; border-radius: 50%; background: var(--surface); border: var(--bw-1) solid var(--line); color: var(--fg-soft); display: grid; place-items: center; box-shadow: var(--shadow-sm); cursor: pointer; }
-.device-tools button:hover { color: var(--accent-text); border-color: var(--accent); }
+.device-tools button, .device-tools a { width: 40px; height: 40px; border-radius: 50%; background: var(--surface); border: var(--bw-1) solid var(--line); color: var(--fg-soft); display: grid; place-items: center; box-shadow: var(--shadow-sm); cursor: pointer; }
+.device-tools button:hover, .device-tools a:hover { color: var(--accent-text); border-color: var(--accent); }
 .device-tools button[aria-pressed="true"] { background: var(--action-sm); color: var(--on-action); border-color: var(--action-sm); }
-.device-tools button svg { width: 18px; height: 18px; }
+.device-tools button svg, .device-tools a svg { width: 18px; height: 18px; }
 .device-wrap { position: relative; display: flex; }
 
 /* ---- Responsive: console becomes a slide-over drawer ---- */

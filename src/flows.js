@@ -28,10 +28,10 @@ export const flows = [
     { screen: 'S202', text: 'Edit lines, change quantity, save.', branch: { label: 'Branch · MOQ not met', screen: 'S207' } },
   ] },
   { id: 'F7', name: 'Submitting an order & its lifecycle', persona: 'P1', phase: 'P0', steps: [
-    { screen: 'S202', text: 'Tap Submit.' },
-    { screen: 'S204', text: 'Review ship-to, terms, and MOQ. Confirm.' },
-    { screen: 'S301', text: 'Order lands at the top of the index.' },
-    { screen: 'S302', text: 'Lifecycle updates Open → Settled; each change fires a push.' },
+    { screen: 'S202', text: 'Tap Continue — the draft is done when you say it is.' },
+    { screen: 'S204', text: 'One shipping screen: where it goes, how it ships, what it costs. Place the order.' },
+    { screen: 'S302', text: 'You land directly on the new order — no detour through a list.' },
+    { screen: 'S301', text: 'It also sits at the top of the index. Lifecycle updates Open → Settled; each change fires a push.' },
   ] },
   { id: 'F8', name: 'Paying an invoice in-app', persona: 'P1', phase: 'P0', steps: [
     { screen: 'S301', text: 'Net-terms wallet shows balance and oldest due.' },

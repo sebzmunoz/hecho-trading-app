@@ -74,6 +74,10 @@ export function initRouter(fn) {
   window.addEventListener('hashchange', () => {
     if (suppress) return;
     const r = parseRoute(location.hash || '#/S001');
+    // ignore echoes of programmatic navs that land after their suppress
+    // window (e.g. two nav.go calls back-to-back) — the route is already top
+    const top = stack[stack.length - 1];
+    if (top && routeToString(top) === routeToString(r)) return;
     stack.push(r);
     renderFn && renderFn(r, { direction: 'forward' });
   });

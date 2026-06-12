@@ -7,7 +7,7 @@ import { registry } from './registry.js';
 import { initPanel, onRouteChange } from './panel.js';
 import { icon } from './icons.js';
 import * as C from './components.js';
-import { newCartBody } from './screens/carts.js';
+import { newCartBody, addAddressBody } from './screens/carts.js';
 import { loveToCartBody } from './screens/love.js';
 import { filtersBody } from './screens/shop.js';
 import { paymentBody, addMethodBody, addCardBody } from './screens/orders.js';
@@ -93,7 +93,7 @@ screenFrame.addEventListener('click', (e) => {
   // Nearest attribute wins when nested — e.g. a love heart inside a product card.
   const nestedAct = e.target.closest('[data-action]');
   const actWins = nestedAct && goEl && goEl !== nestedAct && goEl.contains(nestedAct);
-  if (goEl && goEl.getAttribute('data-go') && !actWins) { e.preventDefault(); C.closeAllOverlays(); state.setEphemeral('_state', null); nav.go(goEl.dataset.go); return; }
+  if (goEl && goEl.getAttribute('data-go') && !actWins) { e.preventDefault(); C.closeAllOverlays(); state.setEphemeral('_state', null); nav.go(goEl.dataset.go, { replace: goEl.hasAttribute('data-replace') }); return; }
   const backEl = e.target.closest('[data-back]');
   if (backEl) { e.preventDefault(); if (!nav.back()) nav.go('S001'); return; }
   const segEl = e.target.closest('.segmented [data-val]');
@@ -146,10 +146,33 @@ function handleAction(action, el) {
       if (state.get('guest')) { C.openSheet({ title: 'Set up your account to order', html: registrationBody() }); break; }
       nav.go('S204?cart=' + (el.dataset.cart || 'c-back'));
       break;
-    case 'confirm-submit':
-      if (state.get('network') !== 'online') { C.toast('You\'re offline — reconnect to submit'); break; }
-      T('cart.submitted', 'cart', el.dataset.cart || 'c-back'); nav.go('S301'); C.toast('Order submitted', { positive: true });
+    case 'confirm-submit': {
+      if (state.get('network') !== 'online') { C.toast('You\'re offline — reconnect to place the order'); break; }
+      const cart = D.cartById[el.dataset.cart] || D.carts[0];
+      const r = nav.current();
+      const o = D.placeOrder(cart, { ship: r.params.ship || 'together', note: state.get('shipNote') || '' });
+      state.setEphemeral('shipNote', '');
+      T('cart.submitted', 'shipping', cart.id);
+      // land directly on the new order; seed Orders underneath so Back goes to the index
+      nav.go('S301', { resetStack: true });
+      nav.go('S302?order=' + o.id);
+      C.toast(`Order #${o.id} placed`, { positive: true });
       break;
+    }
+
+    // ---- shipping ----
+    case 'add-address': C.openSheet({ title: 'Add a ship-to address', html: addAddressBody() }); break;
+    case 'save-address': {
+      const sheet = el.closest('.sheet');
+      const get = (n) => sheet?.querySelector(`[data-f="${n}"]`)?.value?.trim();
+      const a = D.addAddress({ name: get('name') || 'New address', line1: get('line1') || '—', city: get('city') || 'Marfa', region: get('region') || 'TX', postal: get('postal') || '' });
+      C.closeAllOverlays();
+      const r = nav.current();
+      if (r.id === 'S204') nav.go(`S204?cart=${r.params.cart || 'c-back'}&addr=${a.id}&ship=${r.params.ship || 'together'}`, { replace: true });
+      else nav.refresh();
+      C.toast('Address added', { positive: true });
+      break;
+    }
 
     // ---- payment ----
     case 'confirm-pay':
@@ -250,7 +273,25 @@ function handleAction(action, el) {
     case 'email-support': C.toast('Opening mail to support…'); break;
     case 'mark-read': C.toast('All marked read'); break;
     case 'sign-out': nav.go('S417'); break;
-    case 'cart-menu': case 'order-menu': C.openSheet({ title: 'Options', html: `<div class="opts"><button class="opt">${icon('copy', 20)} Duplicate</button><button class="opt">${icon('trash', 20)} Archive</button></div>` }); break;
+    case 'cart-menu': C.openSheet({ title: 'Options', html: `<div class="opts"><button class="opt" data-action="rename-cart">${icon('draft', 20)} Rename</button><button class="opt">${icon('copy', 20)} Duplicate</button><button class="opt">${icon('trash', 20)} Archive</button></div>` }); break;
+    case 'order-menu': C.openSheet({ title: 'Options', html: `<div class="opts"><button class="opt">${icon('copy', 20)} Duplicate</button><button class="opt">${icon('trash', 20)} Archive</button></div>` }); break;
+    // The cart name lives in the header only (no duplicate field on the
+    // screen) — renaming happens here, off the ⋯ menu.
+    case 'rename-cart': {
+      const c = D.cartById[nav.current().params.cart] || D.carts[0];
+      C.closeAllOverlays();
+      C.openSheet({ title: 'Rename cart', html: `
+        <div class="input-group"><label>Name</label><input class="input" data-f="cart-name" value="${C.esc(c.name)}" aria-label="Cart name" /></div>
+        <button class="btn full" data-action="rename-cart-save" data-cart="${c.id}">Save</button>` });
+      break;
+    }
+    case 'rename-cart-save': {
+      const c = D.cartById[el.dataset.cart] || D.carts[0];
+      const v = el.closest('.sheet')?.querySelector('[data-f="cart-name"]')?.value?.trim();
+      if (v) c.name = v;
+      C.closeAllOverlays(); nav.refresh(); C.toast('Renamed', { positive: true });
+      break;
+    }
 
     default: C.toast('Done'); break;
   }
