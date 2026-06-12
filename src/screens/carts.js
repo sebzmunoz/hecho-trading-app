@@ -52,7 +52,6 @@ export const carts = {
       ${repView ? C.banner('<b>Editing as rep.</b> Changes are visible to the retailer.', { ic: 'user' }) : ''}
       ${conflict ? C.banner('<b>This draft changed elsewhere.</b> Resolve before you submit.', { kind: 'caution', ic: 'warning', action: { label: 'Resolve', go: 'S807?cart=' + c.id } }) : ''}
       ${c.sync === 'pending' && state.get('network') !== 'online' ? `<div class="row-between"><span class="sync-tag"><span class="spin-dot"></span>Sync pending</span></div>` : ''}
-      <div class="input-group"><label>Cart name</label><input class="input" value="${C.esc(c.name)}" aria-label="Cart name" /></div>
       ${Object.entries(groups).map(([bid, lines]) => {
         const b = D.brandById[bid];
         const sub = lines.reduce((s, [p, q]) => s + p.wholesale * q, 0);
