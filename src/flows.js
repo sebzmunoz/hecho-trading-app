@@ -36,7 +36,7 @@ export const flows = [
     { screen: 'S202', text: 'Edit lines, change quantity, save.', branch: { label: 'Branch · MOQ not met', screen: 'S207' } },
   ] },
   { id: 'F5', name: 'Sharing a draft for approval', persona: 'P1·P2', phase: 'P1', steps: [
-    { screen: 'S202', text: 'A staff member finishes a draft. Tap Share.' },
+    { screen: 'S202', text: 'A staff draft runs over its budget — only the overage needs sign-off. Tap Share.' },
     { screen: 'S205', text: 'Pick a recipient and permission level.' },
     { screen: 'S206', text: 'Share confirmation. The admin gets a push.' },
     { screen: 'S208', text: 'The admin opens the approval inbox.' },

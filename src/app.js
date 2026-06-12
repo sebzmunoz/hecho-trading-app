@@ -8,6 +8,7 @@ import { initPanel, onRouteChange } from './panel.js';
 import { icon } from './icons.js';
 import * as C from './components.js';
 import { newCartBody, shareBody, addToCartBody, shopLookBody } from './screens/carts.js';
+import { bookApptBody, apptWhenLabel } from './screens/you.js';
 import { filtersBody } from './screens/shop.js';
 import { paymentBody, addMethodBody, addCardBody } from './screens/orders.js';
 import { registrationBody } from './screens/onboarding.js';
@@ -30,7 +31,7 @@ const SELF_STATES = {
   S001: ['empty'], S003: ['launching'], S004: ['oos'], S006: ['empty'],
   S009: ['closed', 'requested'], S101: ['perm', 'lowlight', 'identifying'],
   S106: ['error'], S201: ['empty'], S202: ['conflict'], S208: ['empty'],
-  S301: ['empty'], S308: ['error'], S310: ['empty'], S602: ['empty'],
+  S301: ['empty'], S308: ['error'], S310: ['empty'], S412: ['empty'], S602: ['empty'],
   S604: ['conflict'], S701: ['empty'], S708: ['low', 'out'],
 };
 
@@ -136,6 +137,19 @@ screenFrame.addEventListener('click', (e) => {
   if (actEl) { e.preventDefault(); handleAction(actEl.dataset.action, actEl, e); }
 });
 
+// Ship-date pickers (S204): commit the exact date to state as it changes.
+screenFrame.addEventListener('change', (e) => {
+  const d = e.target.closest('[data-shipdate]');
+  if (!d) return;
+  const sd = JSON.parse(JSON.stringify(state.get('shipDates') || { mode: 'all', all: { when: 'asap', date: '' }, brands: {} }));
+  sd.brands ||= {};
+  const scope = d.dataset.shipdate;
+  if (scope === 'all') sd.all = { when: 'date', date: d.value };
+  else sd.brands[scope] = { when: 'date', date: d.value };
+  state.set({ shipDates: sd });
+  nav.refresh();
+});
+
 // ---------- actions ----------
 function curSource() {
   const id = nav.current().id;
@@ -183,6 +197,63 @@ function handleAction(action, el) {
       break;
     case 'approve-submit': T('cart.approved', 'cart', el.dataset.cart); nav.go('S204?cart=' + (el.dataset.cart || 'c-spring')); break;
     case 'send-back': nav.go('S208'); C.toast('Sent back with notes'); break;
+    case 'split-submit':
+      // Over-budget staff submit: the in-budget part goes through NOW; only
+      // the overage queues for approval. The on-the-spot sale never waits.
+      if (state.get('network') !== 'online') { C.toast('You\'re offline — reconnect to submit'); break; }
+      T('cart.submitted', 'cart', el.dataset.cart || 'c-back');
+      T('cart.shared', 'cart', el.dataset.cart || 'c-back');
+      nav.go('S301');
+      C.toast(`${el.dataset.now} submitted — ${el.dataset.over} overage sent for approval`, { positive: true });
+      break;
+
+    // ---- ship timing (S204) ----
+    case 'ship-mode': {
+      const sd = JSON.parse(JSON.stringify(state.get('shipDates') || {}));
+      sd.mode = el.dataset.mode === 'per' ? 'per' : 'all';
+      sd.all ||= { when: 'asap', date: '' }; sd.brands ||= {};
+      state.set({ shipDates: sd }); nav.refresh(); break;
+    }
+    case 'ship-when': {
+      const sd = JSON.parse(JSON.stringify(state.get('shipDates') || { mode: 'all', all: { when: 'asap', date: '' }, brands: {} }));
+      sd.brands ||= {};
+      const { scope, when } = el.dataset;
+      if (scope === 'all') sd.all = { when, date: sd.all?.date || '' };
+      else sd.brands[scope] = { when, date: sd.brands[scope]?.date || '' };
+      state.set({ shipDates: sd }); nav.refresh(); break;
+    }
+
+    // ---- appointments (admins AND staff book; reps book with retailers) ----
+    case 'book-appt': C.openSheet({ title: 'Book an appointment', html: bookApptBody() }); break;
+    case 'confirm-appt': {
+      const root = el.closest('.sheet') || document;
+      const kind = root.querySelector('[data-appt-kind] .chip.is-selected')?.textContent.trim() || D.appointmentKinds[0];
+      const when = apptWhenLabel(root.querySelector('[data-appt-date]')?.value, root.querySelector('[data-appt-time]')?.value);
+      const role = state.get('role');
+      if (role === 'rep') {
+        const retailer = root.querySelector('[data-appt-with]')?.value || D.repRetailers[0].name;
+        D.repAppointments.unshift({ retailer, when, kind });
+      } else {
+        D.appointments.unshift({ id: 'ap-' + Date.now(), with: D.account.rep, kind, when, where: D.account.retailer + ' · your floor', by: role === 'staff' ? 'Priya N. (Staff)' : 'You' });
+      }
+      T('appointment.booked', 'manual', kind);
+      C.closeAllOverlays(); nav.refresh();
+      C.toast(`Booked — ${kind}, ${when}`, { positive: true });
+      break;
+    }
+
+    // ---- member budgets (admin-set) ----
+    case 'save-budget': {
+      const input = screenBody.querySelector('#budgetInput');
+      const v = Math.max(0, parseInt(String(input?.value || '').replace(/[^0-9]/g, ''), 10) || 0);
+      const budgets = { ...(state.get('budgets') || {}) };
+      budgets[el.dataset.user] = v;
+      state.set({ budgets });
+      T('budget.set', 'manual', el.dataset.user);
+      nav.refresh();
+      C.toast(`Budget saved — ${el.dataset.user.split(' ')[0]} submits up to ${C.money(v)}/mo without approval`, { positive: true });
+      break;
+    }
 
     // ---- payment ----
     case 'confirm-pay':

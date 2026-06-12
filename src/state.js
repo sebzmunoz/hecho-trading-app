@@ -15,13 +15,17 @@ const DEFAULTS = {
   repAccount: 'r-marfa',// current retailer in Rep mode
   savedBrands: [],      // brand ids the buyer saved
   cards: [],            // payment cards added in-session
+  budgets: {},          // admin-set member budgets: name → $/month (overrides data.js defaults)
+  shipDates: { mode: 'all', all: { when: 'asap', date: '' }, brands: {} }, // ship timing on submit
   stateOverride: null,  // per-screen state forced from the panel
 };
 
 // Capabilities per role (§02b roles & capabilities matrix)
+// staff submit = 'budget': instant within the admin-set budget; only the
+// overage above it asks for approval — the sale never waits on a person.
 const CAPS = {
   admin: { submit: true,  approve: true,  grantApprove: true, compliance: true, pay: true, users: true },
-  staff: { submit: false, approve: false, grantApprove: false, compliance: 'view', pay: false, users: false },
+  staff: { submit: 'budget', approve: false, grantApprove: false, compliance: 'view', pay: false, users: false },
   rep:   { submit: 'grant', approve: false, grantApprove: false, compliance: 'view', pay: false, users: false },
 };
 

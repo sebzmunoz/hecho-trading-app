@@ -29,7 +29,7 @@ export const rep = {
     const body = `
       <button class="card" style="max-width:none" data-go="S601"><div class="row-between"><span><span class="muted" style="font-size:var(--fs-nano)">CO-SHOPPING</span><br/><b>${cur.name}</b></span>${icon('swap', 20)}</div></button>
       ${C.listRow({ thumbIcon: 'map', pri: 'Coverage map', sec: 'Where every retailer sits — and who is too close', trail: '<span class="badge">1</span>', go: 'S607' })}
-      ${C.sectionLabel("Today's appointments")}
+      <div class="row-between">${C.sectionLabel("Today's appointments")}<button class="chip" data-action="book-appt" style="min-height:28px;padding:2px 10px;font-size:var(--fs-nano)">+ New</button></div>
       <div class="stack tight">${D.repAppointments.map((a) => C.listRow({ thumbIcon: 'clock', pri: a.retailer, sec: `${a.kind} · ${a.when}` , go: '', attrs: `data-action="pick-retailer-name" data-n="${a.retailer}"` })).join('')}</div>
       ${C.sectionLabel('Live carts')}
       <div class="stack tight">${live.map((r) => C.listRow({ thumbIcon: 'cart', pri: r.liveCart, sec: r.name, trail: '<span class="tag coral">Live</span>', go: 'S604' })).join('')}</div>

@@ -72,6 +72,7 @@ const META = {
   S409: { name: 'Tax-ID upload', group: 'You', tab: 'you', states: S('default') },
   S410: { name: 'Tax-ID hold', group: 'You', tab: 'you', states: S('default') },
   S411: { name: 'Notification settings', group: 'You', tab: 'you', states: S('default') },
+  S412: { name: 'Appointments', group: 'You', tab: 'you', states: S('default', 'empty') },
   S416: { name: 'Reports', group: 'You', tab: 'you', states: S('default') },
   S417: { name: 'Sign out', group: 'You', tab: 'you', states: S('default') },
   // ---- Onboarding ----

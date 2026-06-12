@@ -222,11 +222,23 @@ export const claims = [
 ];
 
 // ---- Company users (§02b roles) ----
+// budget = monthly spend the admin lets this member submit without approval
+// (overridable live via state.budgets); spent = used so far this month.
 export const companyUsers = [
   { name: 'Sebastián Muñoz', role: 'Admin', initials: 'SM', activity: 'active now', self: true },
-  { name: 'Priya Nair', role: 'Staff', initials: 'PN', activity: 'active yesterday' },
-  { name: 'Theo Vance', role: 'Staff', initials: 'TV', activity: 'active three days ago' },
+  { name: 'Priya Nair', role: 'Staff', initials: 'PN', activity: 'active yesterday', budget: 2500, spent: 1840 },
+  { name: 'Theo Vance', role: 'Staff', initials: 'TV', activity: 'active three days ago', budget: 1500, spent: 380 },
 ];
+// When the prototype runs in the Staff role, it simulates this member.
+export const staffSelf = 'Priya Nair';
+
+// ---- Appointments (buyer side) ----
+// Admins AND staff can book time with the rep — no role gate.
+export const appointments = [
+  { id: 'ap-1', with: 'Dana Okafor', kind: 'Showroom walk', when: 'tomorrow · 10:00 AM', where: 'Hecho Showroom · Dallas Market Center', by: 'You' },
+  { id: 'ap-2', with: 'Dana Okafor', kind: 'Line review', when: 'Friday · 2:30 PM', where: 'Marfa Studio · your floor', by: 'Priya N. (Staff)' },
+];
+export const appointmentKinds = ['Showroom walk', 'Line review', 'Reserve preview', 'Order planning'];
 
 // ---- Notification categories (§07-B) + copy deck (§13) ----
 export const pushCategories = [

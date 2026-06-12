@@ -13,6 +13,12 @@ function brandGroups(cart) {
   return groups;
 }
 
+// 'Wed, Jun 24' from an <input type=date> value (noon avoids TZ day-shift).
+function fmtShipDate(iso) {
+  if (!iso) return '';
+  return new Date(iso + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+}
+
 export const carts = {
   // S201 Carts index
   S201() {
@@ -62,11 +68,9 @@ export const carts = {
       <div class="card" style="max-width:none"><div class="row-between"><b>Cart total</b>${C.maskField(`<span class="price compact"><span class="v" data-carttotal>${D.usd(total)}</span><span class="currency">USD</span></span>`, 'spend')}</div></div>
       <div class="sticky-actions">
         <button class="btn ghost" data-action="share-cart" data-cart="${c.id}">${icon('share', 16)} Share</button>
-        ${role === 'admin'
-          ? `<button class="btn" data-action="submit-cart" data-cart="${c.id}">Submit</button>`
-          : (role === 'rep'
-            ? `<button class="btn" data-action="add-line">Add a line</button>`
-            : `<button class="btn" data-action="share-cart" data-cart="${c.id}">Request approval</button>`)}
+        ${role === 'rep'
+          ? `<button class="btn" data-action="add-line">Add a line</button>`
+          : `<button class="btn" data-action="submit-cart" data-cart="${c.id}">Submit</button>`}
       </div>`;
     return base(c.name, { back: true, headerRight: C.hActions([{ icon: 'dots', action: 'cart-menu' }]), body });
   },
@@ -105,10 +109,71 @@ export const carts = {
              <p class="muted" style="font-size:var(--fs-nano)">Waits for ${C.esc(slowest.name)} — the slowest brand in this order.</p>`}
       </div>`;
 
+    // Ship date: ASAP or an exact future date — one date for the whole
+    // order, or each brand on its own. Persisted in state.shipDates.
+    const sd = state.get('shipDates') || { mode: 'all', all: { when: 'asap', date: '' }, brands: {} };
+    const sdMode = sd.mode === 'per' ? 'per' : 'all';
+    const todayISO = new Date().toISOString().slice(0, 10);
+    const whenChips = (scope, sel) => `
+      <div class="chip-row">
+        <button class="chip ${sel.when !== 'date' ? 'is-selected' : ''}" data-action="ship-when" data-scope="${scope}" data-when="asap">ASAP</button>
+        <button class="chip ${sel.when === 'date' ? 'is-selected' : ''}" data-action="ship-when" data-scope="${scope}" data-when="date">${sel.when === 'date' && sel.date ? icon('clock', 12) + ' ' + fmtShipDate(sel.date) : 'Pick a date'}</button>
+      </div>
+      ${sel.when === 'date' ? `<input class="input" type="date" data-shipdate="${scope}" value="${sel.date || ''}" min="${todayISO}" aria-label="Ship date${scope === 'all' ? '' : ' for ' + C.esc(D.brandById[scope]?.name || scope)}" />` : ''}`;
+    let sdSummary;
+    if (sdMode === 'all') sdSummary = sd.all?.when === 'date' && sd.all.date ? 'ships ' + fmtShipDate(sd.all.date) : 'ships ASAP';
+    else {
+      const dated = cartBrands.filter((b) => sd.brands?.[b.id]?.when === 'date' && sd.brands[b.id].date).length;
+      sdSummary = dated ? `${dated} of ${cartBrands.length} scheduled` : 'all ASAP';
+    }
+    const shipDateCard = `
+      <div class="card" style="max-width:none;gap:var(--s-2)">
+        <div class="row-between"><b>Ship date</b><span class="muted" style="font-size:var(--fs-nano)">${sdSummary}</span></div>
+        <div class="chip-row">
+          <button class="chip ${sdMode === 'all' ? 'is-selected' : ''}" data-action="ship-mode" data-mode="all">All brands at once</button>
+          <button class="chip ${sdMode === 'per' ? 'is-selected' : ''}" data-action="ship-mode" data-mode="per">Per brand</button>
+        </div>
+        ${sdMode === 'all'
+          ? whenChips('all', sd.all || { when: 'asap', date: '' })
+          : cartBrands.map((b) => {
+              const sel = (sd.brands && sd.brands[b.id]) || { when: 'asap', date: '' };
+              return `<div class="hairline"></div>
+                <div class="row-between"><b style="font-size:var(--fs-caption)">${C.esc(b.name)}</b><span class="muted" style="font-size:var(--fs-nano)">${weeks(b.lead)} lead</span></div>
+                ${whenChips(b.id, sel)}`;
+            }).join('')}
+        <p class="muted" style="font-size:var(--fs-nano)">${sdMode === 'all' ? 'One ship date for the whole order — ASAP, or exactly when you pick.' : 'Each brand ships ASAP or on its own exact date.'}</p>
+      </div>`;
+
     // Free-shipping note: applied over $500, otherwise show the path to it.
     const freeShip = total >= 500
       ? C.banner(`<b>Free shipping applied.</b> This order clears the $500 minimum.`, { ic: 'truck' })
       : C.banner(`<b>Free shipping</b> kicks in on orders over $500 — ${C.money(500 - total)} to go. It's also free on every order after your second.`, { ic: 'truck' });
+
+    // Staff budget: instant submit up to what's left of the admin-set budget.
+    // Over it, only the overage waits on approval — never the whole sale.
+    let budgetCard = '';
+    let inBudgetNow = 0, overage = 0, budgetLeft = 0, withinBudget = true;
+    if (caps.submit === 'budget') {
+      const me = D.companyUsers.find((u) => u.name === D.staffSelf) || {};
+      const budget = (state.get('budgets') || {})[me.name] ?? me.budget ?? 0;
+      const spent = me.spent || 0;
+      budgetLeft = Math.max(0, budget - spent);
+      withinBudget = total <= budgetLeft;
+      inBudgetNow = Math.min(total, budgetLeft);
+      overage = Math.max(0, total - budgetLeft);
+      const pct = budget ? Math.min(100, Math.round(((spent + inBudgetNow) / budget) * 100)) : 100;
+      budgetCard = `
+        <div class="card" style="max-width:none;gap:var(--s-2)">
+          <div class="row-between"><b>Your budget</b><span class="muted" style="font-size:var(--fs-nano)">set by ${C.esc(D.account.owner.split(' ')[0])} · ${C.money(budget)}/mo</span></div>
+          <div class="row-between"><span class="muted">Left this month</span>${C.maskField(`<b>${C.money(budgetLeft)}</b>`, 'spend')}</div>
+          <div style="height:6px;border-radius:999px;background:var(--surface-dim);overflow:hidden" aria-hidden="true"><div style="height:100%;width:${pct}%;background:${withinBudget ? 'var(--accent)' : 'var(--critical)'}"></div></div>
+          ${withinBudget
+            ? `<p class="muted" style="font-size:var(--fs-nano)">${icon('check', 12)} This order fits your budget — it submits instantly, no approval needed.</p>`
+            : `<div class="row-between"><span class="muted">Submits now (in budget)</span>${C.maskField(`<b>${C.money(inBudgetNow)}</b>`, 'spend')}</div>
+               <div class="row-between"><span class="muted">Needs approval (overage)</span>${C.maskField(`<b style="color:var(--critical)">${C.money(overage)}</b>`, 'spend')}</div>
+               <p class="muted" style="font-size:var(--fs-nano)">Only the ${C.money(overage)} over budget waits for sign-off. The in-budget part goes through on the spot, so the sale never waits on a person.</p>`}
+        </div>`;
+    }
 
     const body = `
       <div class="card" style="max-width:none">
@@ -116,6 +181,7 @@ export const carts = {
         <b>${D.addresses[0].name}</b><span class="muted">${D.addresses[0].line1}, ${D.addresses[0].city} ${D.addresses[0].region}</span>
       </div>
       ${shipCard}
+      ${shipDateCard}
       <div class="card" style="max-width:none">
         <div class="row-between"><span class="muted">Terms</span><span class="pill">${D.account.terms}</span></div>
         <div class="row-between"><span class="muted">Payment</span><span>Net-30 · override at pay</span></div>
@@ -124,17 +190,21 @@ export const carts = {
       <div class="card" style="max-width:none"><div class="row-between"><span class="muted">Tax-ID status</span>${C.statusPill(tax === 'current' ? 'current' : tax)}</div></div>
       ${taxRow}
       ${freeShip}
+      ${budgetCard}
       <div class="card" style="max-width:none"><div class="row-between"><b>Order total</b><span class="price"><span class="v">${D.usd(total)}</span><span class="currency">USD</span></span></div></div>
       ${offline ? C.banner('You\'re offline — Submit needs a connection.', { kind: 'caution', ic: 'wifi_off' }) : ''}
-      ${caps.submit !== true ? C.banner(caps.submit === 'grant'
-        ? '<b>Rep view.</b> Submitting on the retailer\'s behalf needs their per-account grant (§02b).'
-        : '<b>Staff can\'t submit.</b> Send this for approval and the admin takes it from here.', { ic: 'user' }) : ''}
+      ${caps.submit === 'grant' ? C.banner('<b>Rep view.</b> Submitting on the retailer\'s behalf needs their per-account grant (§02b).', { ic: 'user' }) : ''}
+      ${caps.submit === 'budget' && budgetLeft === 0 ? C.banner('<b>Your budget is used up this month.</b> Send this for approval and the admin takes it from here.', { ic: 'user' }) : ''}
       <div class="sticky-actions"><button class="btn ghost" data-back>Edit lines</button>
         ${caps.submit === true
           ? `<button class="btn" data-action="confirm-submit" data-cart="${c.id}" ${offline ? 'aria-disabled="true"' : ''}>Submit order</button>`
-          : (caps.submit === 'grant'
+          : caps.submit === 'grant'
             ? `<button class="btn" aria-disabled="true">Needs retailer grant</button>`
-            : `<button class="btn" data-action="share-cart" data-cart="${c.id}">Request approval</button>`)}</div>`;
+            : budgetLeft === 0
+              ? `<button class="btn" data-action="share-cart" data-cart="${c.id}">Request approval</button>`
+              : withinBudget
+                ? `<button class="btn" data-action="confirm-submit" data-cart="${c.id}" ${offline ? 'aria-disabled="true"' : ''}>Submit order</button>`
+                : `<button class="btn" data-action="split-submit" data-cart="${c.id}" data-now="${C.money(inBudgetNow)}" data-over="${C.money(overage)}" ${offline ? 'aria-disabled="true"' : ''}>Submit ${C.money(inBudgetNow)} now</button>`}</div>`;
     return base('Review & submit', { back: true, noTabbar: true, body });
   },
 
